@@ -1,3 +1,24 @@
+/** Pipeline stages for the seller journey */
+export const PIPELINE_STAGES = [
+  "prep_your_home",
+  "price_it",
+  "create_listing",
+  "manage_showings",
+  "review_offers",
+  "close_the_deal",
+] as const;
+
+export type PipelineStage = (typeof PIPELINE_STAGES)[number];
+
+export const PIPELINE_STAGE_LABELS: Record<PipelineStage, string> = {
+  prep_your_home: "Prep Your Home",
+  price_it: "Price It",
+  create_listing: "Create Your Listing",
+  manage_showings: "Manage Showings",
+  review_offers: "Review Offers",
+  close_the_deal: "Close the Deal",
+};
+
 /** User profile */
 export interface UserProfile {
   id: string;
@@ -5,6 +26,7 @@ export interface UserProfile {
   full_name: string;
   avatar_url?: string;
   phone?: string;
+  current_stage: PipelineStage;
   created_at: string;
   updated_at: string;
 }
