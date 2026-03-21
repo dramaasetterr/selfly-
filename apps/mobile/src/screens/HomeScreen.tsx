@@ -83,6 +83,9 @@ export default function HomeScreen() {
     if (stage === "review_offers") {
       navigation.navigate("Offers");
     }
+    if (stage === "close_the_deal") {
+      navigation.navigate("Closing");
+    }
   };
 
   const getStageState = (stage: PipelineStage): "complete" | "current" | "locked" => {

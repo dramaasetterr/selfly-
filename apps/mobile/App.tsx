@@ -19,6 +19,8 @@ import OffersScreen from "./src/screens/OffersScreen";
 import OfferInputScreen from "./src/screens/OfferInputScreen";
 import OfferAnalysisScreen from "./src/screens/OfferAnalysisScreen";
 import OfferCompareScreen from "./src/screens/OfferCompareScreen";
+import ClosingScreen from "./src/screens/ClosingScreen";
+import ClosingGuideScreen from "./src/screens/ClosingGuideScreen";
 import type { PricingInput, PricingResult, Document, OfferAnalysis, OfferInput } from "@selfly/shared";
 
 export type AuthStackParamList = {
@@ -45,6 +47,8 @@ export type AppStackParamList = {
     offerInput?: OfferInput;
   };
   OfferCompare: { listingId: string };
+  Closing: undefined;
+  ClosingGuide: { listingId: string };
 };
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -86,6 +90,8 @@ function AppNavigator() {
       <AppStack.Screen name="OfferInput" component={OfferInputScreen} />
       <AppStack.Screen name="OfferAnalysis" component={OfferAnalysisScreen} />
       <AppStack.Screen name="OfferCompare" component={OfferCompareScreen} />
+      <AppStack.Screen name="Closing" component={ClosingScreen} />
+      <AppStack.Screen name="ClosingGuide" component={ClosingGuideScreen} />
     </AppStack.Navigator>
   );
 }

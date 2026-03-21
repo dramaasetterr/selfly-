@@ -264,3 +264,66 @@ export interface Offer {
   created_at: string;
   updated_at: string;
 }
+
+/** Closing types */
+export const CLOSING_STEPS = [
+  { key: "accept_offer", label: "Accept an Offer", order: 1 },
+  { key: "hire_attorney", label: "Hire a Real Estate Attorney", order: 2 },
+  { key: "order_title_search", label: "Order Title Search", order: 3 },
+  { key: "schedule_inspection", label: "Schedule Home Inspection", order: 4 },
+  { key: "appraisal_completed", label: "Appraisal Completed", order: 5 },
+  { key: "review_closing_disclosure", label: "Review Closing Disclosure", order: 6 },
+  { key: "final_walkthrough", label: "Final Walkthrough", order: 7 },
+  { key: "sign_closing_documents", label: "Sign Closing Documents", order: 8 },
+  { key: "transfer_keys", label: "Transfer Keys", order: 9 },
+] as const;
+
+export type ClosingStepKey = (typeof CLOSING_STEPS)[number]["key"];
+
+export interface ClosingChecklistItem {
+  id: string;
+  user_id: string;
+  listing_id: string;
+  step_key: string;
+  step_label: string;
+  completed: boolean;
+  completed_at: string | null;
+  step_order: number;
+  created_at: string;
+}
+
+export interface CustomCost {
+  label: string;
+  amount: number;
+}
+
+export interface ClosingCalculator {
+  id: string;
+  user_id: string;
+  listing_id: string;
+  sale_price: number;
+  attorney_fees: number;
+  title_fees: number;
+  transfer_tax_pct: number;
+  recording_fees: number;
+  seller_concessions: number;
+  custom_costs: CustomCost[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ClosingGuideStep {
+  step: string;
+  explanation: string;
+  timeline: string;
+  seller_action: string;
+}
+
+export interface ClosingGuide {
+  id: string;
+  user_id: string;
+  listing_id: string;
+  state: string;
+  guide_content: ClosingGuideStep[];
+  created_at: string;
+}
