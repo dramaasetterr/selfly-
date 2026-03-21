@@ -77,6 +77,9 @@ export default function HomeScreen() {
     if (stage === "create_listing") {
       navigation.navigate("ListingBuilder");
     }
+    if (stage === "manage_showings") {
+      navigation.navigate("Showings");
+    }
   };
 
   const getStageState = (stage: PipelineStage): "complete" | "current" | "locked" => {

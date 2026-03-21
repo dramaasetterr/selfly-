@@ -174,3 +174,41 @@ export interface PricingResult {
   maximize_price: number;
   reasoning: string[];
 }
+
+/** Showing types */
+export type ShowingStatus = "confirmed" | "cancelled" | "completed";
+
+export interface ShowingAvailability {
+  id: string;
+  user_id: string;
+  listing_id: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  is_booked: boolean;
+  created_at: string;
+}
+
+export interface Showing {
+  id: string;
+  listing_id: string;
+  seller_id: string;
+  availability_id: string;
+  buyer_name: string;
+  buyer_email: string;
+  buyer_phone?: string;
+  showing_date: string;
+  showing_time_start: string;
+  showing_time_end: string;
+  status: ShowingStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BookShowingInput {
+  listing_id: string;
+  slot_id: string;
+  buyer_name: string;
+  buyer_email: string;
+  buyer_phone?: string;
+}
