@@ -212,3 +212,55 @@ export interface BookShowingInput {
   buyer_email: string;
   buyer_phone?: string;
 }
+
+/** Offer types */
+export const FINANCING_TYPES = ["cash", "conventional", "fha", "va"] as const;
+export type FinancingType = (typeof FINANCING_TYPES)[number];
+
+export interface OfferInput {
+  offered_price: number;
+  financing_type: FinancingType;
+  down_payment_pct?: number;
+  inspection_contingency: boolean;
+  appraisal_contingency: boolean;
+  closing_date?: string;
+  seller_concessions?: string;
+  notes?: string;
+}
+
+export interface CounterOffer {
+  suggested_price: number;
+  suggested_changes: string[];
+  reasoning: string;
+}
+
+export interface OfferAnalysis {
+  score: number;
+  score_label: string;
+  summary: string;
+  red_flags: string[];
+  counter_offer: CounterOffer;
+}
+
+export interface Offer {
+  id: string;
+  user_id: string;
+  listing_id: string;
+  offered_price: number;
+  financing_type: FinancingType;
+  down_payment_pct?: number;
+  inspection_contingency: boolean;
+  appraisal_contingency: boolean;
+  closing_date?: string;
+  seller_concessions?: string;
+  notes?: string;
+  score?: number;
+  score_label?: string;
+  summary?: string;
+  red_flags?: string[];
+  counter_suggested_price?: number;
+  counter_suggested_changes?: string[];
+  counter_reasoning?: string;
+  created_at: string;
+  updated_at: string;
+}

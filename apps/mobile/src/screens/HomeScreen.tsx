@@ -80,6 +80,9 @@ export default function HomeScreen() {
     if (stage === "manage_showings") {
       navigation.navigate("Showings");
     }
+    if (stage === "review_offers") {
+      navigation.navigate("Offers");
+    }
   };
 
   const getStageState = (stage: PipelineStage): "complete" | "current" | "locked" => {

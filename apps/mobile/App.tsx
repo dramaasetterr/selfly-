@@ -15,7 +15,11 @@ import DocumentsScreen from "./src/screens/DocumentsScreen";
 import DocumentViewerScreen from "./src/screens/DocumentViewerScreen";
 import ShowingsScreen from "./src/screens/ShowingsScreen";
 import ShowingDetailScreen from "./src/screens/ShowingDetailScreen";
-import type { PricingInput, PricingResult, Document } from "@selfly/shared";
+import OffersScreen from "./src/screens/OffersScreen";
+import OfferInputScreen from "./src/screens/OfferInputScreen";
+import OfferAnalysisScreen from "./src/screens/OfferAnalysisScreen";
+import OfferCompareScreen from "./src/screens/OfferCompareScreen";
+import type { PricingInput, PricingResult, Document, OfferAnalysis, OfferInput } from "@selfly/shared";
 
 export type AuthStackParamList = {
   Welcome: undefined;
@@ -32,6 +36,15 @@ export type AppStackParamList = {
   DocumentViewer: { document: Document };
   Showings: undefined;
   ShowingDetail: { showingId: string };
+  Offers: undefined;
+  OfferInput: { listingId: string };
+  OfferAnalysis: {
+    listingId: string;
+    offerId?: string;
+    analysis?: OfferAnalysis;
+    offerInput?: OfferInput;
+  };
+  OfferCompare: { listingId: string };
 };
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -69,6 +82,10 @@ function AppNavigator() {
       <AppStack.Screen name="DocumentViewer" component={DocumentViewerScreen} />
       <AppStack.Screen name="Showings" component={ShowingsScreen} />
       <AppStack.Screen name="ShowingDetail" component={ShowingDetailScreen} />
+      <AppStack.Screen name="Offers" component={OffersScreen} />
+      <AppStack.Screen name="OfferInput" component={OfferInputScreen} />
+      <AppStack.Screen name="OfferAnalysis" component={OfferAnalysisScreen} />
+      <AppStack.Screen name="OfferCompare" component={OfferCompareScreen} />
     </AppStack.Navigator>
   );
 }
