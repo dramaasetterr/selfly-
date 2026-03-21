@@ -68,3 +68,23 @@ export type ListingStatus =
   | "pending"
   | "sold"
   | "withdrawn";
+
+/** Pricing types */
+export type PropertyCondition = "Excellent" | "Good" | "Fair" | "Needs Work";
+export type PriceType = "sell_fast" | "recommended" | "maximize";
+
+export interface PricingInput {
+  address: string;
+  sqft: number;
+  bedrooms: number;
+  bathrooms: number;
+  year_built: number;
+  condition: PropertyCondition;
+}
+
+export interface PricingResult {
+  recommended_price: number;
+  sell_fast_price: number;
+  maximize_price: number;
+  reasoning: string[];
+}

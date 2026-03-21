@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,9 +8,12 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { PIPELINE_STAGES, PIPELINE_STAGE_LABELS, PipelineStage } from "@selfly/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
+import type { AppStackParamList } from "../../App";
 
 function StageIcon({ state }: { state: "complete" | "current" | "locked" }) {
   if (state === "complete") {
@@ -36,27 +39,42 @@ function StageIcon({ state }: { state: "complete" | "current" | "locked" }) {
 
 export default function HomeScreen() {
   const { user, signOut } = useAuth();
+  const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const [currentStage, setCurrentStage] = useState<PipelineStage>("prep_your_home");
   const [loadingProfile, setLoadingProfile] = useState(true);
 
-  useEffect(() => {
+  const fetchProfile = useCallback(async () => {
     if (!user) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("current_stage")
+      .eq("id", user.id)
+      .single();
 
-    const fetchProfile = async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("current_stage")
-        .eq("id", user.id)
-        .single();
-
-      if (data?.current_stage) {
-        setCurrentStage(data.current_stage as PipelineStage);
-      }
-      setLoadingProfile(false);
-    };
-
-    fetchProfile();
+    if (data?.current_stage) {
+      setCurrentStage(data.current_stage as PipelineStage);
+    }
+    setLoadingProfile(false);
   }, [user]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  // Refresh profile when screen regains focus (e.g. after confirming price)
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile();
+    }, [fetchProfile])
+  );
+
+  const handleStageTap = (stage: PipelineStage) => {
+    const state = getStageState(stage);
+    if (state === "locked") return;
+    if (stage === "price_it") {
+      navigation.navigate("Pricing");
+    }
+  };
 
   const getStageState = (stage: PipelineStage): "complete" | "current" | "locked" => {
     const currentIndex = PIPELINE_STAGES.indexOf(currentStage);
@@ -94,7 +112,12 @@ export default function HomeScreen() {
             const state = getStageState(stage);
             const isLast = index === PIPELINE_STAGES.length - 1;
             return (
-              <View key={stage} style={styles.stageRow}>
+              <TouchableOpacity
+                key={stage}
+                style={styles.stageRow}
+                onPress={() => handleStageTap(stage)}
+                activeOpacity={state === "locked" ? 1 : 0.6}
+              >
                 <View style={styles.stageIndicator}>
                   <StageIcon state={state} />
                   {!isLast && (
@@ -125,7 +148,7 @@ export default function HomeScreen() {
                     <Text style={styles.stageComplete}>Complete</Text>
                   )}
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           })}
         </View>
