@@ -107,6 +107,54 @@ export interface Listing {
   updated_at: string;
 }
 
+/** Document types */
+export const DOCUMENT_TYPES = [
+  "sellers_disclosure",
+  "purchase_agreement",
+  "counter_offer",
+] as const;
+
+export type DocumentType = (typeof DOCUMENT_TYPES)[number];
+
+export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
+  sellers_disclosure: "Seller's Disclosure Form",
+  purchase_agreement: "Purchase Agreement Template",
+  counter_offer: "Counter-Offer Template",
+};
+
+export const DOCUMENT_TYPE_DESCRIPTIONS: Record<DocumentType, string> = {
+  sellers_disclosure:
+    "Disclose known property conditions as required by state law",
+  purchase_agreement:
+    "Standard purchase agreement customized for your property",
+  counter_offer: "Respond to buyer offers with your terms",
+};
+
+export const SUPPORTED_STATES = [
+  { value: "NY", label: "New York" },
+  { value: "NJ", label: "New Jersey" },
+  { value: "CT", label: "Connecticut" },
+  { value: "FL", label: "Florida" },
+  { value: "TX", label: "Texas" },
+  { value: "CA", label: "California" },
+] as const;
+
+export type SupportedState = (typeof SUPPORTED_STATES)[number]["value"];
+
+export interface Document {
+  id: string;
+  user_id: string;
+  listing_id: string | null;
+  document_type: DocumentType;
+  state: string;
+  title: string;
+  content: string;
+  html_content: string;
+  pdf_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 /** Pricing types */
 export type PropertyCondition = "Excellent" | "Good" | "Fair" | "Needs Work";
 export type PriceType = "sell_fast" | "recommended" | "maximize";

@@ -11,7 +11,9 @@ import HomeScreen from "./src/screens/HomeScreen";
 import PricingScreen from "./src/screens/PricingScreen";
 import PricingResultsScreen from "./src/screens/PricingResultsScreen";
 import ListingBuilderScreen from "./src/screens/ListingBuilderScreen";
-import type { PricingInput, PricingResult } from "@selfly/shared";
+import DocumentsScreen from "./src/screens/DocumentsScreen";
+import DocumentViewerScreen from "./src/screens/DocumentViewerScreen";
+import type { PricingInput, PricingResult, Document } from "@selfly/shared";
 
 export type AuthStackParamList = {
   Welcome: undefined;
@@ -24,6 +26,8 @@ export type AppStackParamList = {
   Pricing: undefined;
   PricingResults: { input: PricingInput; result: PricingResult };
   ListingBuilder: undefined;
+  Documents: undefined;
+  DocumentViewer: { document: Document };
 };
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -57,6 +61,8 @@ function AppNavigator() {
       <AppStack.Screen name="Pricing" component={PricingScreen} />
       <AppStack.Screen name="PricingResults" component={PricingResultsScreen} />
       <AppStack.Screen name="ListingBuilder" component={ListingBuilderScreen} />
+      <AppStack.Screen name="Documents" component={DocumentsScreen} />
+      <AppStack.Screen name="DocumentViewer" component={DocumentViewerScreen} />
     </AppStack.Navigator>
   );
 }

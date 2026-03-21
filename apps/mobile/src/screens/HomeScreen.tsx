@@ -110,6 +110,20 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
+        <TouchableOpacity
+          style={styles.documentsButton}
+          onPress={() => navigation.navigate("Documents")}
+        >
+          <Text style={styles.documentsButtonIcon}>{"\u{1F4C4}"}</Text>
+          <View style={styles.documentsButtonContent}>
+            <Text style={styles.documentsButtonTitle}>Documents</Text>
+            <Text style={styles.documentsButtonSub}>
+              Generate disclosures, agreements & more
+            </Text>
+          </View>
+          <Text style={styles.documentsChevron}>›</Text>
+        </TouchableOpacity>
+
         <View style={styles.pipeline}>
           {PIPELINE_STAGES.map((stage, index) => {
             const state = getStageState(stage);
@@ -282,5 +296,37 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#6B7280",
     marginTop: 2,
+  },
+  documentsButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    padding: 16,
+    marginBottom: 28,
+  },
+  documentsButtonIcon: {
+    fontSize: 24,
+    marginRight: 14,
+  },
+  documentsButtonContent: {
+    flex: 1,
+  },
+  documentsButtonTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  documentsButtonSub: {
+    fontSize: 13,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  documentsChevron: {
+    fontSize: 22,
+    color: "#9CA3AF",
+    fontWeight: "300",
   },
 });
