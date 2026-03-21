@@ -1,0 +1,17 @@
+{
+  "name": "selfly",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "mobile": "npm run --workspace=apps/mobile",
+    "web": "npm run --workspace=apps/web",
+    "shared": "npm run --workspace=packages/shared"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

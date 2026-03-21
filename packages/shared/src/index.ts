@@ -1,0 +1,48 @@
+/** User profile */
+export interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  avatar_url?: string;
+  phone?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Property listing */
+export interface PropertyListing {
+  id: string;
+  owner_id: string;
+  title: string;
+  description: string;
+  price: number;
+  address: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  bedrooms: number;
+  bathrooms: number;
+  square_feet: number;
+  lot_size?: number;
+  year_built?: number;
+  property_type: PropertyType;
+  status: ListingStatus;
+  images: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export type PropertyType =
+  | "single_family"
+  | "condo"
+  | "townhouse"
+  | "multi_family"
+  | "land"
+  | "other";
+
+export type ListingStatus =
+  | "draft"
+  | "active"
+  | "pending"
+  | "sold"
+  | "withdrawn";
