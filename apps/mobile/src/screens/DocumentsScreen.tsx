@@ -86,8 +86,6 @@ export default function DocumentsScreen() {
       const property = listing
         ? {
             address: listing.address,
-            city: listing.city,
-            zip_code: listing.zip_code,
             bedrooms: listing.bedrooms,
             bathrooms: listing.bathrooms,
             sqft: listing.sqft,

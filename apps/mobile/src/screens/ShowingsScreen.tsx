@@ -194,10 +194,10 @@ export default function ShowingsScreen() {
         .eq("id", user.id)
         .single();
 
-      if (profile?.current_stage === "create_listing") {
+      if (profile?.current_stage === "manage_showings") {
         await supabase
           .from("profiles")
-          .update({ current_stage: "manage_showings" })
+          .update({ current_stage: "review_offers" })
           .eq("id", user.id);
       }
     }
