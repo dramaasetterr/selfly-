@@ -54,20 +54,58 @@ export interface PropertyListing {
   updated_at: string;
 }
 
-export type PropertyType =
-  | "single_family"
-  | "condo"
-  | "townhouse"
-  | "multi_family"
-  | "land"
-  | "other";
+export const PROPERTY_TYPES = [
+  "single_family",
+  "condo",
+  "townhouse",
+  "multi_family",
+] as const;
 
-export type ListingStatus =
-  | "draft"
-  | "active"
-  | "pending"
-  | "sold"
-  | "withdrawn";
+export type PropertyType = (typeof PROPERTY_TYPES)[number];
+
+export const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
+  single_family: "Single Family",
+  condo: "Condo",
+  townhouse: "Townhouse",
+  multi_family: "Multi-Family",
+};
+
+export type ListingStatus = "draft" | "active" | "pending" | "sold";
+
+export interface ListingInput {
+  address: string;
+  bedrooms: number;
+  bathrooms: number;
+  sqft: number;
+  year_built: number;
+  property_type: PropertyType;
+  hoa: boolean;
+  hoa_fee?: number;
+  title: string;
+  description: string;
+  photos: string[];
+  price?: number;
+}
+
+export interface Listing {
+  id: string;
+  user_id: string;
+  address: string;
+  bedrooms: number;
+  bathrooms: number;
+  sqft: number;
+  year_built: number;
+  property_type: PropertyType;
+  hoa: boolean;
+  hoa_fee?: number;
+  title: string;
+  description: string;
+  photos: string[];
+  price: number;
+  status: ListingStatus;
+  created_at: string;
+  updated_at: string;
+}
 
 /** Pricing types */
 export type PropertyCondition = "Excellent" | "Good" | "Fair" | "Needs Work";

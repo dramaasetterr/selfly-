@@ -74,6 +74,9 @@ export default function HomeScreen() {
     if (stage === "price_it") {
       navigation.navigate("Pricing");
     }
+    if (stage === "create_listing") {
+      navigation.navigate("ListingBuilder");
+    }
   };
 
   const getStageState = (stage: PipelineStage): "complete" | "current" | "locked" => {
