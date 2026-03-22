@@ -17,6 +17,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
+import TierGate from "../components/TierGate";
 
 function ScoreBadge({ score, isBest }: { score: number; isBest: boolean }) {
   const color = score >= 8 ? colors.success : score >= 5 ? colors.warning : colors.error;
@@ -161,31 +162,36 @@ export default function OfferCompareScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primaryLight} />
-        </View>
-      </SafeAreaView>
+      <TierGate feature="offer_analyzer">
+        <SafeAreaView style={styles.container}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primaryLight} />
+          </View>
+        </SafeAreaView>
+      </TierGate>
     );
   }
 
   if (offers.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.headerFixed}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Text style={styles.backText}>{"\u2190"} Back</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>Compare Offers</Text>
-        </View>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.emptyText}>No offers to compare yet.</Text>
-        </View>
-      </SafeAreaView>
+      <TierGate feature="offer_analyzer">
+        <SafeAreaView style={styles.container}>
+          <View style={styles.headerFixed}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+              <Text style={styles.backText}>{"\u2190"} Back</Text>
+            </TouchableOpacity>
+            <Text style={styles.title}>Compare Offers</Text>
+          </View>
+          <View style={styles.loadingContainer}>
+            <Text style={styles.emptyText}>No offers to compare yet.</Text>
+          </View>
+        </SafeAreaView>
+      </TierGate>
     );
   }
 
   return (
+    <TierGate feature="offer_analyzer">
     <SafeAreaView style={styles.container}>
       <View style={styles.headerFixed}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -271,6 +277,7 @@ export default function OfferCompareScreen() {
         </ScrollView>
       </ScrollView>
     </SafeAreaView>
+    </TierGate>
   );
 }
 

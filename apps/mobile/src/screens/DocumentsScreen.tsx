@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -22,6 +23,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
+import TierGate from "../components/TierGate";
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -76,6 +78,7 @@ export default function DocumentsScreen() {
   const [hasListing, setHasListing] = useState<boolean | null>(null);
   const [listingData, setListingData] = useState<any>(null);
   const [useSampleData, setUseSampleData] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [expandedExplanations, setExpandedExplanations] = useState<Record<string, boolean>>({});
 
   const toggleExplanation = (docType: string) => {
@@ -88,14 +91,19 @@ export default function DocumentsScreen() {
 
   const fetchDocuments = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from("documents")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+    try {
+      const { data } = await supabase
+        .from("documents")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
 
-    if (data) setDocuments(data as Document[]);
-    setLoading(false);
+      if (data) setDocuments(data as Document[]);
+    } catch {
+      // Will show existing documents or empty state
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
 
   const checkListing = useCallback(async () => {
@@ -128,6 +136,11 @@ export default function DocumentsScreen() {
       checkListing();
     }, [fetchDocuments, checkListing])
   );
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    Promise.all([fetchDocuments(), checkListing()]).finally(() => setRefreshing(false));
+  }, [fetchDocuments, checkListing]);
 
   const getExistingDoc = (type: DocumentType) =>
     documents.find(
@@ -244,18 +257,23 @@ export default function DocumentsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primaryLight} />
-          <Text style={styles.loadingText}>Loading documents...</Text>
-        </View>
-      </SafeAreaView>
+      <TierGate feature="documents">
+        <SafeAreaView style={styles.container}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primaryLight} />
+            <Text style={styles.loadingText}>Loading documents...</Text>
+          </View>
+        </SafeAreaView>
+      </TierGate>
     );
   }
 
   return (
+    <TierGate feature="documents">
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primaryLight} />
+      }>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
@@ -485,6 +503,7 @@ export default function DocumentsScreen() {
         })}
       </ScrollView>
     </SafeAreaView>
+    </TierGate>
   );
 }
 

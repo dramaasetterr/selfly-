@@ -21,6 +21,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
+import TierGate from "../components/TierGate";
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -117,6 +118,7 @@ export default function OfferInputScreen() {
   };
 
   return (
+    <TierGate feature="offer_analyzer">
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -278,6 +280,7 @@ export default function OfferInputScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </TierGate>
   );
 }
 

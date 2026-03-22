@@ -24,9 +24,9 @@ import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 import AddressAutocomplete from "../components/AddressAutocomplete";
+import { useTierAccess } from "../hooks/useTierAccess";
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-const MAX_PHOTOS = 25;
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const PHOTO_GAP = spacing.sm;
 const PHOTO_PADDING = spacing.lg * 2;
@@ -38,6 +38,8 @@ const STEPS = ["Details", "Photos", "Description", "Review"];
 
 export default function ListingBuilderScreen({ navigation }: Props) {
   const { user } = useAuth();
+  const { plan } = useTierAccess();
+  const maxPhotos = plan === 'free' ? 5 : plan === 'seller_pro' ? 25 : 25;
   const [step, setStep] = useState(0);
 
   // Step 1 — Property Details
@@ -191,9 +193,9 @@ export default function ListingBuilderScreen({ navigation }: Props) {
   };
 
   const pickPhotos = async () => {
-    const remaining = MAX_PHOTOS - photos.length;
+    const remaining = maxPhotos - photos.length;
     if (remaining <= 0) {
-      Alert.alert("Limit Reached", `Maximum ${MAX_PHOTOS} photos allowed.`);
+      Alert.alert("Limit Reached", `Maximum ${maxPhotos} photos allowed.`);
       return;
     }
 
@@ -205,7 +207,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
     });
 
     if (!result.canceled && result.assets) {
-      setPhotos((prev) => [...prev, ...result.assets].slice(0, MAX_PHOTOS));
+      setPhotos((prev) => [...prev, ...result.assets].slice(0, maxPhotos));
     }
   };
 
@@ -464,7 +466,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
     <>
       <Text style={styles.sectionTitle}>Add Photos</Text>
       <Text style={styles.photoCount}>
-        {photos.length} of {MAX_PHOTOS} photos
+        {photos.length} of {maxPhotos} photos
         {photos.length > 0 && " — tap the star to set as main photo"}
       </Text>
 
@@ -503,7 +505,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
             </TouchableOpacity>
           </View>
         ))}
-        {photos.length < MAX_PHOTOS && (
+        {photos.length < maxPhotos && (
           <TouchableOpacity style={styles.addPhotoButton} onPress={pickPhotos}>
             <Text style={styles.addPhotoPlus}>+</Text>
             <Text style={styles.addPhotoLabel}>Add</Text>

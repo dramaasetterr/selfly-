@@ -19,6 +19,7 @@ import type { AppStackParamList } from '../../App';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { colors, shadows, spacing, borderRadius, typography } from '../theme';
+import TierGate from '../components/TierGate';
 
 if (
   Platform.OS === 'android' &&
@@ -223,15 +224,18 @@ export default function SyndicationScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primaryLight} />
-        </View>
-      </SafeAreaView>
+      <TierGate feature="syndication">
+        <SafeAreaView style={styles.container}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primaryLight} />
+          </View>
+        </SafeAreaView>
+      </TierGate>
     );
   }
 
   return (
+    <TierGate feature="syndication">
     <SafeAreaView style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -311,6 +315,7 @@ export default function SyndicationScreen() {
         <View style={{ height: spacing.xxl }} />
       </ScrollView>
     </SafeAreaView>
+    </TierGate>
   );
 }
 

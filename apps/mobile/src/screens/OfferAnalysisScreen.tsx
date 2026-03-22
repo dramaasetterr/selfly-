@@ -17,6 +17,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
+import TierGate from "../components/TierGate";
 
 function ScoreCircle({ score }: { score: number }) {
   const color = score >= 8 ? colors.success : score >= 5 ? colors.warning : colors.error;
@@ -129,31 +130,35 @@ export default function OfferAnalysisScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primaryLight} />
-        </View>
-      </SafeAreaView>
+      <TierGate feature="offer_analyzer">
+        <SafeAreaView style={styles.container}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primaryLight} />
+          </View>
+        </SafeAreaView>
+      </TierGate>
     );
   }
 
   if (!analysis) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.scrollContent}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Text style={styles.backText}>{"\u2190"} Back</Text>
-          </TouchableOpacity>
-          <View style={styles.loadingContainer}>
-            <Text style={{ ...typography.h3, color: colors.textPrimary, marginBottom: spacing.sm }}>
-              Analysis Not Available
-            </Text>
-            <Text style={{ ...typography.body, color: colors.textSecondary, textAlign: "center" }}>
-              Could not load the offer analysis. Please go back and try again.
-            </Text>
+      <TierGate feature="offer_analyzer">
+        <SafeAreaView style={styles.container}>
+          <View style={styles.scrollContent}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+              <Text style={styles.backText}>{"\u2190"} Back</Text>
+            </TouchableOpacity>
+            <View style={styles.loadingContainer}>
+              <Text style={{ ...typography.h3, color: colors.textPrimary, marginBottom: spacing.sm }}>
+                Analysis Not Available
+              </Text>
+              <Text style={{ ...typography.body, color: colors.textSecondary, textAlign: "center" }}>
+                Could not load the offer analysis. Please go back and try again.
+              </Text>
+            </View>
           </View>
-        </View>
-      </SafeAreaView>
+        </SafeAreaView>
+      </TierGate>
     );
   }
 
@@ -161,6 +166,7 @@ export default function OfferAnalysisScreen() {
     analysis.score >= 8 ? colors.success : analysis.score >= 5 ? colors.warning : colors.error;
 
   return (
+    <TierGate feature="offer_analyzer">
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -250,6 +256,7 @@ export default function OfferAnalysisScreen() {
         )}
       </ScrollView>
     </SafeAreaView>
+    </TierGate>
   );
 }
 

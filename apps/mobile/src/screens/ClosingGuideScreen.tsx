@@ -16,6 +16,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
+import TierGate from "../components/TierGate";
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -133,6 +134,7 @@ export default function ClosingGuideScreen() {
   }, [fetchGuide]);
 
   return (
+    <TierGate feature="closing_guide">
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -201,6 +203,7 @@ export default function ClosingGuideScreen() {
         )}
       </ScrollView>
     </SafeAreaView>
+    </TierGate>
   );
 }
 

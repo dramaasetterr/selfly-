@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  RefreshControl,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -18,6 +19,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
+import TierGate from "../components/TierGate";
 
 const WEB_APP_URL = process.env.EXPO_PUBLIC_WEB_APP_URL || "https://selfly.app";
 
@@ -77,6 +79,7 @@ export default function ShowingsScreen() {
   const [existingSlots, setExistingSlots] = useState<ShowingAvailability[]>([]);
   const [showings, setShowings] = useState<Showing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState<{ index: number; field: "startTime" | "endTime" } | null>(null);
@@ -124,6 +127,11 @@ export default function ShowingsScreen() {
 
   useEffect(() => {
     fetchData();
+  }, [fetchData]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchData().finally(() => setRefreshing(false));
   }, [fetchData]);
 
   useEffect(() => {
@@ -229,32 +237,39 @@ export default function ShowingsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primaryLight} />
-        </View>
-      </SafeAreaView>
+      <TierGate feature="showings">
+        <SafeAreaView style={styles.container}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primaryLight} />
+          </View>
+        </SafeAreaView>
+      </TierGate>
     );
   }
 
   if (!listingId) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backText}>{"\u2190"} Back</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.emptyText}>Create a listing first to manage showings.</Text>
-        </View>
-      </SafeAreaView>
+      <TierGate feature="showings">
+        <SafeAreaView style={styles.container}>
+          <View style={styles.headerRow}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Text style={styles.backText}>{"\u2190"} Back</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.loadingContainer}>
+            <Text style={styles.emptyText}>Create a listing first to manage showings.</Text>
+          </View>
+        </SafeAreaView>
+      </TierGate>
     );
   }
 
   return (
+    <TierGate feature="showings">
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primaryLight} />
+      }>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Text style={styles.backText}>{"\u2190"} Back</Text>
         </TouchableOpacity>
@@ -431,6 +446,7 @@ export default function ShowingsScreen() {
         )}
       </ScrollView>
     </SafeAreaView>
+    </TierGate>
   );
 }
 

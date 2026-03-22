@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -76,7 +77,9 @@ export default function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const [currentStage, setCurrentStage] = useState<PipelineStage>("prep_your_home");
   const [fullName, setFullName] = useState<string | null>(null);
+  const [plan, setPlan] = useState<string>("free");
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [mode, setMode] = useState<Mode>("selling");
 
   const fetchProfile = useCallback(async () => {
@@ -84,7 +87,7 @@ export default function HomeScreen() {
     try {
       const { data } = await supabase
         .from("profiles")
-        .select("current_stage, full_name")
+        .select("current_stage, full_name, plan")
         .eq("id", user.id)
         .single();
 
@@ -94,6 +97,7 @@ export default function HomeScreen() {
       if (data?.full_name) {
         setFullName(data.full_name);
       }
+      if (data?.plan) setPlan(data.plan);
     } catch {
       // Continue with defaults if profile fetch fails
     } finally {
@@ -106,6 +110,11 @@ export default function HomeScreen() {
       fetchProfile();
     }, [fetchProfile])
   );
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchProfile().finally(() => setRefreshing(false));
+  }, [fetchProfile]);
 
   const currentIndex = PIPELINE_STAGES.indexOf(currentStage);
   const totalStages = PIPELINE_STAGES.length;
@@ -391,6 +400,9 @@ export default function HomeScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primaryLight} />
+        }
       >
         {/* Header */}
         <View style={styles.header}>
@@ -414,6 +426,11 @@ export default function HomeScreen() {
                 <Text style={styles.profileFallbackIcon}>{"\uD83D\uDC64"}</Text>
               )}
             </TouchableOpacity>
+            {plan === "full_service" && (
+              <View style={styles.priorityBadge}>
+                <Text style={styles.priorityBadgeText}>⭐ Priority</Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -518,6 +535,17 @@ const styles = StyleSheet.create({
   },
   profileFallbackIcon: {
     fontSize: 18,
+  },
+  priorityBadge: {
+    backgroundColor: colors.accentLight,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+    marginLeft: spacing.sm,
+  },
+  priorityBadgeText: {
+    ...typography.smallBold,
+    color: colors.accentDark,
   },
 
   /* -- Mode Toggle -- */

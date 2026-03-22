@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -15,6 +16,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
+import TierGate from "../components/TierGate";
 
 function ScoreBadge({ score }: { score: number }) {
   const color = score >= 8 ? colors.success : score >= 5 ? colors.warning : colors.error;
@@ -31,6 +33,7 @@ export default function OffersScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [listingId, setListingId] = useState<string | null>(null);
 
   useFocusEffect(
@@ -69,19 +72,29 @@ export default function OffersScreen() {
     }
   };
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchOffers().finally(() => setRefreshing(false));
+  }, []);
+
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primaryLight} />
-        </View>
-      </SafeAreaView>
+      <TierGate feature="offer_analyzer">
+        <SafeAreaView style={styles.container}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primaryLight} />
+          </View>
+        </SafeAreaView>
+      </TierGate>
     );
   }
 
   return (
+    <TierGate feature="offer_analyzer">
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primaryLight} />
+      }>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Text style={styles.backText}>{"\u2190"} Back</Text>
         </TouchableOpacity>
@@ -166,6 +179,7 @@ export default function OffersScreen() {
         )}
       </ScrollView>
     </SafeAreaView>
+    </TierGate>
   );
 }
 

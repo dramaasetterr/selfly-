@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -63,6 +64,7 @@ export default function MessagesScreen() {
   const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [fetchError, setFetchError] = useState(false);
 
   const fetchConversations = useCallback(async () => {
@@ -156,6 +158,11 @@ export default function MessagesScreen() {
       fetchConversations();
     }, [fetchConversations])
   );
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchConversations().finally(() => setRefreshing(false));
+  }, [fetchConversations]);
 
   // ---------------------------------------------------------------------------
   // Render helpers
@@ -252,6 +259,9 @@ export default function MessagesScreen() {
         <ScrollView
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primaryLight} />
+          }
         >
           {conversations.map((item) => (
             <View key={item.id}>
