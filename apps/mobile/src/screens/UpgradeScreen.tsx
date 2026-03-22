@@ -99,12 +99,16 @@ export default function UpgradeScreen() {
     useCallback(() => {
       if (!user) return;
       (async () => {
-        const { data } = await supabase
-          .from("profiles")
-          .select("plan")
-          .eq("id", user.id)
-          .single();
-        if (data?.plan) setCurrentPlan(data.plan as Plan);
+        try {
+          const { data } = await supabase
+            .from("profiles")
+            .select("plan")
+            .eq("id", user.id)
+            .single();
+          if (data?.plan) setCurrentPlan(data.plan as Plan);
+        } catch {
+          // Continue with default plan if fetch fails
+        }
       })();
     }, [user])
   );

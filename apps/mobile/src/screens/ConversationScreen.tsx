@@ -108,7 +108,7 @@ export default function ConversationScreen() {
         .order("created_at", { ascending: true });
 
       if (error) {
-        console.warn("Failed to fetch messages:", error.message);
+        // Fetch failed — leave messages as-is
       } else {
         setMessages((data as Message[]) || []);
       }

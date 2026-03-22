@@ -35,6 +35,7 @@ export default function OffersScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [listingId, setListingId] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -44,6 +45,7 @@ export default function OffersScreen() {
 
   const fetchOffers = async () => {
     if (!user) return;
+    setFetchError(false);
     try {
       const { data: listing } = await supabase
         .from("listings")
@@ -56,17 +58,21 @@ export default function OffersScreen() {
       if (listing) {
         setListingId(listing.id);
 
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("offers")
           .select("*")
           .eq("listing_id", listing.id)
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
 
-        setOffers(data ?? []);
+        if (error) {
+          setFetchError(true);
+        } else {
+          setOffers(data ?? []);
+        }
       }
     } catch {
-      // Will show empty state gracefully
+      setFetchError(true);
     } finally {
       setLoading(false);
     }
@@ -118,7 +124,24 @@ export default function OffersScreen() {
           </TouchableOpacity>
         )}
 
-        {offers.length === 0 ? (
+        {fetchError ? (
+          <View style={styles.emptyState}>
+            <View style={styles.emptyIconCircle}>
+              <Text style={styles.emptyIcon}>⚠️</Text>
+            </View>
+            <Text style={styles.emptyTitle}>Something Went Wrong</Text>
+            <Text style={styles.emptyText}>
+              Could not load offers. Please check your connection and try again.
+            </Text>
+            <TouchableOpacity
+              style={styles.addButton}
+              activeOpacity={0.8}
+              onPress={() => { setLoading(true); fetchOffers(); }}
+            >
+              <Text style={styles.addButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        ) : offers.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconCircle}>
               <Text style={styles.emptyIcon}>📋</Text>
