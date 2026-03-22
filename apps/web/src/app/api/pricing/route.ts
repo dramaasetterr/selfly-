@@ -5,6 +5,10 @@ import { json, OPTIONS } from "../_cors";
 
 export { OPTIONS };
 
+if (!process.env.ANTHROPIC_API_KEY) {
+  throw new Error("Missing required environment variable: ANTHROPIC_API_KEY");
+}
+
 const anthropic = new Anthropic();
 
 // Regional price per square foot by state
@@ -376,14 +380,11 @@ Be specific in your reasoning — cite the approximate $/sqft you used, explain 
       }
       result.source = "ai";
     } catch (aiError) {
-      console.error("Pricing AI call failed, using fallback:", aiError instanceof Error ? aiError.message : aiError);
       result = generateFallbackPricing(body);
     }
 
     return json(result);
-  } catch (error) {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    console.error("Pricing API error:", errMsg, error);
+  } catch {
     return json(
       { error: "An unexpected error occurred. Please try again." },
       500

@@ -4,9 +4,13 @@ import { json, OPTIONS } from "../../../_cors";
 
 export { OPTIONS };
 
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  throw new Error("Missing required environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
+}
+
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 export async function GET(
@@ -36,8 +40,7 @@ export async function GET(
     }
 
     return json({ slots: data });
-  } catch (error) {
-    console.error("Availability API error:", error);
+  } catch {
     return json({ error: "Failed to fetch availability" }, 500);
   }
 }

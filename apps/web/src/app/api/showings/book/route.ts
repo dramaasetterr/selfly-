@@ -10,9 +10,16 @@ function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  throw new Error("Missing required environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
+}
+if (!process.env.RESEND_API_KEY) {
+  throw new Error("Missing required environment variable: RESEND_API_KEY");
+}
+
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -126,14 +133,13 @@ export async function POST(request: NextRequest) {
             </div>
           `,
         });
-      } catch (emailError) {
-        console.error("Failed to send email:", emailError);
+      } catch {
+        // Email send failed silently — showing is still booked
       }
     }
 
     return json({ showing });
-  } catch (error) {
-    console.error("Book showing API error:", error);
+  } catch {
     return json({ error: "Failed to book showing" }, 500);
   }
 }

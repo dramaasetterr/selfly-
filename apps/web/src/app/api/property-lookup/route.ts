@@ -4,6 +4,10 @@ import { json, OPTIONS } from "../_cors";
 
 export { OPTIONS };
 
+if (!process.env.ANTHROPIC_API_KEY) {
+  throw new Error("Missing required environment variable: ANTHROPIC_API_KEY");
+}
+
 const anthropic = new Anthropic();
 
 export async function POST(request: NextRequest) {
@@ -58,7 +62,6 @@ Return ONLY valid JSON, no markdown or other text.`,
         throw new Error("Failed to parse AI JSON response");
       }
     } catch (aiError) {
-      console.error("Property lookup AI error:", aiError instanceof Error ? aiError.message : aiError);
       // Sensible fallback defaults
       return json({ sqft: 1800, bedrooms: 3, bathrooms: 2, year_built: 1995 });
     }
@@ -80,9 +83,7 @@ Return ONLY valid JSON, no markdown or other text.`,
     }
 
     return json({ sqft, bedrooms, bathrooms, year_built });
-  } catch (error) {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    console.error("Property lookup API error:", errMsg, error);
+  } catch {
     return json(
       { error: "Failed to look up property details. Please try again or enter them manually." },
       500

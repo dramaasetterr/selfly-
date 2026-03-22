@@ -4,9 +4,13 @@ import { json, OPTIONS } from "../_cors";
 
 export { OPTIONS };
 
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  throw new Error("Missing required environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
+}
+
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 export async function POST(req: NextRequest) {
@@ -25,7 +29,6 @@ export async function POST(req: NextRequest) {
     });
 
     if (error) {
-      console.error("[Waitlist] insert error:", error.message);
       return json(
         { success: false, error: "Could not save your email. Please try again." },
         500

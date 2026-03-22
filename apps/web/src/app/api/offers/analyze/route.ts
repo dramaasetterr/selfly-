@@ -5,6 +5,10 @@ import { json, OPTIONS } from "../../_cors";
 
 export { OPTIONS };
 
+if (!process.env.ANTHROPIC_API_KEY) {
+  throw new Error("Missing required environment variable: ANTHROPIC_API_KEY");
+}
+
 const anthropic = new Anthropic();
 
 function generateFallbackAnalysis(body: OfferInput & { listing_price: number; property_address?: string }): OfferAnalysis & { source: "fallback" } {
@@ -282,14 +286,11 @@ Be practical and specific. Real estate sellers need actionable advice, not gener
       }
       result.source = "ai";
     } catch (aiError) {
-      console.error("Offer analysis AI call failed, using fallback:", aiError instanceof Error ? aiError.message : aiError);
       result = generateFallbackAnalysis(body);
     }
 
     return json(result);
-  } catch (error) {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    console.error("Offer analysis API error:", errMsg, error);
+  } catch {
     return json(
       { error: "An unexpected error occurred. Please try again." },
       500
