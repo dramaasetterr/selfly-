@@ -37,16 +37,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-asset",
-      "expo-font",
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Chiavo needs access to your photo library to add photos of your property to your listing."
-        }
-      ]
-    ],
+    "plugins": [],
     "extra": {
       "eas": {
         "projectId": "de3539fa-a711-4803-9cbf-3d0465b6d086"
