@@ -89,7 +89,7 @@ export default function BookShowingPage() {
   useInjectKeyframes();
 
   const params = useParams();
-  const listingId = params.listingId as string;
+  const listingId = (params?.listingId as string) ?? "";
 
   const [listing, setListing] = useState<ListingInfo | null>(null);
   const [slots, setSlots] = useState<ShowingAvailability[]>([]);
