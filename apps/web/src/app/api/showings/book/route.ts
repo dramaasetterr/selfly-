@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
     if (seller?.email) {
       try {
         await resend.emails.send({
-          from: "Selfly <notifications@selfly.app>",
+          from: "Chiavo <notifications@chiavo.com>",
           to: seller.email,
           subject: `New Showing Booked — ${listing.address}`,
           html: `
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
                 ${buyer_phone ? `<p style="margin: 0; color: #374151;">${escapeHtml(buyer_phone || '')}</p>` : ""}
               </div>
 
-              <p style="color: #9CA3AF; font-size: 13px; margin-top: 24px;">— Selfly FSBO Platform</p>
+              <p style="color: #9CA3AF; font-size: 13px; margin-top: 24px;">— Chiavo FSBO Platform</p>
             </div>
           `,
         });

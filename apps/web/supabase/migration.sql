@@ -1,5 +1,5 @@
 -- ============================================================================
--- Selfly FSBO Platform — Comprehensive Database Migration
+-- Chiavo FSBO Platform — Comprehensive Database Migration
 -- ============================================================================
 -- This migration is idempotent: safe to run multiple times.
 -- It creates all tables, RLS policies, indexes, triggers, storage buckets,

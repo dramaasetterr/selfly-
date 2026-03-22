@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Selfly",
-    "slug": "selfly",
+    "name": "Chiavo",
+    "slug": "chiavo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "selfly",
+    "scheme": "chiavo",
     "userInterfaceStyle": "light",
     "splash": {
       "backgroundColor": "#2563EB",
@@ -19,8 +19,8 @@
       "bundleIdentifier": "com.selfly.app",
       "buildNumber": "1",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Selfly needs access to your photo library to add photos of your property to your listing.",
-        "NSCameraUsageDescription": "Selfly needs camera access to take photos of your property for your listing."
+        "NSPhotoLibraryUsageDescription": "Chiavo needs access to your photo library to add photos of your property to your listing.",
+        "NSCameraUsageDescription": "Chiavo needs camera access to take photos of your property for your listing."
       }
     },
     "android": {
@@ -43,7 +43,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Selfly needs access to your photo library to add photos of your property to your listing."
+          "photosPermission": "Chiavo needs access to your photo library to add photos of your property to your listing."
         }
       ]
     ],

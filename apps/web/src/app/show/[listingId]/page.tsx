@@ -499,7 +499,7 @@ export default function BookShowingPage() {
           </div>
           <p className="text-sm text-gray-400">
             Powered by{" "}
-            <span className="font-semibold text-primary">Selfly</span>{" "}
+            <span className="font-semibold text-primary">Chiavo</span>{" "}
             &mdash; For Sale By Owner
           </p>
         </div>
@@ -515,7 +515,7 @@ function Nav() {
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
         <a href="/" className="text-2xl font-extrabold tracking-tight text-primary">
-          Selfly
+          Chiavo
         </a>
         <span className="text-sm font-medium text-gray-500">Schedule a Showing</span>
       </div>
@@ -527,7 +527,7 @@ function PoweredByFooter() {
   return (
     <p className="text-center text-sm text-gray-400 mt-12">
       Powered by{" "}
-      <span className="font-semibold text-primary">Selfly</span>{" "}
+      <span className="font-semibold text-primary">Chiavo</span>{" "}
       &mdash; For Sale By Owner
     </p>
   );

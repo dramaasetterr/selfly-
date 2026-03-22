@@ -34,7 +34,7 @@ const PAGES: OnboardingPage[] = [
     heading: "Save Thousands",
     title: "Keep Your Commission",
     description:
-      "The average homeowner saves $15,000\u201325,000 by selling without an agent. Selfly guides you through every step.",
+      "The average homeowner saves $15,000\u201325,000 by selling without an agent. Chiavo guides you through every step.",
   },
   {
     icon: "\u2728",
@@ -48,7 +48,7 @@ const PAGES: OnboardingPage[] = [
     heading: "Buy or Sell",
     title: "Your Home, Your Way",
     description:
-      "Whether you\u2019re selling your home or looking for your next one, Selfly puts you in control.",
+      "Whether you\u2019re selling your home or looking for your next one, Chiavo puts you in control.",
   },
 ];
 

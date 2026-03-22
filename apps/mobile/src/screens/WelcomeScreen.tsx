@@ -38,9 +38,9 @@ export default function WelcomeScreen({ navigation }: Props) {
       <View style={styles.content}>
         {/* Brand */}
         <View style={styles.brandSection}>
-          <Text style={styles.brandName}>Selfly</Text>
+          <Text style={styles.brandName}>Chiavo</Text>
           <Text style={styles.tagline}>
-            Sell your home.{"\n"}Keep your equity.
+            Sell Your Home.{"\n"}Save Thousands.
           </Text>
         </View>
 

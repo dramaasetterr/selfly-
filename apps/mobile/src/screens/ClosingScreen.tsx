@@ -340,7 +340,7 @@ export default function ClosingScreen() {
             <Text style={styles.celebrationEmoji}>🏠🎉</Text>
             <Text style={styles.celebrationTitle}>Congratulations!</Text>
             <Text style={styles.celebrationText}>
-              You sold your home — Selfly!
+              You sold your home — with Chiavo!
             </Text>
           </View>
         )}

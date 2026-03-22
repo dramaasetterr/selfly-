@@ -224,7 +224,7 @@ export default function MarketplaceScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Selfly Marketplace</Text>
+        <Text style={styles.title}>Chiavo Marketplace</Text>
         <Text style={styles.subtitle}>Find your next home — no agent needed</Text>
       </View>
 

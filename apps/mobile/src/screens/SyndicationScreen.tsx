@@ -57,12 +57,12 @@ interface PlatformInfo {
 
 const PLATFORMS: PlatformInfo[] = [
   {
-    key: 'selfly',
+    key: 'chiavo',
     icon: '🏠',
-    name: 'Selfly Marketplace',
+    name: 'Chiavo Marketplace',
     getStatus: (listing) => (listing?.status === 'active' ? 'listed' : 'not_listed'),
     instructions: [
-      'Your listing is automatically published on the Selfly Marketplace when you set it to active.',
+      'Your listing is automatically published on the Chiavo Marketplace when you set it to active.',
       'Buyers can find your home, schedule showings, and contact you directly.',
     ],
   },
@@ -104,7 +104,7 @@ const PLATFORMS: PlatformInfo[] = [
     instructions: [
       '1. Open Facebook and go to Marketplace',
       '2. Click "Create New Listing" then select "Home for Sale"',
-      '3. Add your property photos (use the ones from your Selfly listing)',
+      '3. Add your property photos (use the ones from your Chiavo listing)',
       '4. Fill in price, address, bedrooms, bathrooms, and square footage',
       '5. Write a compelling description',
       '6. Publish — your listing will be visible to local buyers',
@@ -204,7 +204,7 @@ export default function SyndicationScreen() {
     if (listing.description) {
       lines.push(`Description:`, listing.description, ``);
     }
-    lines.push(`Listed on Selfly — sell your home without an agent.`);
+    lines.push(`Listed on Chiavo — sell your home without an agent.`);
     return lines.join('\n');
   };
 
