@@ -20,6 +20,8 @@ export const PIPELINE_STAGE_LABELS: Record<PipelineStage, string> = {
 };
 
 /** User profile */
+export type PlanType = "free" | "seller_pro" | "full_service";
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -27,29 +29,33 @@ export interface UserProfile {
   avatar_url?: string;
   phone?: string;
   current_stage: PipelineStage;
+  plan: PlanType;
   created_at: string;
   updated_at: string;
 }
 
-/** Property listing */
+/** Property listing (matches DB schema) */
 export interface PropertyListing {
   id: string;
-  owner_id: string;
+  user_id: string;
   title: string;
   description: string;
   price: number;
   address: string;
-  city: string;
-  state: string;
-  zip_code: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
   bedrooms: number;
   bathrooms: number;
-  square_feet: number;
+  sqft: number;
   lot_size?: number;
   year_built?: number;
   property_type: PropertyType;
+  hoa: boolean;
+  hoa_fee?: number;
+  features?: string;
   status: ListingStatus;
-  images: string[];
+  photos: string[];
   created_at: string;
   updated_at: string;
 }
@@ -92,6 +98,9 @@ export interface Listing {
   id: string;
   user_id: string;
   address: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
   bedrooms: number;
   bathrooms: number;
   sqft: number;
@@ -99,6 +108,7 @@ export interface Listing {
   property_type: PropertyType;
   hoa: boolean;
   hoa_fee?: number;
+  lot_size?: number;
   features?: string;
   title: string;
   description: string;
