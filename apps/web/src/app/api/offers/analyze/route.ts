@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import type { OfferInput, OfferAnalysis } from "@selfly/shared";
+import type { OfferInput, OfferAnalysis } from '../shared';
 import { json, OPTIONS } from "../../_cors";
 
 export { OPTIONS };
@@ -297,3 +297,4 @@ Be practical and specific. Real estate sellers need actionable advice, not gener
     );
   }
 }
+

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import type { PricingInput, PricingResult } from "@selfly/shared";
+import type { PricingInput, PricingResult } from '../shared';
 import { json, OPTIONS } from "../_cors";
 
 export { OPTIONS };
@@ -391,3 +391,4 @@ Be specific in your reasoning — cite the approximate $/sqft you used, explain 
     );
   }
 }
+

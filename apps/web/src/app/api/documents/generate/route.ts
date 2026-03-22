@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import type { DocumentType } from "@selfly/shared";
+import type { DocumentType } from '../shared';
 import { json, OPTIONS } from "../../_cors";
 
 export { OPTIONS };
@@ -1771,3 +1771,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
-import type { BookShowingInput } from "@selfly/shared";
+import type { BookShowingInput } from '../shared';
 import { json, OPTIONS } from "../../_cors";
 
 export { OPTIONS };
@@ -143,3 +143,4 @@ export async function POST(request: NextRequest) {
     return json({ error: "Failed to book showing" }, 500);
   }
 }
+

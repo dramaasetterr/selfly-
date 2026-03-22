@@ -56,3 +56,5 @@ android/
 .cache/
 tmp/
 temp/
+
+.vercel
