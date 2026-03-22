@@ -213,7 +213,7 @@ Be warm, practical, and reassuring. FSBO sellers may be doing this for the first
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Closing guide API error:", errMsg, error);
     return NextResponse.json(
-      { error: "Failed to generate closing guide", detail: errMsg },
+      { error: "An unexpected error occurred. Please try again." },
       { status: 500 }
     );
   }

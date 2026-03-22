@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -79,12 +80,16 @@ export default function ConversationScreen() {
   // Fetch listing address
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("listings")
-        .select("address")
-        .eq("id", listingId)
-        .single();
-      if (data?.address) setListingAddress(data.address);
+      try {
+        const { data } = await supabase
+          .from("listings")
+          .select("address")
+          .eq("id", listingId)
+          .single();
+        if (data?.address) setListingAddress(data.address);
+      } catch (err) {
+        // Non-critical: address is supplementary info
+      }
     })();
   }, [listingId]);
 
@@ -103,6 +108,7 @@ export default function ConversationScreen() {
         .order("created_at", { ascending: true });
 
       if (error) {
+        console.warn("Failed to fetch messages:", error.message);
       } else {
         setMessages((data as Message[]) || []);
       }
@@ -200,6 +206,7 @@ export default function ConversationScreen() {
       }
     } catch (err) {
       setText(content);
+      Alert.alert("Error", "Could not send message. Please try again.");
     } finally {
       setSending(false);
     }

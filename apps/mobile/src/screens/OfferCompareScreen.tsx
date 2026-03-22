@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -135,15 +136,20 @@ export default function OfferCompareScreen() {
   const fetchOffers = async () => {
     if (!user) return;
 
-    const { data } = await supabase
-      .from("offers")
-      .select("*")
-      .eq("listing_id", listingId)
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: true });
+    try {
+      const { data } = await supabase
+        .from("offers")
+        .select("*")
+        .eq("listing_id", listingId)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
 
-    setOffers(data ?? []);
-    setLoading(false);
+      setOffers(data ?? []);
+    } catch (err) {
+      Alert.alert("Error", "Failed to load offers. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const bestOverallIndex = offers.length
@@ -158,6 +164,22 @@ export default function OfferCompareScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primaryLight} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (offers.length === 0) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.headerFixed}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Text style={styles.backText}>{"\u2190"} Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>Compare Offers</Text>
+        </View>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.emptyText}>No offers to compare yet.</Text>
         </View>
       </SafeAreaView>
     );
@@ -261,6 +283,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  emptyText: {
+    ...typography.body,
+    color: colors.textSecondary,
+    textAlign: "center",
   },
   headerFixed: {
     paddingHorizontal: spacing.lg,

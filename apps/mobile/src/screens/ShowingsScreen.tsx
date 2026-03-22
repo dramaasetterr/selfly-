@@ -84,37 +84,42 @@ export default function ShowingsScreen() {
 
   const fetchData = useCallback(async () => {
     if (!user) return;
-    const { data: listing } = await supabase
-      .from("listings")
-      .select("id")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (!listing) {
-      setLoading(false);
-      return;
-    }
-    setListingId(listing.id);
-
-    const [availRes, showingsRes] = await Promise.all([
-      supabase
-        .from("showing_availability")
-        .select("*")
-        .eq("listing_id", listing.id)
+    try {
+      const { data: listing } = await supabase
+        .from("listings")
+        .select("id")
         .eq("user_id", user.id)
-        .order("date", { ascending: true }),
-      supabase
-        .from("showings")
-        .select("*")
-        .eq("seller_id", user.id)
-        .order("showing_date", { ascending: true }),
-    ]);
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
 
-    if (availRes.data) setExistingSlots(availRes.data);
-    if (showingsRes.data) setShowings(showingsRes.data);
-    setLoading(false);
+      if (!listing) {
+        setLoading(false);
+        return;
+      }
+      setListingId(listing.id);
+
+      const [availRes, showingsRes] = await Promise.all([
+        supabase
+          .from("showing_availability")
+          .select("*")
+          .eq("listing_id", listing.id)
+          .eq("user_id", user.id)
+          .order("date", { ascending: true }),
+        supabase
+          .from("showings")
+          .select("*")
+          .eq("seller_id", user.id)
+          .order("showing_date", { ascending: true }),
+      ]);
+
+      if (availRes.data) setExistingSlots(availRes.data);
+      if (showingsRes.data) setShowings(showingsRes.data);
+    } catch {
+      Alert.alert("Error", "Could not load showings. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
 
   useEffect(() => {
@@ -157,48 +162,53 @@ export default function ShowingsScreen() {
 
     const dateStr = formatDate(selectedDate);
 
-    await supabase
-      .from("showing_availability")
-      .delete()
-      .eq("user_id", user.id)
-      .eq("listing_id", listingId)
-      .eq("date", dateStr)
-      .eq("is_booked", false);
+    try {
+      await supabase
+        .from("showing_availability")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("listing_id", listingId)
+        .eq("date", dateStr)
+        .eq("is_booked", false);
 
-    if (timeWindows.length > 0) {
-      const rows = timeWindows.map((tw) => ({
-        user_id: user.id,
-        listing_id: listingId,
-        date: dateStr,
-        start_time: tw.startTime,
-        end_time: tw.endTime,
-      }));
-      await supabase.from("showing_availability").insert(rows);
-    }
-
-    const { count } = await supabase
-      .from("showing_availability")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id);
-
-    if (count && count > 0) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("current_stage")
-        .eq("id", user.id)
-        .single();
-
-      if (profile?.current_stage === "manage_showings") {
-        await supabase
-          .from("profiles")
-          .update({ current_stage: "review_offers" })
-          .eq("id", user.id);
+      if (timeWindows.length > 0) {
+        const rows = timeWindows.map((tw) => ({
+          user_id: user.id,
+          listing_id: listingId,
+          date: dateStr,
+          start_time: tw.startTime,
+          end_time: tw.endTime,
+        }));
+        await supabase.from("showing_availability").insert(rows);
       }
-    }
 
-    await fetchData();
-    setSaving(false);
-    Alert.alert("Saved", "Availability updated for " + dateStr);
+      const { count } = await supabase
+        .from("showing_availability")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id);
+
+      if (count && count > 0) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("current_stage")
+          .eq("id", user.id)
+          .single();
+
+        if (profile?.current_stage === "manage_showings") {
+          await supabase
+            .from("profiles")
+            .update({ current_stage: "review_offers" })
+            .eq("id", user.id);
+        }
+      }
+
+      await fetchData();
+      Alert.alert("Saved", "Availability updated for " + dateStr);
+    } catch {
+      Alert.alert("Error", "Could not save availability. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const copyLink = async () => {

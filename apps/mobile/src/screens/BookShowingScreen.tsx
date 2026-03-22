@@ -146,7 +146,7 @@ export default function BookShowingScreen() {
         setBookedDetails({ date: selectedSlot.date, time: selectedSlot.time });
       } else {
         const err = await res.json().catch(() => ({}));
-        Alert.alert('Booking Failed', err.message || 'Please try again later.');
+        Alert.alert('Booking Failed', 'Could not book this showing. Please try again later.');
       }
     } catch (err) {
       Alert.alert('Error', 'Could not connect to the server. Please try again.');

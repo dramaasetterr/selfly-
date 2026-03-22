@@ -45,18 +45,23 @@ export default function ProfileScreen() {
 
   const fetchProfile = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from("profiles")
-      .select("full_name, phone, plan")
-      .eq("id", user.id)
-      .single();
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, phone, plan")
+        .eq("id", user.id)
+        .single();
 
-    if (data) {
-      setFullName(data.full_name ?? "");
-      setPhone(data.phone ?? "");
-      if (data.plan) setPlan(data.plan as Plan);
+      if (data) {
+        setFullName(data.full_name ?? "");
+        setPhone(data.phone ?? "");
+        if (data.plan) setPlan(data.plan as Plan);
+      }
+    } catch {
+      // Continue with defaults if profile fetch fails
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [user]);
 
   useFocusEffect(

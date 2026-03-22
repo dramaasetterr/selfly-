@@ -218,7 +218,7 @@ function generateFallbackPricing(body: PricingInput): PricingResult & { source: 
   }
 
   // 5. Age adjustment
-  const age = 2026 - year_built;
+  const age = new Date().getFullYear() - year_built;
   let ageMultiplier: number;
   let ageLabel: string;
   if (age <= 5) {
@@ -338,7 +338,7 @@ Property Details:
 - Square Footage: ${sqft.toLocaleString()}
 - Bedrooms: ${bedrooms}
 - Bathrooms: ${bathrooms}
-- Year Built: ${year_built} (${2026 - year_built} years old)
+- Year Built: ${year_built} (${new Date().getFullYear() - year_built} years old)
 - Condition: ${condition}${featuresLine}
 
 Consider ALL of the following in your analysis:
@@ -381,7 +381,7 @@ Be specific in your reasoning — cite the approximate $/sqft you used, explain 
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Pricing API error:", errMsg, error);
     return NextResponse.json(
-      { error: "Failed to generate pricing", detail: errMsg },
+      { error: "An unexpected error occurred. Please try again." },
       { status: 500 }
     );
   }

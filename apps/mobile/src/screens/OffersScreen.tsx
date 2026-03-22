@@ -41,28 +41,32 @@ export default function OffersScreen() {
 
   const fetchOffers = async () => {
     if (!user) return;
-
-    const { data: listing } = await supabase
-      .from("listings")
-      .select("id, price")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (listing) {
-      setListingId(listing.id);
-
-      const { data } = await supabase
-        .from("offers")
-        .select("*")
-        .eq("listing_id", listing.id)
+    try {
+      const { data: listing } = await supabase
+        .from("listings")
+        .select("id, price")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
 
-      setOffers(data ?? []);
+      if (listing) {
+        setListingId(listing.id);
+
+        const { data } = await supabase
+          .from("offers")
+          .select("*")
+          .eq("listing_id", listing.id)
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+
+        setOffers(data ?? []);
+      }
+    } catch {
+      // Will show empty state gracefully
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (loading) {

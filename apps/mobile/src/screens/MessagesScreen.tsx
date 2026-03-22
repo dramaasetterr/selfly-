@@ -63,6 +63,7 @@ export default function MessagesScreen() {
   const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
   const fetchConversations = useCallback(async () => {
     if (!user) return;
@@ -76,6 +77,7 @@ export default function MessagesScreen() {
         .order("created_at", { ascending: false });
 
       if (error) {
+        setFetchError(true);
         setLoading(false);
         return;
       }
@@ -141,6 +143,7 @@ export default function MessagesScreen() {
 
       setConversations(sorted);
     } catch (err) {
+      setFetchError(true);
     } finally {
       setLoading(false);
     }
@@ -149,6 +152,7 @@ export default function MessagesScreen() {
   useFocusEffect(
     useCallback(() => {
       setLoading(true);
+      setFetchError(false);
       fetchConversations();
     }, [fetchConversations])
   );
@@ -218,6 +222,23 @@ export default function MessagesScreen() {
       {loading ? (
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={colors.primaryLight} />
+        </View>
+      ) : fetchError ? (
+        <View style={styles.centerContainer}>
+          <Text style={styles.emptyTitle}>Something went wrong</Text>
+          <Text style={styles.emptySubtitle}>
+            Could not load messages. Please check your connection and try again.
+          </Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => {
+              setLoading(true);
+              setFetchError(false);
+              fetchConversations();
+            }}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
         </View>
       ) : conversations.length === 0 ? (
         <View style={styles.centerContainer}>
@@ -301,6 +322,17 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: "center",
     lineHeight: 22,
+  },
+  retryButton: {
+    marginTop: spacing.lg,
+    backgroundColor: colors.primaryLight,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.xl,
+    borderRadius: borderRadius.md,
+  },
+  retryButtonText: {
+    ...typography.bodyBold,
+    color: colors.white,
   },
 
   // List

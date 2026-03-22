@@ -72,24 +72,29 @@ export default function ListingBuilderScreen({ navigation }: Props) {
   useEffect(() => {
     if (prefilled || !user) return;
     (async () => {
-      const { data } = await supabase
-        .from("pricing_results")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
+      try {
+        const { data } = await supabase
+          .from("pricing_results")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
 
-      if (data) {
-        setAddress(data.address || "");
-        setBedrooms(String(data.bedrooms || ""));
-        setBathrooms(String(data.bathrooms || ""));
-        setSqft(String(data.sqft || ""));
-        setYearBuilt(String(data.year_built || ""));
-        if (data.condition) setCondition(data.condition);
-        if (data.selected_price) setSelectedPrice(data.selected_price);
+        if (data) {
+          setAddress(data.address || "");
+          setBedrooms(String(data.bedrooms || ""));
+          setBathrooms(String(data.bathrooms || ""));
+          setSqft(String(data.sqft || ""));
+          setYearBuilt(String(data.year_built || ""));
+          if (data.condition) setCondition(data.condition);
+          if (data.selected_price) setSelectedPrice(data.selected_price);
+        }
+      } catch (err) {
+        // Non-critical: user can still fill in details manually
+      } finally {
+        setPrefilled(true);
       }
-      setPrefilled(true);
     })();
   }, [user, prefilled]);
 
@@ -150,6 +155,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
     setUploadProgress(0);
     const orderedPhotos = getOrderedPhotos();
     const urls: string[] = [];
+    let failedCount = 0;
 
     for (let i = 0; i < orderedPhotos.length; i++) {
       const photo = orderedPhotos[i];
@@ -164,6 +170,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
         .upload(fileName, blob, { contentType: photo.mimeType || "image/jpeg" });
 
       if (error) {
+        failedCount++;
         continue;
       }
 
@@ -173,6 +180,10 @@ export default function ListingBuilderScreen({ navigation }: Props) {
 
       urls.push(urlData.publicUrl);
       setUploadProgress(Math.round(((i + 1) / orderedPhotos.length) * 100));
+    }
+
+    if (failedCount > 0) {
+      Alert.alert("Warning", `${failedCount} photo(s) failed to upload.`);
     }
 
     setPhotoUrls(urls);

@@ -64,7 +64,7 @@ export default function LoginScreen({ navigation }: Props) {
     setLoading(false);
 
     if (error) {
-      setGeneralError(error);
+      setGeneralError("Invalid email or password. Please try again.");
     }
   };
 
@@ -95,12 +95,12 @@ export default function LoginScreen({ navigation }: Props) {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail.trim());
       if (error) {
-        setForgotError(error.message);
+        setForgotError("Could not send reset email. Please check your email address and try again.");
       } else {
         setForgotSuccess(true);
       }
     } catch (err: any) {
-      setForgotError(err?.message || "Something went wrong. Please try again.");
+      setForgotError("Could not send reset email. Please check your email address and try again.");
     } finally {
       setForgotLoading(false);
     }

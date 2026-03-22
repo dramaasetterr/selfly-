@@ -53,11 +53,13 @@ export default function ListingDetailScreen() {
 
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
   useEffect(() => {
     (async () => {
       try {
+        setFetchError(false);
         const { data, error } = await supabase
           .from('listings')
           .select('*')
@@ -65,10 +67,12 @@ export default function ListingDetailScreen() {
           .single();
 
         if (error) {
+          setFetchError(true);
         } else {
           setListing(data as Listing);
         }
-      } catch (err) {
+      } catch {
+        setFetchError(true);
       } finally {
         setLoading(false);
       }
@@ -106,7 +110,18 @@ export default function ListingDetailScreen() {
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
         <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>Listing not found.</Text>
+          <Text style={styles.errorText}>
+            {fetchError ? 'Something went wrong. Please check your connection.' : 'Listing not found.'}
+          </Text>
+          {fetchError && (
+            <TouchableOpacity
+              style={styles.showingButton}
+              activeOpacity={0.8}
+              onPress={() => { setLoading(true); setFetchError(false); }}
+            >
+              <Text style={styles.showingButtonText}>Retry</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </SafeAreaView>
     );

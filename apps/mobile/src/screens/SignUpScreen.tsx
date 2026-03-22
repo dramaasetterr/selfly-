@@ -87,7 +87,7 @@ export default function SignUpScreen({ navigation }: Props) {
 
     if (error) {
       setLoading(false);
-      setGeneralError(error.message);
+      setGeneralError("Could not create your account. Please try again.");
       return;
     }
 

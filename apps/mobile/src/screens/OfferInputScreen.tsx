@@ -47,15 +47,19 @@ export default function OfferInputScreen() {
   }, []);
 
   const fetchListing = async () => {
-    const { data } = await supabase
-      .from("listings")
-      .select("price, address")
-      .eq("id", listingId)
-      .single();
+    try {
+      const { data } = await supabase
+        .from("listings")
+        .select("price, address")
+        .eq("id", listingId)
+        .single();
 
-    if (data) {
-      setListingPrice(data.price);
-      setPropertyAddress(data.address || "");
+      if (data) {
+        setListingPrice(data.price);
+        setPropertyAddress(data.address || "");
+      }
+    } catch (err) {
+      Alert.alert("Error", "Failed to load listing details.");
     }
   };
 

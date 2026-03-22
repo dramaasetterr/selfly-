@@ -50,7 +50,7 @@ function generateFallbackDescription(body: DescriptionRequest): { title: string;
     .replace(/\b\w/g, (c) => c.toUpperCase());
   const ptLower = propertyTypeLabel.toLowerCase();
 
-  const age = 2026 - year_built;
+  const age = new Date().getFullYear() - year_built;
   const isNew = age <= 5;
   const isModern = age > 5 && age <= 15;
   const isEstablished = age > 15 && age <= 40;
@@ -267,7 +267,7 @@ export async function POST(request: NextRequest) {
       .replace(/_/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
 
-    const age = 2026 - year_built;
+    const age = new Date().getFullYear() - year_built;
     const priceRange = selected_price
       ? selected_price >= 1000000 ? "luxury" : selected_price >= 500000 ? "mid-high" : selected_price >= 250000 ? "mid" : "affordable"
       : "unknown";
@@ -337,7 +337,7 @@ Return ONLY valid JSON, no markdown or other text.`,
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Listing description API error:", errMsg, error);
     return NextResponse.json(
-      { error: "Failed to generate listing description", detail: errMsg },
+      { error: "An unexpected error occurred. Please try again." },
       { status: 500 }
     );
   }

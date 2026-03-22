@@ -117,7 +117,7 @@ function generateFallbackAnalysis(body: OfferInput & { listing_price: number; pr
   }
 
   if (closing_date) {
-    const today = new Date("2026-03-21T00:00:00");
+    const today = new Date();
     const closeDate = new Date(closing_date + "T00:00:00");
     const daysToClose = Math.round((closeDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     if (daysToClose < 21) {
@@ -284,7 +284,7 @@ Be practical and specific. Real estate sellers need actionable advice, not gener
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Offer analysis API error:", errMsg, error);
     return NextResponse.json(
-      { error: "Failed to analyze offer", detail: errMsg },
+      { error: "An unexpected error occurred. Please try again." },
       { status: 500 }
     );
   }

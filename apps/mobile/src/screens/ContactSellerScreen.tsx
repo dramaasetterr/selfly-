@@ -123,12 +123,12 @@ export default function ContactSellerScreen() {
       });
 
       if (insertError) {
-        setError(insertError.message);
+        setError("Could not send your message. Please check your connection and try again.");
       } else {
         setSent(true);
       }
     } catch (err: any) {
-      setError(err?.message || "Something went wrong. Please try again.");
+      setError("Could not send your message. Please check your connection and try again.");
     } finally {
       setSending(false);
     }

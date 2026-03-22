@@ -25,7 +25,7 @@ export async function GET(
       .order("start_time", { ascending: true });
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Failed to fetch availability" }, { status: 500 });
     }
 
     return NextResponse.json({ slots: data });

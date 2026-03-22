@@ -3,6 +3,10 @@ import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import type { BookShowingInput } from "@selfly/shared";
 
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -116,9 +120,9 @@ export async function POST(request: NextRequest) {
 
               <div style="margin: 20px 0;">
                 <p style="margin: 0 0 4px; color: #111827; font-weight: 600;">Buyer Contact</p>
-                <p style="margin: 0 0 4px; color: #374151;">${buyer_name}</p>
-                <p style="margin: 0 0 4px; color: #374151;">${buyer_email}</p>
-                ${buyer_phone ? `<p style="margin: 0; color: #374151;">${buyer_phone}</p>` : ""}
+                <p style="margin: 0 0 4px; color: #374151;">${escapeHtml(buyer_name)}</p>
+                <p style="margin: 0 0 4px; color: #374151;">${escapeHtml(buyer_email)}</p>
+                ${buyer_phone ? `<p style="margin: 0; color: #374151;">${escapeHtml(buyer_phone || '')}</p>` : ""}
               </div>
 
               <p style="color: #9CA3AF; font-size: 13px; margin-top: 24px;">— Selfly FSBO Platform</p>

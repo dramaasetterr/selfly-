@@ -81,19 +81,24 @@ export default function HomeScreen() {
 
   const fetchProfile = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from("profiles")
-      .select("current_stage, full_name")
-      .eq("id", user.id)
-      .single();
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("current_stage, full_name")
+        .eq("id", user.id)
+        .single();
 
-    if (data?.current_stage) {
-      setCurrentStage(data.current_stage as PipelineStage);
+      if (data?.current_stage) {
+        setCurrentStage(data.current_stage as PipelineStage);
+      }
+      if (data?.full_name) {
+        setFullName(data.full_name);
+      }
+    } catch {
+      // Continue with defaults if profile fetch fails
+    } finally {
+      setLoadingProfile(false);
     }
-    if (data?.full_name) {
-      setFullName(data.full_name);
-    }
-    setLoadingProfile(false);
   }, [user]);
 
   useFocusEffect(

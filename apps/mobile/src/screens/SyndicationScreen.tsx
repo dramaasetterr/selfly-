@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   LayoutAnimation,
   Platform,
@@ -157,6 +158,7 @@ export default function SyndicationScreen() {
   const { user } = useAuth();
   const [listing, setListing] = useState<ListingSummary | null>(null);
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
@@ -171,6 +173,9 @@ export default function SyndicationScreen() {
           .maybeSingle();
         if (data) setListing(data as ListingSummary);
       } catch (err) {
+        Alert.alert("Error", "Failed to load listing data. Please try again.");
+      } finally {
+        setLoading(false);
       }
     })();
   }, [user]);
@@ -215,6 +220,16 @@ export default function SyndicationScreen() {
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primaryLight} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -307,6 +322,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollContent: {
     paddingHorizontal: spacing.lg,

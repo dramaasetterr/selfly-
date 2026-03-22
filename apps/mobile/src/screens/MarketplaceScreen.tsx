@@ -79,12 +79,14 @@ export default function MarketplaceScreen() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [propertyFilter, setPropertyFilter] = useState<PropertyFilter>('All');
   const [priceFilter, setPriceFilter] = useState<PriceFilter>('Any');
 
   const fetchListings = useCallback(async () => {
     try {
+      setFetchError(false);
       const { data, error } = await supabase
         .from('listings')
         .select('*')
@@ -92,10 +94,12 @@ export default function MarketplaceScreen() {
         .order('created_at', { ascending: false });
 
       if (error) {
+        setFetchError(true);
       } else {
         setListings((data as Listing[]) || []);
       }
-    } catch (err) {
+    } catch {
+      setFetchError(true);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -278,7 +282,22 @@ export default function MarketplaceScreen() {
       </ScrollView>
 
       {/* Listings */}
-      {filtered.length === 0 ? (
+      {fetchError ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyIcon}>⚠️</Text>
+          <Text style={styles.emptyTitle}>Something Went Wrong</Text>
+          <Text style={styles.emptyBody}>
+            Please check your connection and try again.
+          </Text>
+          <TouchableOpacity
+            style={styles.viewButton}
+            activeOpacity={0.8}
+            onPress={() => { setLoading(true); fetchListings(); }}
+          >
+            <Text style={styles.viewButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      ) : filtered.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyIcon}>🏘️</Text>
           <Text style={styles.emptyTitle}>No Listings Found</Text>

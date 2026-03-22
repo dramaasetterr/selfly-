@@ -1757,7 +1757,7 @@ export async function POST(request: NextRequest) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Document generation API error:", errMsg, error);
     return NextResponse.json(
-      { error: "Failed to generate document", detail: errMsg },
+      { error: "An unexpected error occurred. Please try again." },
       { status: 500 }
     );
   }

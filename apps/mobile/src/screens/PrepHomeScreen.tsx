@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Animated,
   LayoutAnimation,
   Platform,
@@ -183,10 +184,12 @@ export default function PrepHomeScreen() {
           .maybeSingle();
 
         if (error) {
+          Alert.alert("Error", "Failed to load checklist. Please try again.");
         } else if (data?.items) {
           setChecklist((prev) => ({ ...prev, ...(data.items as ChecklistState) }));
         }
       } catch (err) {
+        Alert.alert("Error", "Failed to load checklist. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -204,6 +207,7 @@ export default function PrepHomeScreen() {
           { onConflict: 'user_id' },
         );
       } catch (err) {
+        Alert.alert("Error", "Failed to save checklist. Please try again.");
       } finally {
         setSaving(false);
       }

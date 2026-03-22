@@ -64,93 +64,96 @@ export default function ClosingScreen() {
   const loadData = useCallback(async () => {
     if (!user) return;
 
-    const { data: listing } = await supabase
-      .from("listings")
-      .select("id, price")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (!listing) {
-      setLoading(false);
-      return;
-    }
-
-    setListingId(listing.id);
-
-    const { data: existingChecklist } = await supabase
-      .from("closing_checklist")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("listing_id", listing.id)
-      .order("step_order");
-
-    if (existingChecklist && existingChecklist.length > 0) {
-      setChecklist(existingChecklist);
-    } else {
-      const items = CLOSING_STEPS.map((step) => ({
-        user_id: user.id,
-        listing_id: listing.id,
-        step_key: step.key,
-        step_label: step.label,
-        completed: false,
-        completed_at: null,
-        step_order: step.order,
-      }));
-
-      const { data: inserted } = await supabase
-        .from("closing_checklist")
-        .insert(items)
-        .select();
-
-      if (inserted) setChecklist(inserted);
-    }
-
-    const { data: existingCalc } = await supabase
-      .from("closing_calculator")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("listing_id", listing.id)
-      .single();
-
-    if (existingCalc) {
-      setCalculator({
-        sale_price: existingCalc.sale_price ?? listing.price ?? 0,
-        attorney_fees: existingCalc.attorney_fees ?? 1500,
-        title_fees: existingCalc.title_fees ?? 1000,
-        transfer_tax_pct: existingCalc.transfer_tax_pct ?? 1.0,
-        recording_fees: existingCalc.recording_fees ?? 250,
-        seller_concessions: existingCalc.seller_concessions ?? 0,
-        custom_costs: existingCalc.custom_costs ?? [],
-      });
-    } else {
-      let salePrice = listing.price ?? 0;
-      let concessions = 0;
-      const { data: bestOffer } = await supabase
-        .from("offers")
-        .select("offered_price, seller_concessions")
-        .eq("listing_id", listing.id)
-        .order("score", { ascending: false })
+    try {
+      const { data: listing } = await supabase
+        .from("listings")
+        .select("id, price")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
         .limit(1)
         .single();
 
-      if (bestOffer) {
-        salePrice = bestOffer.offered_price ?? salePrice;
-        concessions = parseFloat(bestOffer.seller_concessions || "0") || 0;
+      if (!listing) {
+        return;
       }
 
-      const calcData = { ...DEFAULT_CALCULATOR, sale_price: salePrice, seller_concessions: concessions };
-      setCalculator(calcData);
+      setListingId(listing.id);
 
-      await supabase.from("closing_calculator").insert({
-        user_id: user.id,
-        listing_id: listing.id,
-        ...calcData,
-      });
+      const { data: existingChecklist } = await supabase
+        .from("closing_checklist")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("listing_id", listing.id)
+        .order("step_order");
+
+      if (existingChecklist && existingChecklist.length > 0) {
+        setChecklist(existingChecklist);
+      } else {
+        const items = CLOSING_STEPS.map((step) => ({
+          user_id: user.id,
+          listing_id: listing.id,
+          step_key: step.key,
+          step_label: step.label,
+          completed: false,
+          completed_at: null,
+          step_order: step.order,
+        }));
+
+        const { data: inserted } = await supabase
+          .from("closing_checklist")
+          .insert(items)
+          .select();
+
+        if (inserted) setChecklist(inserted);
+      }
+
+      const { data: existingCalc } = await supabase
+        .from("closing_calculator")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("listing_id", listing.id)
+        .single();
+
+      if (existingCalc) {
+        setCalculator({
+          sale_price: existingCalc.sale_price ?? listing.price ?? 0,
+          attorney_fees: existingCalc.attorney_fees ?? 1500,
+          title_fees: existingCalc.title_fees ?? 1000,
+          transfer_tax_pct: existingCalc.transfer_tax_pct ?? 1.0,
+          recording_fees: existingCalc.recording_fees ?? 250,
+          seller_concessions: existingCalc.seller_concessions ?? 0,
+          custom_costs: existingCalc.custom_costs ?? [],
+        });
+      } else {
+        let salePrice = listing.price ?? 0;
+        let concessions = 0;
+        const { data: bestOffer } = await supabase
+          .from("offers")
+          .select("offered_price, seller_concessions")
+          .eq("listing_id", listing.id)
+          .order("score", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (bestOffer) {
+          salePrice = bestOffer.offered_price ?? salePrice;
+          concessions = parseFloat(bestOffer.seller_concessions || "0") || 0;
+        }
+
+        const calcData = { ...DEFAULT_CALCULATOR, sale_price: salePrice, seller_concessions: concessions };
+        setCalculator(calcData);
+
+        await supabase.from("closing_calculator").insert({
+          user_id: user.id,
+          listing_id: listing.id,
+          ...calcData,
+        });
+      }
+    } catch (err) {
+      Alert.alert("Error", "Failed to load closing data. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }, [user]);
 
   useEffect(() => {
@@ -173,60 +176,73 @@ export default function ClosingScreen() {
           text: "Unmark",
           style: "destructive",
           onPress: async () => {
-            await supabase
-              .from("closing_checklist")
-              .update({ completed: false, completed_at: null })
-              .eq("id", item.id);
+            try {
+              await supabase
+                .from("closing_checklist")
+                .update({ completed: false, completed_at: null })
+                .eq("id", item.id);
 
-            setChecklist((prev) =>
-              prev.map((c) =>
-                c.id === item.id ? { ...c, completed: false, completed_at: null } : c
-              )
-            );
-            setCelebrated(false);
+              setChecklist((prev) =>
+                prev.map((c) =>
+                  c.id === item.id ? { ...c, completed: false, completed_at: null } : c
+                )
+              );
+              setCelebrated(false);
+            } catch (err) {
+              Alert.alert("Error", "Failed to update step. Please try again.");
+            }
           },
         },
       ]);
       return;
     }
 
-    await supabase
-      .from("closing_checklist")
-      .update({ completed: true, completed_at: new Date().toISOString() })
-      .eq("id", item.id);
-
-    const updated = checklist.map((c) =>
-      c.id === item.id ? { ...c, completed: true, completed_at: new Date().toISOString() } : c
-    );
-    setChecklist(updated);
-
-    const allDone = updated.every((c) => c.completed);
-    if (allDone && !celebrated) {
-      setCelebrated(true);
+    try {
       await supabase
-        .from("profiles")
-        .update({ current_stage: "close_the_deal" })
-        .eq("id", user.id);
+        .from("closing_checklist")
+        .update({ completed: true, completed_at: new Date().toISOString() })
+        .eq("id", item.id);
+
+      const updated = checklist.map((c) =>
+        c.id === item.id ? { ...c, completed: true, completed_at: new Date().toISOString() } : c
+      );
+      setChecklist(updated);
+
+      const allDone = updated.every((c) => c.completed);
+      if (allDone && !celebrated) {
+        setCelebrated(true);
+        await supabase
+          .from("profiles")
+          .update({ current_stage: "close_the_deal" })
+          .eq("id", user.id);
+      }
+    } catch (err) {
+      Alert.alert("Error", "Failed to update step. Please try again.");
     }
   };
 
   const saveCalculator = async () => {
     if (!user || !listingId) return;
     setSaving(true);
-    await supabase
-      .from("closing_calculator")
-      .update({
-        sale_price: calculator.sale_price,
-        attorney_fees: calculator.attorney_fees,
-        title_fees: calculator.title_fees,
-        transfer_tax_pct: calculator.transfer_tax_pct,
-        recording_fees: calculator.recording_fees,
-        seller_concessions: calculator.seller_concessions,
-        custom_costs: calculator.custom_costs,
-      })
-      .eq("user_id", user.id)
-      .eq("listing_id", listingId);
-    setSaving(false);
+    try {
+      await supabase
+        .from("closing_calculator")
+        .update({
+          sale_price: calculator.sale_price,
+          attorney_fees: calculator.attorney_fees,
+          title_fees: calculator.title_fees,
+          transfer_tax_pct: calculator.transfer_tax_pct,
+          recording_fees: calculator.recording_fees,
+          seller_concessions: calculator.seller_concessions,
+          custom_costs: calculator.custom_costs,
+        })
+        .eq("user_id", user.id)
+        .eq("listing_id", listingId);
+    } catch (err) {
+      Alert.alert("Error", "Failed to save calculator. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const addCustomCost = () => {

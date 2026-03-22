@@ -61,7 +61,7 @@ Return ONLY valid JSON, no markdown or other text.`,
       isNaN(sqft) || sqft < 200 || sqft > 20000 ||
       isNaN(bedrooms) || bedrooms < 0 || bedrooms > 20 ||
       isNaN(bathrooms) || bathrooms < 0 || bathrooms > 20 ||
-      isNaN(year_built) || year_built < 1700 || year_built > 2026
+      isNaN(year_built) || year_built < 1700 || year_built > new Date().getFullYear()
     ) {
       throw new Error("AI returned property details outside of valid ranges");
     }

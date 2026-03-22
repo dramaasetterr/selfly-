@@ -35,13 +35,18 @@ export default function ShowingDetailScreen() {
   const [cancelling, setCancelling] = useState(false);
 
   const fetchShowing = useCallback(async () => {
-    const { data } = await supabase
-      .from("showings")
-      .select("*")
-      .eq("id", route.params.showingId)
-      .single();
-    if (data) setShowing(data);
-    setLoading(false);
+    try {
+      const { data } = await supabase
+        .from("showings")
+        .select("*")
+        .eq("id", route.params.showingId)
+        .single();
+      if (data) setShowing(data);
+    } catch {
+      // Will show "Showing not found" state
+    } finally {
+      setLoading(false);
+    }
   }, [route.params.showingId]);
 
   useEffect(() => {
@@ -56,18 +61,23 @@ export default function ShowingDetailScreen() {
         style: "destructive",
         onPress: async () => {
           setCancelling(true);
-          await supabase
-            .from("showings")
-            .update({ status: "cancelled" })
-            .eq("id", route.params.showingId);
-          if (showing?.availability_id) {
+          try {
             await supabase
-              .from("showing_availability")
-              .update({ is_booked: false })
-              .eq("id", showing.availability_id);
+              .from("showings")
+              .update({ status: "cancelled" })
+              .eq("id", route.params.showingId);
+            if (showing?.availability_id) {
+              await supabase
+                .from("showing_availability")
+                .update({ is_booked: false })
+                .eq("id", showing.availability_id);
+            }
+            await fetchShowing();
+          } catch {
+            Alert.alert("Error", "Could not cancel showing. Please try again.");
+          } finally {
+            setCancelling(false);
           }
-          await fetchShowing();
-          setCancelling(false);
         },
       },
     ]);

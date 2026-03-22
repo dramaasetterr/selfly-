@@ -48,27 +48,32 @@ export default function OfferAnalysisScreen() {
   }, [offerId]);
 
   const loadOffer = async () => {
-    const { data } = await supabase
-      .from("offers")
-      .select("*")
-      .eq("id", offerId)
-      .single();
+    try {
+      const { data } = await supabase
+        .from("offers")
+        .select("*")
+        .eq("id", offerId)
+        .single();
 
-    if (data) {
-      setOffer(data);
-      setAnalysis({
-        score: data.score!,
-        score_label: data.score_label!,
-        summary: data.summary!,
-        red_flags: data.red_flags || [],
-        counter_offer: {
-          suggested_price: data.counter_suggested_price!,
-          suggested_changes: data.counter_suggested_changes || [],
-          reasoning: data.counter_reasoning!,
-        },
-      });
+      if (data) {
+        setOffer(data);
+        setAnalysis({
+          score: data.score!,
+          score_label: data.score_label!,
+          summary: data.summary!,
+          red_flags: data.red_flags || [],
+          counter_offer: {
+            suggested_price: data.counter_suggested_price!,
+            suggested_changes: data.counter_suggested_changes || [],
+            reasoning: data.counter_reasoning!,
+          },
+        });
+      }
+    } catch {
+      // Will show error state
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSave = async () => {
@@ -132,7 +137,25 @@ export default function OfferAnalysisScreen() {
     );
   }
 
-  if (!analysis) return null;
+  if (!analysis) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.scrollContent}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Text style={styles.backText}>{"\u2190"} Back</Text>
+          </TouchableOpacity>
+          <View style={styles.loadingContainer}>
+            <Text style={{ ...typography.h3, color: colors.textPrimary, marginBottom: spacing.sm }}>
+              Analysis Not Available
+            </Text>
+            <Text style={{ ...typography.body, color: colors.textSecondary, textAlign: "center" }}>
+              Could not load the offer analysis. Please go back and try again.
+            </Text>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const scoreColor =
     analysis.score >= 8 ? colors.success : analysis.score >= 5 ? colors.warning : colors.error;
