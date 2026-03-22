@@ -1,0 +1,6 @@
+{
+  "installCommand": "npm install --workspace=apps/web --workspace=packages/shared",
+  "buildCommand": "cd apps/web && npx next build",
+  "outputDirectory": "apps/web/.next",
+  "framework": "nextjs"
+}
