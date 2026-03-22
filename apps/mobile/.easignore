@@ -1,4 +1,2 @@
-../../apps/web
-../../packages
-../../node_modules
-../../.git
+apps/web
+.next
