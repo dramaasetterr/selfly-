@@ -2,6 +2,7 @@ const path = require("path");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   transpilePackages: ["@selfly/shared"],
   // Use standalone output for production deployment (Vercel handles this automatically)
   webpack: (config, { isServer }) => {
