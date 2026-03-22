@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { json, OPTIONS } from "../_cors";
+
+export { OPTIONS };
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -12,10 +15,7 @@ export async function POST(req: NextRequest) {
     const { email, plan, source } = body;
 
     if (!email || !plan) {
-      return NextResponse.json(
-        { success: false, error: "Email and plan are required" },
-        { status: 400 }
-      );
+      return json({ success: false, error: "Email and plan are required" }, 400);
     }
 
     const { error } = await supabase.from("waitlist").insert({
@@ -26,17 +26,14 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error("[Waitlist] insert error:", error.message);
-      return NextResponse.json(
+      return json(
         { success: false, error: "Could not save your email. Please try again." },
-        { status: 500 }
+        500
       );
     }
 
-    return NextResponse.json({ success: true });
+    return json({ success: true });
   } catch {
-    return NextResponse.json(
-      { success: false, error: "Invalid request" },
-      { status: 400 }
-    );
+    return json({ success: false, error: "Invalid request" }, 400);
   }
 }

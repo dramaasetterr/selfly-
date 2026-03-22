@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { json, OPTIONS } from "../../_cors";
+
+export { OPTIONS };
 
 const anthropic = new Anthropic();
 
@@ -156,9 +159,9 @@ export async function POST(request: NextRequest) {
     const { state, remaining_steps, property_address, sale_price } = body;
 
     if (!remaining_steps || remaining_steps.length === 0) {
-      return NextResponse.json(
+      return json(
         { error: "At least one remaining step is required" },
-        { status: 400 }
+        400
       );
     }
 
@@ -201,20 +204,25 @@ Be warm, practical, and reassuring. FSBO sellers may be doing this for the first
         throw new Error("AI response did not contain a text block");
       }
 
-      const guide: GuideStep[] = JSON.parse(textBlock.text);
+      let guide: GuideStep[];
+      try {
+        guide = JSON.parse(textBlock.text);
+      } catch {
+        throw new Error("Failed to parse AI JSON response");
+      }
       result = { guide, source: "ai" };
     } catch (aiError) {
       console.error("Closing guide AI call failed, using fallback:", aiError instanceof Error ? aiError.message : aiError);
       result = generateFallbackGuide(body);
     }
 
-    return NextResponse.json(result);
+    return json(result, 200);
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Closing guide API error:", errMsg, error);
-    return NextResponse.json(
+    return json(
       { error: "An unexpected error occurred. Please try again." },
-      { status: 500 }
+      500
     );
   }
 }

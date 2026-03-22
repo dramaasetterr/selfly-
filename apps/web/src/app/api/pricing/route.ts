@@ -1,6 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import type { PricingInput, PricingResult } from "@selfly/shared";
+import { json, OPTIONS } from "../_cors";
+
+export { OPTIONS };
 
 const anthropic = new Anthropic();
 
@@ -312,10 +315,7 @@ export async function POST(request: NextRequest) {
     const { address, sqft, bedrooms, bathrooms, year_built, condition } = body;
 
     if (!address || !sqft || !bedrooms || !bathrooms || !year_built || !condition) {
-      return NextResponse.json(
-        { error: "All property fields are required" },
-        { status: 400 }
-      );
+      return json({ error: "All property fields are required" }, 400);
     }
 
     let result: PricingResult & { source?: string };
@@ -369,20 +369,24 @@ Be specific in your reasoning — cite the approximate $/sqft you used, explain 
         throw new Error("AI response did not contain a text block");
       }
 
-      result = JSON.parse(textBlock.text);
+      try {
+        result = JSON.parse(textBlock.text);
+      } catch {
+        throw new Error("Failed to parse AI JSON response");
+      }
       result.source = "ai";
     } catch (aiError) {
       console.error("Pricing AI call failed, using fallback:", aiError instanceof Error ? aiError.message : aiError);
       result = generateFallbackPricing(body);
     }
 
-    return NextResponse.json(result);
+    return json(result);
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Pricing API error:", errMsg, error);
-    return NextResponse.json(
+    return json(
       { error: "An unexpected error occurred. Please try again." },
-      { status: 500 }
+      500
     );
   }
 }

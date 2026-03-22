@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { json, OPTIONS } from "../_cors";
+
+export { OPTIONS };
 
 const anthropic = new Anthropic();
 
@@ -257,10 +260,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!address || !bedrooms || !bathrooms || !sqft || !year_built) {
-      return NextResponse.json(
-        { error: "Property details are required" },
-        { status: 400 }
-      );
+      return json({ error: "Property details are required" }, 400);
     }
 
     const propertyTypeLabel = property_type
@@ -325,20 +325,24 @@ Return ONLY valid JSON, no markdown or other text.`,
         throw new Error("AI response did not contain a text block");
       }
 
-      result = JSON.parse(textBlock.text);
+      try {
+        result = JSON.parse(textBlock.text);
+      } catch {
+        throw new Error("Failed to parse AI JSON response");
+      }
       result.source = "ai";
     } catch (aiError) {
       console.error("Listing description AI call failed, using fallback:", aiError instanceof Error ? aiError.message : aiError);
       result = generateFallbackDescription(body);
     }
 
-    return NextResponse.json(result);
+    return json(result);
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Listing description API error:", errMsg, error);
-    return NextResponse.json(
+    return json(
       { error: "An unexpected error occurred. Please try again." },
-      { status: 500 }
+      500
     );
   }
 }

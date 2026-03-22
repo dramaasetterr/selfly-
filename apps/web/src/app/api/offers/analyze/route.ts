@@ -1,6 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import type { OfferInput, OfferAnalysis } from "@selfly/shared";
+import { json, OPTIONS } from "../../_cors";
+
+export { OPTIONS };
 
 const anthropic = new Anthropic();
 
@@ -207,9 +210,9 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!offered_price || !financing_type || listing_price === undefined) {
-      return NextResponse.json(
+      return json(
         { error: "Offered price, financing type, and listing price are required" },
-        { status: 400 }
+        400
       );
     }
 
@@ -272,20 +275,24 @@ Be practical and specific. Real estate sellers need actionable advice, not gener
         throw new Error("AI response did not contain a text block");
       }
 
-      result = JSON.parse(textBlock.text);
+      try {
+        result = JSON.parse(textBlock.text);
+      } catch {
+        throw new Error("Failed to parse AI JSON response");
+      }
       result.source = "ai";
     } catch (aiError) {
       console.error("Offer analysis AI call failed, using fallback:", aiError instanceof Error ? aiError.message : aiError);
       result = generateFallbackAnalysis(body);
     }
 
-    return NextResponse.json(result);
+    return json(result);
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Offer analysis API error:", errMsg, error);
-    return NextResponse.json(
+    return json(
       { error: "An unexpected error occurred. Please try again." },
-      { status: 500 }
+      500
     );
   }
 }

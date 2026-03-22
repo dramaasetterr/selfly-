@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import type { BookShowingInput } from "@selfly/shared";
+import { json, OPTIONS } from "../../_cors";
+
+export { OPTIONS };
 
 function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -20,9 +23,9 @@ export async function POST(request: NextRequest) {
     const { listing_id, slot_id, buyer_name, buyer_email, buyer_phone } = body;
 
     if (!listing_id || !slot_id || !buyer_name || !buyer_email) {
-      return NextResponse.json(
+      return json(
         { error: "listing_id, slot_id, buyer_name, and buyer_email are required" },
-        { status: 400 }
+        400
       );
     }
 
@@ -36,10 +39,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (slotError || !slot) {
-      return NextResponse.json(
-        { error: "Time slot is no longer available" },
-        { status: 409 }
-      );
+      return json({ error: "Time slot is no longer available" }, 409);
     }
 
     // Fetch listing for seller info
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!listing) {
-      return NextResponse.json({ error: "Listing not found" }, { status: 404 });
+      return json({ error: "Listing not found" }, 404);
     }
 
     // Get seller profile for email
@@ -79,10 +79,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (showingError) {
-      return NextResponse.json(
-        { error: "Failed to book showing" },
-        { status: 500 }
-      );
+      return json({ error: "Failed to book showing" }, 500);
     }
 
     // Mark slot as booked
@@ -131,16 +128,12 @@ export async function POST(request: NextRequest) {
         });
       } catch (emailError) {
         console.error("Failed to send email:", emailError);
-        // Don't fail the booking if email fails
       }
     }
 
-    return NextResponse.json({ showing });
+    return json({ showing });
   } catch (error) {
     console.error("Book showing API error:", error);
-    return NextResponse.json(
-      { error: "Failed to book showing" },
-      { status: 500 }
-    );
+    return json({ error: "Failed to book showing" }, 500);
   }
 }

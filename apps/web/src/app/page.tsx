@@ -29,6 +29,52 @@ function useWaitlist() {
   return { email, setEmail, status, submit };
 }
 
+/* ------------------------------------------------------------------ */
+/*  FAQ Accordion                                                      */
+/* ------------------------------------------------------------------ */
+const FAQ_ITEMS = [
+  {
+    q: "Do I need a realtor to sell my home?",
+    a: "No! Millions of homes are sold every year without a traditional real estate agent. Selfly gives you the same professional tools agents use — AI pricing, document generation, showing management, and offer analysis — so you can sell confidently on your own and keep thousands in commission.",
+  },
+  {
+    q: "What states is Selfly available in?",
+    a: "Selfly is available nationwide across all 50 US states. Our document generation engine produces state-specific disclosure forms, purchase agreements, and counter-offers tailored to your state's legal requirements.",
+  },
+  {
+    q: "How does AI pricing work?",
+    a: "Our AI pricing engine analyzes comparable recent sales, current market trends, property condition, special features, and regional price-per-square-foot data to generate a recommended list price, a sell-fast price, and a maximize price — giving you a data-driven range in seconds.",
+  },
+  {
+    q: "Is Selfly really free to start?",
+    a: "Yes. The Free plan includes AI pricing analysis, a home prep checklist, and basic listing creation at no cost. When you're ready for advanced features like document generation, offer analysis, and showing management, upgrade to Seller Pro for a one-time $299 fee — no subscriptions, no hidden costs.",
+  },
+  {
+    q: "How much can I save by selling FSBO with Selfly?",
+    a: "The typical real estate commission is 5-6% of the sale price. On a $350,000 home, that's up to $21,000. By selling FSBO with Selfly, you keep that money in your pocket. Even our Full Service plan at $499 saves you over $20,000 compared to a traditional agent.",
+  },
+];
+
+function FAQItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-b border-gray-200">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between py-5 text-left"
+      >
+        <span className="text-base font-semibold text-gray-900">{q}</span>
+        <span className="ml-4 flex-shrink-0 text-primary text-xl font-bold">
+          {open ? "−" : "+"}
+        </span>
+      </button>
+      {open && (
+        <p className="pb-5 text-gray-600 text-sm leading-relaxed">{a}</p>
+      )}
+    </div>
+  );
+}
+
 /* ================================================================== */
 /*  PAGE                                                               */
 /* ================================================================== */
@@ -53,8 +99,10 @@ export default function Home() {
             <a href="#pricing" className="hover:text-primary transition">
               Pricing
             </a>
+            <a href="#faq" className="hover:text-primary transition">
+              FAQ
+            </a>
           </div>
-          {/* mobile hamburger — kept minimal, no JS toggle for brevity */}
           <a
             href="#pricing"
             className="sm:hidden text-sm font-semibold text-primary"
@@ -66,34 +114,57 @@ export default function Home() {
 
       {/* ─── HERO ─── */}
       <section className="relative overflow-hidden">
-        {/* subtle gradient backdrop */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-blue-50 -z-10" />
         <div className="max-w-6xl mx-auto px-6 pt-24 pb-20 lg:pt-32 lg:pb-28 text-center">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
             Sell Your Home.{" "}
-            <span className="text-primary">Save Thousands.</span>
+            <span className="text-primary">Keep Your Equity.</span>
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-gray-600 leading-relaxed">
-            Selfly is the AI-powered For Sale By Owner platform that guides you through every step
-            — from pricing and listing to offers and closing — so you keep the commission in your
-            pocket.
+            Why pay a 6% commission when you can do it yourself? Selfly is the AI-powered
+            FSBO platform that guides you from pricing to closing — so you keep thousands
+            more at the settlement table.
           </p>
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href="#"
-              className="inline-flex items-center gap-2 bg-primary hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl text-lg shadow-lg shadow-blue-200 transition"
-            >
-              Download the App
-            </a>
-            <a
-              href="#how-it-works"
-              className="text-primary font-semibold hover:underline text-lg"
-            >
-              See how it works &rarr;
-            </a>
-          </div>
 
-          {/* stats row */}
+          {/* Email waitlist in hero */}
+          <form
+            onSubmit={waitlist.submit}
+            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-lg mx-auto"
+          >
+            <input
+              type="email"
+              required
+              placeholder="you@email.com"
+              value={waitlist.email}
+              onChange={(e) => waitlist.setEmail(e.target.value)}
+              className="w-full sm:flex-1 px-5 py-4 rounded-xl border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+            <button
+              type="submit"
+              disabled={waitlist.status === "loading"}
+              className="w-full sm:w-auto whitespace-nowrap bg-primary hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-blue-200 transition disabled:opacity-60"
+            >
+              {waitlist.status === "loading" ? "Sending..." : "Get Early Access"}
+            </button>
+          </form>
+
+          {waitlist.status === "success" && (
+            <p className="mt-3 text-sm text-accent font-medium">
+              You&apos;re on the list! We&apos;ll be in touch soon.
+            </p>
+          )}
+          {waitlist.status === "error" && (
+            <p className="mt-3 text-sm text-red-500 font-medium">
+              Something went wrong. Please try again.
+            </p>
+          )}
+
+          {/* Trust line */}
+          <p className="mt-6 text-sm font-semibold text-accent">
+            Save up to $21,000 on a $350K home
+          </p>
+
+          {/* Stats row */}
           <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto">
             {[
               { value: "$21,000+", label: "Average savings" },
@@ -121,48 +192,17 @@ export default function Home() {
 
           <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              {
-                step: 1,
-                icon: "📋",
-                title: "Prep Your Home",
-                desc: "Follow our AI-generated checklist to get your home market-ready and maximize curb appeal.",
-              },
-              {
-                step: 2,
-                icon: "📊",
-                title: "Price It Right",
-                desc: "Our AI pricing engine analyzes comps and market trends to suggest the optimal list price.",
-              },
-              {
-                step: 3,
-                icon: "📝",
-                title: "Create Your Listing",
-                desc: "AI writes compelling descriptions and gives you photo tips — no photographer needed.",
-              },
-              {
-                step: 4,
-                icon: "📅",
-                title: "Manage Showings",
-                desc: "Buyers book showings online. You approve, reschedule, or decline in a tap.",
-              },
-              {
-                step: 5,
-                icon: "🔍",
-                title: "Review Offers",
-                desc: "Our Offer Analyzer scores and compares every offer side-by-side so you pick the best deal.",
-              },
-              {
-                step: 6,
-                icon: "🏠",
-                title: "Close the Deal",
-                desc: "Closing-cost calculators, net-sheet estimates, and step-by-step guides to the finish line.",
-              },
+              { step: 1, icon: "📋", title: "Prep Your Home", desc: "Follow our AI-generated checklist to get your home market-ready and maximize curb appeal." },
+              { step: 2, icon: "📊", title: "Price It Right", desc: "Our AI pricing engine analyzes comps and market trends to suggest the optimal list price." },
+              { step: 3, icon: "📝", title: "Create Your Listing", desc: "AI writes compelling descriptions and gives you photo tips — no photographer needed." },
+              { step: 4, icon: "📅", title: "Manage Showings", desc: "Buyers book showings online. You approve, reschedule, or decline in a tap." },
+              { step: 5, icon: "🔍", title: "Review Offers", desc: "Our Offer Analyzer scores and compares every offer side-by-side so you pick the best deal." },
+              { step: 6, icon: "🏠", title: "Close the Deal", desc: "Closing-cost calculators, net-sheet estimates, and step-by-step guides to the finish line." },
             ].map((item) => (
               <div
                 key={item.step}
                 className="relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition group"
               >
-                {/* step number badge */}
                 <span className="absolute -top-4 -left-2 bg-primary text-white text-xs font-bold w-8 h-8 flex items-center justify-center rounded-full shadow">
                   {item.step}
                 </span>
@@ -187,36 +227,12 @@ export default function Home() {
 
           <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              {
-                icon: "🤖",
-                title: "AI Pricing Analysis",
-                desc: "Comparable sales, market trends, and a suggested price range — generated in seconds.",
-              },
-              {
-                icon: "📄",
-                title: "Smart Document Generation",
-                desc: "Disclosure forms, listing agreements, and more — auto-filled and ready to sign.",
-              },
-              {
-                icon: "⚖️",
-                title: "Offer Analyzer",
-                desc: "Side-by-side scoring on price, contingencies, financing, and timeline so you negotiate with confidence.",
-              },
-              {
-                icon: "🧮",
-                title: "Closing Cost Calculator",
-                desc: "Know your net proceeds before you accept. Estimates title fees, taxes, and payoff amounts.",
-              },
-              {
-                icon: "🗓️",
-                title: "Showing Management",
-                desc: "Shareable booking page, automated confirmations, and a calendar view — all in one place.",
-              },
-              {
-                icon: "📡",
-                title: "Listing Syndication Guide",
-                desc: "Step-by-step instructions to get your home on Zillow, Realtor.com, and 50+ sites.",
-              },
+              { icon: "🤖", title: "AI Pricing Analysis", desc: "Comparable sales, market trends, and a suggested price range — generated in seconds." },
+              { icon: "📄", title: "Smart Document Generation", desc: "Disclosure forms, listing agreements, and more — auto-filled and ready to sign." },
+              { icon: "⚖️", title: "Offer Analyzer", desc: "Side-by-side scoring on price, contingencies, financing, and timeline so you negotiate with confidence." },
+              { icon: "🧮", title: "Closing Cost Calculator", desc: "Know your net proceeds before you accept. Estimates title fees, taxes, and payoff amounts." },
+              { icon: "🗓️", title: "Showing Management", desc: "Shareable booking page, automated confirmations, and a calendar view — all in one place." },
+              { icon: "📡", title: "Listing Syndication Guide", desc: "Step-by-step instructions to get your home on Zillow, Realtor.com, and 50+ sites." },
             ].map((f) => (
               <div
                 key={f.title}
@@ -242,7 +258,6 @@ export default function Home() {
           </p>
 
           <div className="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            {/* Free */}
             <PricingCard
               name="Free"
               price="$0"
@@ -256,7 +271,6 @@ export default function Home() {
               cta="Get Started"
               highlighted={false}
             />
-            {/* Seller Pro */}
             <PricingCard
               name="Seller Pro"
               price="$299"
@@ -273,7 +287,6 @@ export default function Home() {
               cta="Choose Seller Pro"
               highlighted
             />
-            {/* Full Service */}
             <PricingCard
               name="Full Service"
               price="$499"
@@ -293,8 +306,25 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ─── FAQ ─── */}
+      <section id="faq" className="py-24">
+        <div className="max-w-3xl mx-auto px-6">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center">
+            Frequently Asked Questions
+          </h2>
+          <p className="mt-4 text-center text-gray-500 max-w-xl mx-auto">
+            Everything you need to know about selling your home with Selfly.
+          </p>
+          <div className="mt-12 border-t border-gray-200">
+            {FAQ_ITEMS.map((item) => (
+              <FAQItem key={item.q} q={item.q} a={item.a} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ─── SOCIAL PROOF ─── */}
-      <section className="py-24">
+      <section className="bg-gray-50 py-24">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl sm:text-4xl font-extrabold">
             Join Thousands of Homeowners Saving on Commission
@@ -319,16 +349,16 @@ export default function Home() {
 
           <div className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-6 text-gray-400 text-sm font-medium">
             <span className="flex items-center gap-2">
-              <span className="text-green-500 text-lg">&#10003;</span> SSL encrypted
+              <span className="text-accent text-lg">&#10003;</span> SSL encrypted
             </span>
             <span className="flex items-center gap-2">
-              <span className="text-green-500 text-lg">&#10003;</span> SOC 2 compliant
+              <span className="text-accent text-lg">&#10003;</span> SOC 2 compliant
             </span>
             <span className="flex items-center gap-2">
-              <span className="text-green-500 text-lg">&#10003;</span> GDPR ready
+              <span className="text-accent text-lg">&#10003;</span> GDPR ready
             </span>
             <span className="flex items-center gap-2">
-              <span className="text-green-500 text-lg">&#10003;</span> 99.9% uptime
+              <span className="text-accent text-lg">&#10003;</span> 99.9% uptime
             </span>
           </div>
         </div>
@@ -381,7 +411,7 @@ export default function Home() {
       {/* ─── FOOTER ─── */}
       <footer className="border-t border-gray-100 py-12">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6 text-sm text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Selfly. All rights reserved.</p>
+          <p>&copy; 2026 Selfly. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <a href="#" className="hover:text-gray-600 transition">
               Privacy Policy

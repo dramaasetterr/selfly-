@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { json, OPTIONS } from "../../../_cors";
+
+export { OPTIONS };
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -13,6 +16,10 @@ export async function GET(
   try {
     const { listingId } = await params;
 
+    if (!listingId) {
+      return json({ error: "Listing ID is required" }, 400);
+    }
+
     const today = new Date().toISOString().split("T")[0];
 
     const { data, error } = await supabase
@@ -25,15 +32,12 @@ export async function GET(
       .order("start_time", { ascending: true });
 
     if (error) {
-      return NextResponse.json({ error: "Failed to fetch availability" }, { status: 500 });
+      return json({ error: "Failed to fetch availability" }, 500);
     }
 
-    return NextResponse.json({ slots: data });
+    return json({ slots: data });
   } catch (error) {
     console.error("Availability API error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch availability" },
-      { status: 500 }
-    );
+    return json({ error: "Failed to fetch availability" }, 500);
   }
 }

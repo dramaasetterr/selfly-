@@ -50,44 +50,9 @@ function formatDateLabel(dateStr: string): string {
   });
 }
 
-/* ─── CSS-in-JS keyframes (injected once) ───────────────────────────── */
-
-const KEYFRAMES = `
-@keyframes selflyPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-@keyframes selflyFadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes selflyCheckPop {
-  0%   { transform: scale(0); opacity: 0; }
-  60%  { transform: scale(1.15); }
-  100% { transform: scale(1); opacity: 1; }
-}
-@keyframes selflySpin {
-  to { transform: rotate(360deg); }
-}
-`;
-
-function useInjectKeyframes() {
-  useEffect(() => {
-    const id = "selfly-booking-keyframes";
-    if (typeof document !== "undefined" && !document.getElementById(id)) {
-      const style = document.createElement("style");
-      style.id = id;
-      style.textContent = KEYFRAMES;
-      document.head.appendChild(style);
-    }
-  }, []);
-}
-
 /* ─── component ─────────────────────────────────────────────────────── */
 
 export default function BookShowingPage() {
-  useInjectKeyframes();
-
   const params = useParams();
   const listingId = (params?.listingId as string) ?? "";
 
@@ -101,19 +66,16 @@ export default function BookShowingPage() {
   const [booking, setBooking] = useState(false);
   const [booked, setBooked] = useState(false);
   const [error, setError] = useState("");
-  const [hoveredSlot, setHoveredSlot] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch availability
         const availRes = await fetch(
           `${API_BASE}/api/showings/availability/${listingId}`,
         );
         const availData = await availRes.json();
         if (availData.slots) setSlots(availData.slots);
 
-        // Fetch listing info via Supabase REST (anon key from env)
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
         const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
         if (supabaseUrl && supabaseKey) {
@@ -190,12 +152,12 @@ export default function BookShowingPage() {
 
   if (loading) {
     return (
-      <div style={S.page}>
-        <div style={S.wrapper}>
-          <div style={S.card}>
-            <div style={S.loadingContainer}>
-              <div style={S.spinner} />
-              <p style={S.loadingText}>Loading property details...</p>
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-gray-50">
+        <div className="max-w-xl mx-auto px-4 py-8 pb-12">
+          <div className="bg-white rounded-2xl p-7 shadow-sm border border-black/5">
+            <div className="flex flex-col items-center py-12 gap-4">
+              <div className="w-8 h-8 border-3 border-gray-200 border-t-primary rounded-full animate-spin" />
+              <p className="text-sm text-gray-500 animate-pulse">Loading property details...</p>
             </div>
           </div>
         </div>
@@ -207,46 +169,37 @@ export default function BookShowingPage() {
 
   if (booked) {
     return (
-      <div style={S.page}>
-        <div style={S.wrapper}>
-          <div style={S.card}>
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-gray-50">
+        <div className="max-w-xl mx-auto px-4 py-8 pb-12">
+          <div className="bg-white rounded-2xl p-7 shadow-sm border border-black/5 animate-[fadeIn_0.4s_ease-out]">
             {/* Header */}
-            <div style={S.header}>
+            <div className="flex justify-between items-center mb-6">
               <Logo />
             </div>
 
-            <div style={S.successContainer}>
-              <div style={S.checkCircle}>
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#16a34a"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
+            <div className="text-center pt-2">
+              <div className="w-[72px] h-[72px] rounded-full bg-green-50 border-2 border-green-200 flex items-center justify-center mx-auto mb-5">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
-              <h1 style={S.successTitle}>Showing Confirmed!</h1>
-              <p style={S.successBody}>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2 tracking-tight">Showing Confirmed!</h1>
+              <p className="text-sm text-gray-500 leading-relaxed max-w-[380px] mx-auto mb-5">
                 Your showing has been booked successfully. The seller has been
                 notified and will expect you at the scheduled time.
               </p>
 
               {selectedSlotInfo && (
-                <div style={S.confirmationCard}>
-                  <div style={S.confirmRow}>
-                    <span style={S.confirmLabel}>Date</span>
-                    <span style={S.confirmValue}>
+                <div className="bg-gray-50 rounded-xl p-0.5 px-4 mx-auto mb-4 max-w-xs border border-gray-100">
+                  <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                    <span className="text-[13px] text-gray-500 font-medium">Date</span>
+                    <span className="text-[13px] text-gray-900 font-semibold">
                       {formatDateLabel(selectedSlotInfo.date)}
                     </span>
                   </div>
-                  <div style={{ ...S.confirmRow, border: "none" }}>
-                    <span style={S.confirmLabel}>Time</span>
-                    <span style={S.confirmValue}>
+                  <div className="flex justify-between items-center py-3">
+                    <span className="text-[13px] text-gray-500 font-medium">Time</span>
+                    <span className="text-[13px] text-gray-900 font-semibold">
                       {formatTime(selectedSlotInfo.start_time)} &ndash;{" "}
                       {formatTime(selectedSlotInfo.end_time)}
                     </span>
@@ -255,12 +208,12 @@ export default function BookShowingPage() {
               )}
 
               {listing && (
-                <p style={S.confirmAddress}>
+                <p className="text-[13px] text-gray-700 mb-4 flex items-center justify-center gap-1">
                   <MapPinIcon /> {listing.address}
                 </p>
               )}
 
-              <p style={S.confirmEmail}>
+              <p className="text-[13px] text-gray-500">
                 A confirmation email has been sent to{" "}
                 <strong>{buyerEmail}</strong>.
               </p>
@@ -279,116 +232,93 @@ export default function BookShowingPage() {
     !!selectedSlot && buyerName.trim().length > 0 && buyerEmail.trim().length > 0;
 
   return (
-    <div style={S.page}>
-      <div style={S.wrapper}>
-        <div style={S.card}>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-gray-50">
+      <div className="max-w-xl mx-auto px-4 py-8 pb-12">
+        <div className="bg-white rounded-2xl p-7 shadow-sm border border-black/5">
           {/* Header */}
-          <div style={S.header}>
+          <div className="flex justify-between items-center mb-6">
             <Logo />
-            <span style={S.headerBadge}>Book a Showing</span>
+            <span className="text-xs font-semibold text-primary bg-blue-50 px-3 py-1.5 rounded-full uppercase tracking-wide">
+              Book a Showing
+            </span>
           </div>
 
           {/* Property card */}
           {listing && (
-            <div style={S.propertyCard}>
+            <div className="rounded-xl overflow-hidden border border-gray-200 mb-0">
               {listing.photos && listing.photos.length > 0 && (
-                <div style={S.propertyImageWrap}>
+                <div className="relative overflow-hidden">
                   <img
                     src={listing.photos[0]}
                     alt={listing.address}
-                    style={S.propertyImage}
+                    className="w-full h-[220px] object-cover block"
                   />
-                  <div style={S.propertyPriceBadge}>
+                  <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm text-white font-bold text-lg px-3.5 py-1.5 rounded-lg">
                     {formatPrice(listing.price)}
                   </div>
                 </div>
               )}
-              <div style={S.propertyBody}>
-                <h2 style={S.propertyAddress}>{listing.address}</h2>
+              <div className="p-4 px-[18px] pb-[18px]">
+                <h2 className="text-[17px] font-semibold text-gray-900 leading-tight mb-0.5">
+                  {listing.address}
+                </h2>
                 {listing.title && listing.title !== listing.address && (
-                  <p style={S.propertyTitle}>{listing.title}</p>
+                  <p className="text-[13px] text-gray-500 mb-3">{listing.title}</p>
                 )}
-                <div style={S.propertyStats}>
-                  <Stat
-                    icon={<BedIcon />}
-                    value={listing.bedrooms}
-                    label="Beds"
-                  />
-                  <Stat
-                    icon={<BathIcon />}
-                    value={listing.bathrooms}
-                    label="Baths"
-                  />
-                  <Stat
-                    icon={<RulerIcon />}
-                    value={listing.sqft.toLocaleString()}
-                    label="Sq Ft"
-                  />
+                <div className="flex gap-5 flex-wrap mt-3">
+                  <Stat icon={<BedIcon />} value={listing.bedrooms} label="Beds" />
+                  <Stat icon={<BathIcon />} value={listing.bathrooms} label="Baths" />
+                  <Stat icon={<RulerIcon />} value={listing.sqft.toLocaleString()} label="Sq Ft" />
                 </div>
               </div>
             </div>
           )}
 
           {/* Divider */}
-          <div style={S.divider} />
+          <div className="h-px bg-gray-100 my-6" />
 
           {/* Step 1 — Select time */}
-          <div style={S.section}>
-            <div style={S.sectionHeader}>
-              <span style={S.stepBadge}>1</span>
-              <h3 style={S.sectionTitle}>Select a Time</h3>
+          <div>
+            <div className="flex items-center gap-2.5 mb-4">
+              <span className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-purple-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                1
+              </span>
+              <h3 className="text-base font-semibold text-gray-900">Select a Time</h3>
             </div>
 
             {Object.keys(groupedSlots).length === 0 ? (
-              <div style={S.emptyState}>
+              <div className="text-center py-7 px-4 bg-gray-50 rounded-xl border border-dashed border-gray-300">
                 <CalendarIcon />
-                <p style={S.emptyTitle}>No available times</p>
-                <p style={S.emptyBody}>
+                <p className="text-[15px] font-semibold text-gray-700 mt-3 mb-1">No available times</p>
+                <p className="text-[13px] text-gray-400 leading-relaxed">
                   There are no open time slots right now. Please check back
                   later or contact the seller directly.
                 </p>
               </div>
             ) : (
               Object.entries(groupedSlots).map(([date, dateSlots]) => (
-                <div key={date} style={S.dateGroup}>
-                  <p style={S.dateLabel}>
+                <div key={date} className="mb-[18px]">
+                  <p className="text-[13px] font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
                     <CalendarSmallIcon /> {formatDateLabel(date)}
                   </p>
-                  <div style={S.slotsRow}>
+                  <div className="flex flex-wrap gap-2">
                     {dateSlots.map((slot) => {
                       const isSelected = selectedSlot === slot.id;
-                      const isHovered = hoveredSlot === slot.id;
                       return (
                         <button
                           key={slot.id}
                           onClick={() => setSelectedSlot(slot.id)}
-                          onMouseEnter={() => setHoveredSlot(slot.id)}
-                          onMouseLeave={() => setHoveredSlot(null)}
-                          style={{
-                            ...S.slotBtn,
-                            ...(isSelected
-                              ? S.slotBtnSelected
-                              : isHovered
-                                ? S.slotBtnHover
-                                : {}),
-                          }}
+                          className={`relative flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] border-[1.5px] text-sm font-medium transition-all ${
+                            isSelected
+                              ? "bg-gradient-to-br from-primary to-blue-500 border-primary text-white shadow-md shadow-primary/25"
+                              : "border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50/50"
+                          }`}
                         >
-                          <span style={S.slotTime}>
-                            {formatTime(slot.start_time)}
-                          </span>
-                          <span
-                            style={{
-                              ...S.slotDash,
-                              color: isSelected ? "rgba(255,255,255,0.7)" : "#9ca3af",
-                            }}
-                          >
-                            to
-                          </span>
-                          <span style={S.slotTime}>
-                            {formatTime(slot.end_time)}
-                          </span>
+                          <span className="font-semibold text-sm">{formatTime(slot.start_time)}</span>
+                          <span className={`text-[11px] lowercase ${isSelected ? "text-white/70" : "text-gray-400"}`}>to</span>
+                          <span className="font-semibold text-sm">{formatTime(slot.end_time)}</span>
                           {isSelected && (
-                            <span style={S.slotCheck}>
+                            <span className="ml-0.5 flex items-center">
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                             </span>
                           )}
@@ -402,48 +332,52 @@ export default function BookShowingPage() {
           </div>
 
           {/* Divider */}
-          <div style={S.divider} />
+          <div className="h-px bg-gray-100 my-6" />
 
           {/* Step 2 — Your info */}
-          <div style={S.section}>
-            <div style={S.sectionHeader}>
-              <span style={S.stepBadge}>2</span>
-              <h3 style={S.sectionTitle}>Your Information</h3>
+          <div>
+            <div className="flex items-center gap-2.5 mb-4">
+              <span className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-purple-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                2
+              </span>
+              <h3 className="text-base font-semibold text-gray-900">Your Information</h3>
             </div>
 
-            <div style={S.formGrid}>
-              <div style={S.field}>
-                <label style={S.label}>
-                  Full Name <span style={S.required}>*</span>
+            <div className="flex flex-col gap-3.5">
+              <div>
+                <label className="block text-[13px] font-medium text-gray-700 mb-1.5">
+                  Full Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={buyerName}
                   onChange={(e) => setBuyerName(e.target.value)}
                   placeholder="Jane Smith"
-                  style={S.input}
+                  className="w-full px-3.5 py-[11px] rounded-[10px] border-[1.5px] border-gray-200 text-[15px] text-gray-900 bg-white placeholder-gray-400 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition"
                 />
               </div>
-              <div style={S.field}>
-                <label style={S.label}>
-                  Email Address <span style={S.required}>*</span>
+              <div>
+                <label className="block text-[13px] font-medium text-gray-700 mb-1.5">
+                  Email Address <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
                   value={buyerEmail}
                   onChange={(e) => setBuyerEmail(e.target.value)}
                   placeholder="jane@example.com"
-                  style={S.input}
+                  className="w-full px-3.5 py-[11px] rounded-[10px] border-[1.5px] border-gray-200 text-[15px] text-gray-900 bg-white placeholder-gray-400 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition"
                 />
               </div>
-              <div style={S.field}>
-                <label style={S.label}>Phone Number</label>
+              <div>
+                <label className="block text-[13px] font-medium text-gray-700 mb-1.5">
+                  Phone Number
+                </label>
                 <input
                   type="tel"
                   value={buyerPhone}
                   onChange={(e) => setBuyerPhone(e.target.value)}
                   placeholder="(555) 123-4567"
-                  style={S.input}
+                  className="w-full px-3.5 py-[11px] rounded-[10px] border-[1.5px] border-gray-200 text-[15px] text-gray-900 bg-white placeholder-gray-400 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition"
                 />
               </div>
             </div>
@@ -451,7 +385,7 @@ export default function BookShowingPage() {
 
           {/* Error */}
           {error && (
-            <div style={S.errorBanner}>
+            <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] bg-red-50 border border-red-200 text-red-600 text-[13px] font-medium mt-5 mb-1">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               <span>{error}</span>
             </div>
@@ -461,14 +395,12 @@ export default function BookShowingPage() {
           <button
             onClick={handleBook}
             disabled={booking || !isFormValid}
-            style={{
-              ...S.ctaButton,
-              ...(booking || !isFormValid ? S.ctaButtonDisabled : {}),
-            }}
+            className="w-full py-[15px] rounded-xl bg-gradient-to-br from-primary to-purple-600 text-white text-base font-semibold border-none cursor-pointer mt-5 tracking-tight transition-opacity shadow-md shadow-primary/20 disabled:opacity-45 disabled:cursor-not-allowed disabled:shadow-none"
           >
             {booking ? (
-              <span style={S.ctaInner}>
-                <span style={S.ctaSpinner} /> Booking...
+              <span className="inline-flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
+                Booking...
               </span>
             ) : (
               "Confirm & Book Showing"
@@ -486,25 +418,11 @@ export default function BookShowingPage() {
 
 function Logo() {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <div
-        style={{
-          width: 32,
-          height: 32,
-          borderRadius: 8,
-          background: "linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#fff",
-          fontWeight: 800,
-          fontSize: 16,
-          letterSpacing: -1,
-        }}
-      >
+    <div className="flex items-center gap-2">
+      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-extrabold text-base -tracking-widest">
         S
       </div>
-      <span style={{ fontSize: 20, fontWeight: 700, color: "#111827", letterSpacing: "-0.02em" }}>
+      <span className="text-xl font-bold text-gray-900 -tracking-wide">
         Selfly
       </span>
     </div>
@@ -513,18 +431,9 @@ function Logo() {
 
 function Footer() {
   return (
-    <p
-      style={{
-        textAlign: "center",
-        fontSize: 12,
-        color: "#9ca3af",
-        marginTop: 28,
-        marginBottom: 0,
-        letterSpacing: "0.01em",
-      }}
-    >
+    <p className="text-center text-xs text-gray-400 mt-7 mb-0 tracking-wide">
       Powered by{" "}
-      <span style={{ fontWeight: 600, color: "#6b7280" }}>Selfly</span>{" "}
+      <span className="font-semibold text-gray-500">Selfly</span>{" "}
       &mdash; For Sale By Owner
     </p>
   );
@@ -540,12 +449,10 @@ function Stat({
   label: string;
 }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-      <span style={{ color: "#6b7280", display: "flex" }}>{icon}</span>
-      <span style={{ fontWeight: 600, fontSize: 14, color: "#111827" }}>
-        {value}
-      </span>
-      <span style={{ fontSize: 13, color: "#6b7280" }}>{label}</span>
+    <div className="flex items-center gap-1.5">
+      <span className="text-gray-500 flex">{icon}</span>
+      <span className="font-semibold text-sm text-gray-900">{value}</span>
+      <span className="text-[13px] text-gray-500">{label}</span>
     </div>
   );
 }
@@ -578,7 +485,7 @@ function RulerIcon() {
 
 function CalendarIcon() {
   return (
-    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto">
       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
     </svg>
   );
@@ -586,7 +493,7 @@ function CalendarIcon() {
 
 function CalendarSmallIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: "-2px" }}>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="align-[-2px]">
       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
     </svg>
   );
@@ -594,403 +501,8 @@ function CalendarSmallIcon() {
 
 function MapPinIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: "-2px" }}>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="align-[-2px]">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
     </svg>
   );
 }
-
-/* ─── styles ────────────────────────────────────────────────────────── */
-
-const FONT =
-  "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
-
-const S: { [key: string]: React.CSSProperties } = {
-  /* layout */
-  page: {
-    minHeight: "100vh",
-    background: "linear-gradient(180deg, #f0f4ff 0%, #f9fafb 50%)",
-    fontFamily: FONT,
-    WebkitFontSmoothing: "antialiased",
-  },
-  wrapper: {
-    maxWidth: 560,
-    margin: "0 auto",
-    padding: "32px 16px 48px",
-  },
-  card: {
-    background: "#fff",
-    borderRadius: 16,
-    padding: "28px 28px 24px",
-    boxShadow:
-      "0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)",
-    border: "1px solid rgba(0,0,0,0.04)",
-    animation: "selflyFadeIn 0.4s ease-out",
-  },
-
-  /* header */
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  headerBadge: {
-    fontSize: 12,
-    fontWeight: 600,
-    color: "#2563eb",
-    background: "#eff6ff",
-    padding: "5px 12px",
-    borderRadius: 20,
-    letterSpacing: "0.02em",
-    textTransform: "uppercase" as const,
-  },
-
-  /* property card */
-  propertyCard: {
-    borderRadius: 12,
-    overflow: "hidden",
-    border: "1px solid #e5e7eb",
-    marginBottom: 0,
-  },
-  propertyImageWrap: {
-    position: "relative" as const,
-    overflow: "hidden",
-  },
-  propertyImage: {
-    width: "100%",
-    height: 220,
-    objectFit: "cover" as const,
-    display: "block",
-  },
-  propertyPriceBadge: {
-    position: "absolute" as const,
-    bottom: 12,
-    left: 12,
-    background: "rgba(0,0,0,0.7)",
-    backdropFilter: "blur(8px)",
-    color: "#fff",
-    fontWeight: 700,
-    fontSize: 18,
-    padding: "6px 14px",
-    borderRadius: 8,
-    letterSpacing: "-0.01em",
-  },
-  propertyBody: {
-    padding: "16px 18px 18px",
-  },
-  propertyAddress: {
-    fontSize: 17,
-    fontWeight: 600,
-    color: "#111827",
-    margin: "0 0 2px",
-    lineHeight: 1.3,
-  },
-  propertyTitle: {
-    fontSize: 13,
-    color: "#6b7280",
-    margin: "0 0 12px",
-  },
-  propertyStats: {
-    display: "flex",
-    gap: 20,
-    flexWrap: "wrap" as const,
-    marginTop: 12,
-  },
-
-  /* divider */
-  divider: {
-    height: 1,
-    background: "#f3f4f6",
-    margin: "24px 0",
-  },
-
-  /* sections */
-  section: {
-    marginBottom: 0,
-  },
-  sectionHeader: {
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 16,
-  },
-  stepBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    background: "linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)",
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: 700,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 600,
-    color: "#111827",
-    margin: 0,
-  },
-
-  /* empty state */
-  emptyState: {
-    textAlign: "center" as const,
-    padding: "28px 16px",
-    background: "#f9fafb",
-    borderRadius: 12,
-    border: "1px dashed #d1d5db",
-  },
-  emptyTitle: {
-    fontSize: 15,
-    fontWeight: 600,
-    color: "#374151",
-    margin: "12px 0 4px",
-  },
-  emptyBody: {
-    fontSize: 13,
-    color: "#9ca3af",
-    margin: 0,
-    lineHeight: 1.5,
-  },
-
-  /* date groups & slots */
-  dateGroup: {
-    marginBottom: 18,
-  },
-  dateLabel: {
-    fontSize: 13,
-    fontWeight: 600,
-    color: "#374151",
-    margin: "0 0 8px",
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-  },
-  slotsRow: {
-    display: "flex",
-    flexWrap: "wrap" as const,
-    gap: 8,
-  },
-  slotBtn: {
-    position: "relative" as const,
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-    padding: "10px 16px",
-    borderRadius: 10,
-    border: "1.5px solid #e5e7eb",
-    background: "#fff",
-    cursor: "pointer",
-    fontSize: 14,
-    fontWeight: 500,
-    color: "#374151",
-    fontFamily: FONT,
-    transition: "all 0.15s ease",
-  },
-  slotBtnHover: {
-    borderColor: "#93c5fd",
-    background: "#f0f7ff",
-  },
-  slotBtnSelected: {
-    background: "linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)",
-    borderColor: "#2563eb",
-    color: "#fff",
-    boxShadow: "0 2px 8px rgba(37,99,235,0.25)",
-  },
-  slotTime: {
-    fontWeight: 600,
-    fontSize: 14,
-  },
-  slotDash: {
-    fontSize: 11,
-    textTransform: "lowercase" as const,
-  },
-  slotCheck: {
-    marginLeft: 2,
-    display: "flex",
-    alignItems: "center",
-  },
-
-  /* form */
-  formGrid: {
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: 14,
-  },
-  field: {},
-  label: {
-    display: "block",
-    fontSize: 13,
-    fontWeight: 500,
-    color: "#374151",
-    marginBottom: 5,
-  },
-  required: {
-    color: "#ef4444",
-  },
-  input: {
-    width: "100%",
-    padding: "11px 14px",
-    borderRadius: 10,
-    border: "1.5px solid #e5e7eb",
-    fontSize: 15,
-    color: "#111827",
-    background: "#fff",
-    outline: "none",
-    boxSizing: "border-box" as const,
-    fontFamily: FONT,
-    transition: "border-color 0.15s ease",
-  },
-
-  /* error */
-  errorBanner: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    padding: "10px 14px",
-    borderRadius: 10,
-    background: "#fef2f2",
-    border: "1px solid #fecaca",
-    color: "#dc2626",
-    fontSize: 13,
-    fontWeight: 500,
-    marginTop: 20,
-    marginBottom: 4,
-  },
-
-  /* CTA button */
-  ctaButton: {
-    width: "100%",
-    padding: "15px 0",
-    borderRadius: 12,
-    background: "linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)",
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: 600,
-    border: "none",
-    cursor: "pointer",
-    marginTop: 20,
-    fontFamily: FONT,
-    letterSpacing: "-0.01em",
-    transition: "opacity 0.15s ease, transform 0.1s ease",
-    boxShadow: "0 2px 8px rgba(37,99,235,0.2)",
-  },
-  ctaButtonDisabled: {
-    opacity: 0.45,
-    cursor: "not-allowed",
-    boxShadow: "none",
-  },
-  ctaInner: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-  },
-  ctaSpinner: {
-    width: 16,
-    height: 16,
-    border: "2px solid rgba(255,255,255,0.3)",
-    borderTopColor: "#fff",
-    borderRadius: "50%",
-    animation: "selflySpin 0.6s linear infinite",
-    display: "inline-block",
-  },
-
-  /* loading */
-  loadingContainer: {
-    display: "flex",
-    flexDirection: "column" as const,
-    alignItems: "center",
-    padding: "48px 0",
-    gap: 16,
-  },
-  spinner: {
-    width: 32,
-    height: 32,
-    border: "3px solid #e5e7eb",
-    borderTopColor: "#2563eb",
-    borderRadius: "50%",
-    animation: "selflySpin 0.7s linear infinite",
-  },
-  loadingText: {
-    fontSize: 14,
-    color: "#6b7280",
-    margin: 0,
-    animation: "selflyPulse 1.5s ease-in-out infinite",
-  },
-
-  /* success */
-  successContainer: {
-    textAlign: "center" as const,
-    padding: "8px 0 0",
-  },
-  checkCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    background: "#f0fdf4",
-    border: "2px solid #bbf7d0",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: "0 auto 20px",
-    animation: "selflyCheckPop 0.4s ease-out",
-  },
-  successTitle: {
-    fontSize: 24,
-    fontWeight: 700,
-    color: "#111827",
-    margin: "0 0 8px",
-    letterSpacing: "-0.02em",
-  },
-  successBody: {
-    fontSize: 14,
-    color: "#6b7280",
-    lineHeight: 1.6,
-    margin: "0 0 20px",
-    maxWidth: 380,
-    marginLeft: "auto",
-    marginRight: "auto",
-  },
-  confirmationCard: {
-    background: "#f9fafb",
-    borderRadius: 12,
-    padding: "2px 16px",
-    margin: "0 auto 16px",
-    maxWidth: 320,
-    border: "1px solid #f3f4f6",
-  },
-  confirmRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "12px 0",
-    borderBottom: "1px solid #f3f4f6",
-  },
-  confirmLabel: {
-    fontSize: 13,
-    color: "#6b7280",
-    fontWeight: 500,
-  },
-  confirmValue: {
-    fontSize: 13,
-    color: "#111827",
-    fontWeight: 600,
-  },
-  confirmAddress: {
-    fontSize: 13,
-    color: "#374151",
-    margin: "0 0 16px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
-  },
-  confirmEmail: {
-    fontSize: 13,
-    color: "#6b7280",
-    margin: 0,
-  },
-};
