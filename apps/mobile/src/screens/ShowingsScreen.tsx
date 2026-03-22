@@ -14,7 +14,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
-import type { Showing, ShowingAvailability } from "@selfly/shared";
+import type { Showing, ShowingAvailability } from "../shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
@@ -726,3 +726,4 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+

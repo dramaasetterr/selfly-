@@ -11,7 +11,7 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
-import type { ClosingGuideStep } from "@selfly/shared";
+import type { ClosingGuideStep } from "../shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
@@ -374,3 +374,4 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
 });
+

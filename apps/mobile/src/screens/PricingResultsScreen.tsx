@@ -11,7 +11,7 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AppStackParamList } from "../../App";
-import type { PriceType, PricingInput, PricingResult } from "@selfly/shared";
+import type { PriceType, PricingInput, PricingResult } from "../shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
@@ -527,3 +527,4 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
 });
+

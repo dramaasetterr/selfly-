@@ -21,7 +21,7 @@ import {
   PROPERTY_TYPES,
   PROPERTY_TYPE_LABELS,
   PropertyType,
-} from "@selfly/shared";
+} from "../shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
@@ -1115,3 +1115,4 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
 });
+

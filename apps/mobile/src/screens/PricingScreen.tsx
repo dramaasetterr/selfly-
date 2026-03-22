@@ -14,7 +14,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AppStackParamList } from "../../App";
-import type { PricingInput, PropertyCondition } from "@selfly/shared";
+import type { PricingInput, PropertyCondition } from "../shared";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 import AddressAutocomplete from "../components/AddressAutocomplete";
 
@@ -505,3 +505,4 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 });
+

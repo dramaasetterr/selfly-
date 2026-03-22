@@ -16,7 +16,7 @@ import * as Sharing from "expo-sharing";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
-import type { Document } from "@selfly/shared";
+import type { Document } from "../shared";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 
 const PDF_HTML_WRAPPER = (html: string, title: string) => `
@@ -278,3 +278,4 @@ const styles = StyleSheet.create({
     ...typography.bodyBold,
   },
 });
+

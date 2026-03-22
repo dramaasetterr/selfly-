@@ -29,7 +29,10 @@
         "backgroundColor": "#2563EB"
       },
       "package": "com.selfly.app",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -46,8 +49,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "selfly"
+        "projectId": "de3539fa-a711-4803-9cbf-3d0465b6d086"
       }
-    }
+    },
+    "owner": "gija-brands"
   }
 }

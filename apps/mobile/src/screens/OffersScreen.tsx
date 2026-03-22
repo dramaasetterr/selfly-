@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { Offer } from "@selfly/shared";
+import type { Offer } from "../shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
@@ -337,3 +337,4 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs + 2,
   },
 });
+

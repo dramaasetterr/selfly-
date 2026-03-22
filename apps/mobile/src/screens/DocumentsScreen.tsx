@@ -18,7 +18,7 @@ import {
   SUPPORTED_STATES,
   DocumentType,
   Document,
-} from "@selfly/shared";
+} from "../shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
@@ -902,3 +902,4 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 });
+

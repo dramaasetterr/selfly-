@@ -12,7 +12,7 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
-import type { OfferAnalysis, Offer } from "@selfly/shared";
+import type { OfferAnalysis, Offer } from "../shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
@@ -457,3 +457,4 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
 });
+
