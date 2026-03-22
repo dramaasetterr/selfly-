@@ -17,6 +17,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
 import type { Document } from "@selfly/shared";
+import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 
 const PDF_HTML_WRAPPER = (html: string, title: string) => `
 <!DOCTYPE html>
@@ -53,41 +54,46 @@ export default function DocumentViewerScreen() {
   const { user } = useAuth();
   const { document: doc } = route.params;
   const [downloading, setDownloading] = useState(false);
+  const [sharing, setSharing] = useState(false);
+
+  const generatePdf = async () => {
+    const htmlContent = doc.html_content || `<pre>${doc.content}</pre>`;
+    const fullHtml = PDF_HTML_WRAPPER(htmlContent, doc.title || "Document");
+    const { uri } = await Print.printToFileAsync({ html: fullHtml });
+
+    // Upload to Supabase Storage
+    if (user) {
+      try {
+        const fileResponse = await fetch(uri);
+        const blob = await fileResponse.blob();
+        const filePath = `${user.id}/${doc.id}.pdf`;
+
+        await supabase.storage.from("documents").upload(filePath, blob, {
+          contentType: "application/pdf",
+          upsert: true,
+        });
+
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("documents").getPublicUrl(filePath);
+
+        await supabase
+          .from("documents")
+          .update({ pdf_url: publicUrl })
+          .eq("id", doc.id);
+      } catch {
+        // Upload failure is non-critical; PDF is still available locally
+      }
+    }
+
+    return uri;
+  };
 
   const handleDownloadPDF = async () => {
     setDownloading(true);
     try {
-      const htmlContent = doc.html_content || `<pre>${doc.content}</pre>`;
-      const fullHtml = PDF_HTML_WRAPPER(htmlContent, doc.title || "Document");
+      const uri = await generatePdf();
 
-      const { uri } = await Print.printToFileAsync({ html: fullHtml });
-
-      // Upload to Supabase Storage
-      if (user) {
-        try {
-          const fileResponse = await fetch(uri);
-          const blob = await fileResponse.blob();
-          const filePath = `${user.id}/${doc.id}.pdf`;
-
-          await supabase.storage.from("documents").upload(filePath, blob, {
-            contentType: "application/pdf",
-            upsert: true,
-          });
-
-          const {
-            data: { publicUrl },
-          } = supabase.storage.from("documents").getPublicUrl(filePath);
-
-          await supabase
-            .from("documents")
-            .update({ pdf_url: publicUrl })
-            .eq("id", doc.id);
-        } catch {
-          // Upload failure is non-critical; PDF is still available locally
-        }
-      }
-
-      // Share the PDF
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, {
           mimeType: "application/pdf",
@@ -103,16 +109,35 @@ export default function DocumentViewerScreen() {
     }
   };
 
+  const handleShare = async () => {
+    setSharing(true);
+    try {
+      const uri = await generatePdf();
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, {
+          mimeType: "application/pdf",
+          UTI: "com.adobe.pdf",
+        });
+      } else {
+        Alert.alert("Sharing Unavailable", "Sharing is not available on this device.");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to share document. Please try again.");
+    } finally {
+      setSharing(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>← Back</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Text style={styles.backText}>{"\u2190"} Back</Text>
         </TouchableOpacity>
-        <Text style={styles.title} numberOfLines={1}>
+        <Text style={styles.headerTitle} numberOfLines={1}>
           {doc.title || "Document"}
         </Text>
-        <View style={{ width: 50 }} />
+        <View style={{ width: 60 }} />
       </View>
 
       <View style={styles.documentWrapper}>
@@ -126,17 +151,30 @@ export default function DocumentViewerScreen() {
       </View>
 
       <View style={styles.footer}>
-        <TouchableOpacity
-          style={styles.downloadButton}
-          onPress={handleDownloadPDF}
-          disabled={downloading}
-        >
-          {downloading ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
-          ) : (
-            <Text style={styles.downloadButtonText}>Download as PDF</Text>
-          )}
-        </TouchableOpacity>
+        <View style={styles.footerButtons}>
+          <TouchableOpacity
+            style={styles.downloadButton}
+            onPress={handleDownloadPDF}
+            disabled={downloading}
+          >
+            {downloading ? (
+              <ActivityIndicator size="small" color={colors.white} />
+            ) : (
+              <Text style={styles.downloadButtonText}>Download PDF</Text>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.shareButton}
+            onPress={handleShare}
+            disabled={sharing}
+          >
+            {sharing ? (
+              <ActivityIndicator size="small" color={colors.primaryLight} />
+            ) : (
+              <Text style={styles.shareButtonText}>Share</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -145,80 +183,98 @@ export default function DocumentViewerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    backgroundColor: "#FFFFFF",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: colors.border,
+    ...shadows.sm,
   },
   backButton: {
-    fontSize: 16,
-    color: "#2563EB",
+    width: 60,
+  },
+  backText: {
+    ...typography.body,
+    color: colors.primaryLight,
     fontWeight: "500",
   },
-  title: {
-    fontSize: 17,
-    fontWeight: "600",
-    color: "#111827",
+  headerTitle: {
+    ...typography.bodyBold,
+    color: colors.textPrimary,
     flex: 1,
     textAlign: "center",
-    marginHorizontal: 8,
+    marginHorizontal: spacing.sm,
   },
   documentWrapper: {
     flex: 1,
-    margin: 16,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    margin: spacing.md,
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    ...shadows.lg,
   },
   documentScroll: {
     flex: 1,
   },
   documentContent: {
-    padding: 28,
-    paddingTop: 36,
-    paddingBottom: 40,
+    padding: spacing.lg + 4,
+    paddingTop: spacing.xl + 4,
+    paddingBottom: spacing.xxl,
   },
   documentTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#111827",
+    color: colors.textPrimary,
     textAlign: "center",
-    marginBottom: 24,
+    marginBottom: spacing.lg,
     fontFamily: "serif",
   },
   documentBody: {
     fontSize: 14,
     lineHeight: 22,
-    color: "#1F2937",
+    color: colors.textSecondary,
     fontFamily: "serif",
   },
   footer: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: "#FFFFFF",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.card,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: colors.border,
+    ...shadows.sm,
+  },
+  footerButtons: {
+    flexDirection: "row",
+    gap: spacing.md,
   },
   downloadButton: {
-    backgroundColor: "#2563EB",
-    borderRadius: 12,
-    paddingVertical: 16,
+    flex: 2,
+    backgroundColor: colors.primaryLight,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
     alignItems: "center",
+    ...shadows.sm,
   },
   downloadButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.white,
+    ...typography.bodyBold,
+  },
+  shareButton: {
+    flex: 1,
+    backgroundColor: colors.primarySoft,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.primaryLight,
+  },
+  shareButtonText: {
+    color: colors.primaryLight,
+    ...typography.bodyBold,
   },
 });

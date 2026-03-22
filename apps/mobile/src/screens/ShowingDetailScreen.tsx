@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   SafeAreaView,
+  ScrollView,
   TouchableOpacity,
   ActivityIndicator,
   Alert,
@@ -15,6 +16,7 @@ import type { Showing } from "@selfly/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
+import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 
 function formatTime(time: string): string {
   const [h, m] = time.split(":");
@@ -58,7 +60,6 @@ export default function ShowingDetailScreen() {
             .from("showings")
             .update({ status: "cancelled" })
             .eq("id", route.params.showingId);
-          // Free up the availability slot
           if (showing?.availability_id) {
             await supabase
               .from("showing_availability")
@@ -76,7 +77,7 @@ export default function ShowingDetailScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2563EB" />
+          <ActivityIndicator size="large" color={colors.primaryLight} />
         </View>
       </SafeAreaView>
     );
@@ -85,13 +86,13 @@ export default function ShowingDetailScreen() {
   if (!showing) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backButton}>{"< Back"}</Text>
+        <View style={styles.content}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Text style={styles.backText}>{"\u2190"} Back</Text>
           </TouchableOpacity>
-        </View>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.emptyText}>Showing not found.</Text>
+          <View style={styles.loadingContainer}>
+            <Text style={styles.emptyText}>Showing not found.</Text>
+          </View>
         </View>
       </SafeAreaView>
     );
@@ -101,34 +102,26 @@ export default function ShowingDetailScreen() {
     showing.status !== "confirmed" ||
     new Date(showing.showing_date + "T" + showing.showing_time_start) < new Date();
 
+  const statusConfig = {
+    confirmed: { bg: colors.accentLight, text: colors.accentDark },
+    cancelled: { bg: colors.errorLight, text: colors.errorDark },
+    completed: { bg: colors.borderLight, text: colors.textSecondary },
+  };
+  const statusStyle = statusConfig[showing.status as keyof typeof statusConfig] || statusConfig.completed;
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backButton}>{"< Back"}</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>Showing Details</Text>
-        </View>
+      <ScrollView contentContainerStyle={styles.content}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Text style={styles.backText}>{"\u2190"} Back</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.title}>Showing Details</Text>
 
         <View style={styles.card}>
           <View style={styles.statusRow}>
-            <View
-              style={[
-                styles.badge,
-                showing.status === "confirmed" && styles.badgeConfirmed,
-                showing.status === "cancelled" && styles.badgeCancelled,
-                showing.status === "completed" && styles.badgeCompleted,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.badgeText,
-                  showing.status === "confirmed" && styles.badgeTextConfirmed,
-                  showing.status === "cancelled" && styles.badgeTextCancelled,
-                  showing.status === "completed" && styles.badgeTextCompleted,
-                ]}
-              >
+            <View style={[styles.badge, { backgroundColor: statusStyle.bg }]}>
+              <Text style={[styles.badgeText, { color: statusStyle.text }]}>
                 {showing.status.charAt(0).toUpperCase() + showing.status.slice(1)}
               </Text>
             </View>
@@ -161,7 +154,7 @@ export default function ShowingDetailScreen() {
           </View>
 
           {showing.buyer_phone && (
-            <View style={styles.detailRow}>
+            <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
               <Text style={styles.detailLabel}>Phone</Text>
               <Text style={styles.detailValue}>{showing.buyer_phone}</Text>
             </View>
@@ -175,13 +168,13 @@ export default function ShowingDetailScreen() {
             disabled={cancelling}
           >
             {cancelling ? (
-              <ActivityIndicator color="#DC2626" size="small" />
+              <ActivityIndicator color={colors.error} size="small" />
             ) : (
               <Text style={styles.cancelButtonText}>Cancel Showing</Text>
             )}
           </TouchableOpacity>
         )}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -189,7 +182,7 @@ export default function ShowingDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -197,104 +190,82 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   content: {
-    flex: 1,
-    paddingHorizontal: 28,
-    paddingTop: 24,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
   },
   backButton: {
-    fontSize: 16,
-    color: "#2563EB",
+    marginBottom: spacing.sm,
+    alignSelf: "flex-start",
+  },
+  backText: {
+    ...typography.body,
+    color: colors.primaryLight,
     fontWeight: "500",
-    marginRight: 16,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#111827",
+    ...typography.h1,
+    color: colors.textPrimary,
+    marginBottom: spacing.lg,
   },
   card: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 12,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    ...shadows.md,
   },
   statusRow: {
     alignItems: "flex-start",
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   badge: {
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  badgeConfirmed: {
-    backgroundColor: "#DCFCE7",
-  },
-  badgeCancelled: {
-    backgroundColor: "#FEE2E2",
-  },
-  badgeCompleted: {
-    backgroundColor: "#F3F4F6",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: borderRadius.full,
   },
   badgeText: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  badgeTextConfirmed: {
-    color: "#16A34A",
-  },
-  badgeTextCancelled: {
-    color: "#DC2626",
-  },
-  badgeTextCompleted: {
-    color: "#6B7280",
+    ...typography.captionBold,
   },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 8,
+    paddingVertical: spacing.sm + 2,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
   },
   detailLabel: {
-    fontSize: 14,
-    color: "#6B7280",
+    ...typography.caption,
+    color: colors.textSecondary,
   },
   detailValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#111827",
+    ...typography.captionBold,
+    color: colors.textPrimary,
   },
   divider: {
     height: 1,
-    backgroundColor: "#E5E7EB",
-    marginVertical: 12,
+    backgroundColor: colors.border,
+    marginVertical: spacing.md,
   },
   sectionLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#111827",
-    marginBottom: 8,
+    ...typography.bodyBold,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
   },
   cancelButton: {
-    marginTop: 24,
+    marginTop: spacing.lg,
     borderWidth: 1.5,
-    borderColor: "#DC2626",
-    borderRadius: 10,
-    paddingVertical: 14,
+    borderColor: colors.error,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
     alignItems: "center",
+    backgroundColor: colors.errorLight,
   },
   cancelButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#DC2626",
+    ...typography.bodyBold,
+    color: colors.error,
   },
   emptyText: {
-    fontSize: 15,
-    color: "#9CA3AF",
+    ...typography.body,
+    color: colors.textMuted,
   },
 });

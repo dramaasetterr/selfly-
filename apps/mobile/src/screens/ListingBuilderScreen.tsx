@@ -22,12 +22,13 @@ import {
 } from "@selfly/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
+import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 const MAX_PHOTOS = 25;
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const PHOTO_GAP = 8;
-const PHOTO_PADDING = 28 * 2;
+const PHOTO_GAP = spacing.sm;
+const PHOTO_PADDING = spacing.lg * 2;
 const PHOTO_SIZE = (SCREEN_WIDTH - PHOTO_PADDING - PHOTO_GAP * 2) / 3;
 
 type Props = NativeStackScreenProps<AppStackParamList, "ListingBuilder">;
@@ -56,6 +57,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [mainPhotoIndex, setMainPhotoIndex] = useState(0);
 
   // Step 3 — Description
   const [title, setTitle] = useState("");
@@ -121,14 +123,35 @@ export default function ListingBuilderScreen({ navigation }: Props) {
     }
   }, [address, bedrooms, bathrooms, sqft, yearBuilt, propertyType, hoa, condition, selectedPrice, description]);
 
+  const getOrderedPhotos = () => {
+    if (photos.length === 0) return photos;
+    const ordered = [...photos];
+    if (mainPhotoIndex > 0 && mainPhotoIndex < ordered.length) {
+      const [main] = ordered.splice(mainPhotoIndex, 1);
+      ordered.unshift(main);
+    }
+    return ordered;
+  };
+
+  const getOrderedPhotoUrls = () => {
+    if (photoUrls.length === 0) return photoUrls;
+    const ordered = [...photoUrls];
+    if (mainPhotoIndex > 0 && mainPhotoIndex < ordered.length) {
+      const [main] = ordered.splice(mainPhotoIndex, 1);
+      ordered.unshift(main);
+    }
+    return ordered;
+  };
+
   const uploadPhotos = async () => {
     if (!user || photos.length === 0) return;
     setUploading(true);
     setUploadProgress(0);
+    const orderedPhotos = getOrderedPhotos();
     const urls: string[] = [];
 
-    for (let i = 0; i < photos.length; i++) {
-      const photo = photos[i];
+    for (let i = 0; i < orderedPhotos.length; i++) {
+      const photo = orderedPhotos[i];
       const ext = photo.uri.split(".").pop() || "jpg";
       const fileName = `${user.id}/${Date.now()}_${i}.${ext}`;
 
@@ -149,7 +172,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
         .getPublicUrl(fileName);
 
       urls.push(urlData.publicUrl);
-      setUploadProgress(Math.round(((i + 1) / photos.length) * 100));
+      setUploadProgress(Math.round(((i + 1) / orderedPhotos.length) * 100));
     }
 
     setPhotoUrls(urls);
@@ -176,7 +199,20 @@ export default function ListingBuilderScreen({ navigation }: Props) {
   };
 
   const removePhoto = (index: number) => {
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPhotos((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      // Adjust mainPhotoIndex
+      if (index === mainPhotoIndex) {
+        setMainPhotoIndex(0);
+      } else if (index < mainPhotoIndex) {
+        setMainPhotoIndex((prev) => prev - 1);
+      }
+      return next;
+    });
+  };
+
+  const handleSetMainPhoto = (index: number) => {
+    setMainPhotoIndex(index);
   };
 
   const handleNext = async () => {
@@ -214,6 +250,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
     if (!user) return;
     setPublishing(true);
     try {
+      const orderedUrls = getOrderedPhotoUrls();
       const { error: insertError } = await supabase.from("listings").insert({
         user_id: user.id,
         address,
@@ -226,7 +263,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
         hoa_fee: hoa && hoaFee ? parseFloat(hoaFee) : null,
         title,
         description,
-        photos: photoUrls,
+        photos: orderedUrls,
         price: selectedPrice,
         status: "active",
       });
@@ -255,37 +292,47 @@ export default function ListingBuilderScreen({ navigation }: Props) {
   const renderStepIndicator = () => (
     <View style={styles.stepIndicator}>
       {STEPS.map((label, i) => (
-        <View key={label} style={styles.stepItem}>
-          <View
-            style={[
-              styles.stepDot,
-              i < step && styles.stepDotComplete,
-              i === step && styles.stepDotCurrent,
-            ]}
-          >
-            {i < step ? (
-              <Text style={styles.stepCheck}>✓</Text>
-            ) : (
-              <Text
-                style={[
-                  styles.stepNumber,
-                  i === step && styles.stepNumberCurrent,
-                ]}
-              >
-                {i + 1}
-              </Text>
-            )}
+        <React.Fragment key={label}>
+          {i > 0 && (
+            <View
+              style={[
+                styles.stepConnector,
+                i <= step && styles.stepConnectorActive,
+              ]}
+            />
+          )}
+          <View style={styles.stepItem}>
+            <View
+              style={[
+                styles.stepDot,
+                i < step && styles.stepDotComplete,
+                i === step && styles.stepDotCurrent,
+              ]}
+            >
+              {i < step ? (
+                <Text style={styles.stepCheck}>{"\u2713"}</Text>
+              ) : (
+                <Text
+                  style={[
+                    styles.stepNumber,
+                    i === step && styles.stepNumberCurrent,
+                  ]}
+                >
+                  {i + 1}
+                </Text>
+              )}
+            </View>
+            <Text
+              style={[
+                styles.stepLabel,
+                i === step && styles.stepLabelCurrent,
+                i < step && styles.stepLabelComplete,
+              ]}
+            >
+              {label}
+            </Text>
           </View>
-          <Text
-            style={[
-              styles.stepLabel,
-              i === step && styles.stepLabelCurrent,
-              i < step && styles.stepLabelComplete,
-            ]}
-          >
-            {label}
-          </Text>
-        </View>
+        </React.Fragment>
       ))}
     </View>
   );
@@ -299,7 +346,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
         value={address}
         onChangeText={setAddress}
         placeholder="123 Main St, City, State"
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={colors.textMuted}
       />
 
       <View style={styles.row}>
@@ -310,7 +357,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
             value={bedrooms}
             onChangeText={setBedrooms}
             placeholder="3"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.textMuted}
             keyboardType="numeric"
           />
         </View>
@@ -321,7 +368,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
             value={bathrooms}
             onChangeText={setBathrooms}
             placeholder="2"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.textMuted}
             keyboardType="numeric"
           />
         </View>
@@ -333,7 +380,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
         value={sqft}
         onChangeText={setSqft}
         placeholder="e.g. 2000"
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={colors.textMuted}
         keyboardType="numeric"
       />
 
@@ -343,7 +390,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
         value={yearBuilt}
         onChangeText={setYearBuilt}
         placeholder="e.g. 1995"
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={colors.textMuted}
         keyboardType="numeric"
       />
 
@@ -386,7 +433,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
             value={hoaFee}
             onChangeText={setHoaFee}
             placeholder="e.g. 350"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.textMuted}
             keyboardType="numeric"
           />
         </>
@@ -400,6 +447,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
       <Text style={styles.sectionTitle}>Add Photos</Text>
       <Text style={styles.photoCount}>
         {photos.length} of {MAX_PHOTOS} photos
+        {photos.length > 0 && " — tap the star to set as main photo"}
       </Text>
 
       {uploading && (
@@ -413,11 +461,27 @@ export default function ListingBuilderScreen({ navigation }: Props) {
         {photos.map((photo, index) => (
           <View key={index} style={styles.photoContainer}>
             <Image source={{ uri: photo.uri }} style={styles.photoThumb} />
+            {index === mainPhotoIndex && (
+              <View style={styles.mainPhotoBadge}>
+                <Text style={styles.mainPhotoBadgeText}>{"\u2605"} Main</Text>
+              </View>
+            )}
+            <TouchableOpacity
+              style={styles.setMainButton}
+              onPress={() => handleSetMainPhoto(index)}
+            >
+              <Text style={[
+                styles.setMainButtonText,
+                index === mainPhotoIndex && styles.setMainButtonTextActive,
+              ]}>
+                {index === mainPhotoIndex ? "\u2605" : "\u2606"}
+              </Text>
+            </TouchableOpacity>
             <TouchableOpacity
               style={styles.removePhoto}
               onPress={() => removePhoto(index)}
             >
-              <Text style={styles.removePhotoText}>✕</Text>
+              <Text style={styles.removePhotoText}>{"\u2715"}</Text>
             </TouchableOpacity>
           </View>
         ))}
@@ -443,7 +507,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
 
       {generatingDesc ? (
         <View style={styles.generatingContainer}>
-          <ActivityIndicator size="large" color="#2563EB" />
+          <ActivityIndicator size="large" color={colors.primaryLight} />
           <Text style={styles.generatingText}>Generating your listing description...</Text>
         </View>
       ) : (
@@ -454,7 +518,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
             value={title}
             onChangeText={setTitle}
             placeholder="e.g. Stunning 3BR Home in Prime Location"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.textMuted}
           />
 
           <Text style={styles.label}>Description</Text>
@@ -463,7 +527,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
             value={description}
             onChangeText={setDescription}
             placeholder="Describe your property..."
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.textMuted}
             multiline
             textAlignVertical="top"
           />
@@ -473,71 +537,86 @@ export default function ListingBuilderScreen({ navigation }: Props) {
   );
 
   // --- Step 4: Review ---
-  const renderStep4 = () => (
-    <>
-      <Text style={styles.sectionTitle}>Review Your Listing</Text>
+  const renderStep4 = () => {
+    const orderedUrls = getOrderedPhotoUrls();
+    const heroUrl = orderedUrls.length > 0 ? orderedUrls[0] : null;
 
-      {photoUrls.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.photoCarousel}
-        >
-          {photoUrls.map((url, i) => (
-            <Image key={i} source={{ uri: url }} style={styles.carouselPhoto} />
-          ))}
-        </ScrollView>
-      )}
+    return (
+      <>
+        <Text style={styles.sectionTitle}>Review Your Listing</Text>
 
-      {title ? (
-        <Text style={styles.reviewTitle}>{title}</Text>
-      ) : null}
-
-      {selectedPrice && (
-        <Text style={styles.reviewPrice}>{formatPrice(selectedPrice)}</Text>
-      )}
-
-      <View style={styles.reviewDetails}>
-        <View style={styles.reviewRow}>
-          <Text style={styles.reviewLabel}>Address</Text>
-          <Text style={styles.reviewValue}>{address}</Text>
-        </View>
-        <View style={styles.reviewRow}>
-          <Text style={styles.reviewLabel}>Bedrooms</Text>
-          <Text style={styles.reviewValue}>{bedrooms}</Text>
-        </View>
-        <View style={styles.reviewRow}>
-          <Text style={styles.reviewLabel}>Bathrooms</Text>
-          <Text style={styles.reviewValue}>{bathrooms}</Text>
-        </View>
-        <View style={styles.reviewRow}>
-          <Text style={styles.reviewLabel}>Square Feet</Text>
-          <Text style={styles.reviewValue}>{parseInt(sqft, 10).toLocaleString()}</Text>
-        </View>
-        <View style={styles.reviewRow}>
-          <Text style={styles.reviewLabel}>Year Built</Text>
-          <Text style={styles.reviewValue}>{yearBuilt}</Text>
-        </View>
-        <View style={styles.reviewRow}>
-          <Text style={styles.reviewLabel}>Type</Text>
-          <Text style={styles.reviewValue}>{PROPERTY_TYPE_LABELS[propertyType]}</Text>
-        </View>
-        {hoa && (
-          <View style={styles.reviewRow}>
-            <Text style={styles.reviewLabel}>HOA Fee</Text>
-            <Text style={styles.reviewValue}>${hoaFee}/mo</Text>
+        {/* Hero image */}
+        {heroUrl && (
+          <View style={styles.heroImageContainer}>
+            <Image source={{ uri: heroUrl }} style={styles.heroImage} />
+            <View style={styles.heroImageOverlay}>
+              <Text style={styles.heroImageLabel}>Main Photo</Text>
+            </View>
           </View>
         )}
-      </View>
 
-      {description ? (
-        <View style={styles.reviewDescSection}>
-          <Text style={styles.reviewDescLabel}>Description</Text>
-          <Text style={styles.reviewDescText}>{description}</Text>
+        {orderedUrls.length > 1 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.photoCarousel}
+          >
+            {orderedUrls.slice(1).map((url, i) => (
+              <Image key={i} source={{ uri: url }} style={styles.carouselPhoto} />
+            ))}
+          </ScrollView>
+        )}
+
+        {title ? (
+          <Text style={styles.reviewTitle}>{title}</Text>
+        ) : null}
+
+        {selectedPrice && (
+          <Text style={styles.reviewPrice}>{formatPrice(selectedPrice)}</Text>
+        )}
+
+        <View style={styles.reviewCard}>
+          <View style={styles.reviewRow}>
+            <Text style={styles.reviewLabel}>Address</Text>
+            <Text style={styles.reviewValue}>{address}</Text>
+          </View>
+          <View style={styles.reviewRow}>
+            <Text style={styles.reviewLabel}>Bedrooms</Text>
+            <Text style={styles.reviewValue}>{bedrooms}</Text>
+          </View>
+          <View style={styles.reviewRow}>
+            <Text style={styles.reviewLabel}>Bathrooms</Text>
+            <Text style={styles.reviewValue}>{bathrooms}</Text>
+          </View>
+          <View style={styles.reviewRow}>
+            <Text style={styles.reviewLabel}>Square Feet</Text>
+            <Text style={styles.reviewValue}>{parseInt(sqft, 10).toLocaleString()}</Text>
+          </View>
+          <View style={styles.reviewRow}>
+            <Text style={styles.reviewLabel}>Year Built</Text>
+            <Text style={styles.reviewValue}>{yearBuilt}</Text>
+          </View>
+          <View style={styles.reviewRow}>
+            <Text style={styles.reviewLabel}>Type</Text>
+            <Text style={styles.reviewValue}>{PROPERTY_TYPE_LABELS[propertyType]}</Text>
+          </View>
+          {hoa && (
+            <View style={[styles.reviewRow, { borderBottomWidth: 0 }]}>
+              <Text style={styles.reviewLabel}>HOA Fee</Text>
+              <Text style={styles.reviewValue}>${hoaFee}/mo</Text>
+            </View>
+          )}
         </View>
-      ) : null}
-    </>
-  );
+
+        {description ? (
+          <View style={styles.reviewDescSection}>
+            <Text style={styles.reviewDescLabel}>Description</Text>
+            <Text style={styles.reviewDescText}>{description}</Text>
+          </View>
+        ) : null}
+      </>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -546,7 +625,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
         keyboardShouldPersistTaps="handled"
       >
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Text style={styles.backText}>← Back</Text>
+          <Text style={styles.backText}>{"\u2190"} Back</Text>
         </TouchableOpacity>
 
         <Text style={styles.title}>Create Your Listing</Text>
@@ -567,7 +646,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
               disabled={uploading}
             >
               {uploading ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={colors.white} />
               ) : (
                 <Text style={styles.nextButtonText}>Next</Text>
               )}
@@ -579,7 +658,7 @@ export default function ListingBuilderScreen({ navigation }: Props) {
               disabled={publishing}
             >
               {publishing ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={colors.white} />
               ) : (
                 <Text style={styles.publishButtonText}>Publish Listing</Text>
               )}
@@ -594,110 +673,117 @@ export default function ListingBuilderScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    paddingHorizontal: 28,
-    paddingTop: 16,
-    paddingBottom: 40,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
   },
   backButton: {
-    marginBottom: 8,
+    marginBottom: spacing.sm,
     alignSelf: "flex-start",
   },
   backText: {
-    fontSize: 16,
-    color: "#2563EB",
+    ...typography.body,
+    color: colors.primaryLight,
     fontWeight: "500",
   },
   title: {
-    fontSize: 26,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 4,
+    ...typography.h1,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
   },
   stepText: {
-    fontSize: 14,
-    color: "#6B7280",
-    marginBottom: 16,
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginBottom: spacing.md,
   },
   // Step indicator
   stepIndicator: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 28,
+    alignItems: "flex-start",
+    justifyContent: "center",
+    marginBottom: spacing.lg,
+    paddingHorizontal: spacing.sm,
   },
   stepItem: {
     alignItems: "center",
-    flex: 1,
+  },
+  stepConnector: {
+    height: 2,
+    width: 28,
+    backgroundColor: colors.border,
+    marginTop: 16,
+    marginHorizontal: spacing.xs,
+  },
+  stepConnectorActive: {
+    backgroundColor: colors.primaryLight,
   },
   stepDot: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F3F4F6",
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.borderLight,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   stepDotCurrent: {
-    backgroundColor: "#EFF6FF",
+    backgroundColor: colors.primarySoft,
     borderWidth: 2,
-    borderColor: "#2563EB",
+    borderColor: colors.primaryLight,
   },
   stepDotComplete: {
-    backgroundColor: "#2563EB",
+    backgroundColor: colors.primaryLight,
   },
   stepCheck: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "700",
+    color: colors.white,
+    ...typography.captionBold,
   },
   stepNumber: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#9CA3AF",
+    ...typography.captionBold,
+    color: colors.textMuted,
   },
   stepNumberCurrent: {
-    color: "#2563EB",
+    color: colors.primaryLight,
   },
   stepLabel: {
-    fontSize: 11,
-    color: "#9CA3AF",
+    ...typography.small,
+    color: colors.textMuted,
     fontWeight: "500",
   },
   stepLabelCurrent: {
-    color: "#2563EB",
+    color: colors.primaryLight,
     fontWeight: "600",
   },
   stepLabelComplete: {
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
   // Form elements
   label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-    marginBottom: 6,
-    marginTop: 12,
+    ...typography.captionBold,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs + 2,
+    marginTop: spacing.md,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: "#111827",
-    backgroundColor: "#FFFFFF",
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md - 2,
+    ...typography.body,
+    color: colors.textPrimary,
+    backgroundColor: colors.white,
   },
   textArea: {
     height: 200,
-    paddingTop: 14,
+    paddingTop: spacing.md,
   },
   row: {
     flexDirection: "row",
-    gap: 12,
+    gap: spacing.md,
   },
   halfField: {
     flex: 1,
@@ -705,71 +791,70 @@ const styles = StyleSheet.create({
   chipRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    marginTop: 4,
+    gap: spacing.sm,
+    marginTop: spacing.xs,
   },
   chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: "#D1D5DB",
-    backgroundColor: "#FFFFFF",
+    borderColor: colors.border,
+    backgroundColor: colors.white,
   },
   chipActive: {
-    backgroundColor: "#2563EB",
-    borderColor: "#2563EB",
+    backgroundColor: colors.primaryLight,
+    borderColor: colors.primaryLight,
   },
   chipText: {
-    fontSize: 14,
+    ...typography.caption,
     fontWeight: "500",
-    color: "#374151",
+    color: colors.textSecondary,
   },
   chipTextActive: {
-    color: "#FFFFFF",
+    color: colors.white,
   },
   toggleRow: {
     flexDirection: "row",
-    gap: 8,
-    marginTop: 4,
+    gap: spacing.sm,
+    marginTop: spacing.xs,
   },
   toggleButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm + 2,
+    borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: "#D1D5DB",
-    backgroundColor: "#FFFFFF",
+    borderColor: colors.border,
+    backgroundColor: colors.white,
   },
   toggleButtonActive: {
-    backgroundColor: "#2563EB",
-    borderColor: "#2563EB",
+    backgroundColor: colors.primaryLight,
+    borderColor: colors.primaryLight,
   },
   toggleText: {
-    fontSize: 14,
+    ...typography.caption,
     fontWeight: "500",
-    color: "#374151",
+    color: colors.textSecondary,
   },
   toggleTextActive: {
-    color: "#FFFFFF",
+    color: colors.white,
   },
   // Photos
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 8,
+    ...typography.h2,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
   },
   photoCount: {
-    fontSize: 14,
-    color: "#6B7280",
-    marginBottom: 16,
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginBottom: spacing.md,
   },
   uploadProgress: {
     height: 36,
-    backgroundColor: "#F3F4F6",
-    borderRadius: 8,
-    marginBottom: 16,
+    backgroundColor: colors.borderLight,
+    borderRadius: borderRadius.sm,
+    marginBottom: spacing.md,
     overflow: "hidden",
     justifyContent: "center",
   },
@@ -778,14 +863,13 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     bottom: 0,
-    backgroundColor: "#BFDBFE",
-    borderRadius: 8,
+    backgroundColor: colors.primarySoft,
+    borderRadius: borderRadius.sm,
   },
   uploadText: {
     textAlign: "center",
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#1E40AF",
+    ...typography.smallBold,
+    color: colors.primary,
   },
   photoGrid: {
     flexDirection: "row",
@@ -795,17 +879,50 @@ const styles = StyleSheet.create({
   photoContainer: {
     width: PHOTO_SIZE,
     height: PHOTO_SIZE,
-    borderRadius: 10,
+    borderRadius: borderRadius.md,
     overflow: "hidden",
+    ...shadows.md,
   },
   photoThumb: {
     width: "100%",
     height: "100%",
   },
+  mainPhotoBadge: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colors.primaryLight,
+    paddingVertical: 2,
+    alignItems: "center",
+  },
+  mainPhotoBadgeText: {
+    color: colors.white,
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  setMainButton: {
+    position: "absolute",
+    bottom: spacing.xs,
+    left: spacing.xs,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  setMainButtonText: {
+    color: colors.white,
+    fontSize: 14,
+  },
+  setMainButtonTextActive: {
+    color: colors.amber,
+  },
   removePhoto: {
     position: "absolute",
-    top: 4,
-    right: 4,
+    top: spacing.xs,
+    right: spacing.xs,
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -814,134 +931,158 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   removePhotoText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "700",
+    color: colors.white,
+    ...typography.smallBold,
   },
   addPhotoButton: {
     width: PHOTO_SIZE,
     height: PHOTO_SIZE,
-    borderRadius: 10,
+    borderRadius: borderRadius.md,
     borderWidth: 2,
-    borderColor: "#D1D5DB",
+    borderColor: colors.border,
     borderStyle: "dashed",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.borderLight,
   },
   addPhotoPlus: {
     fontSize: 28,
-    color: "#9CA3AF",
+    color: colors.textMuted,
     fontWeight: "300",
   },
   addPhotoLabel: {
-    fontSize: 12,
-    color: "#9CA3AF",
+    ...typography.small,
+    color: colors.textMuted,
     marginTop: 2,
   },
   // Description
   aiNote: {
-    backgroundColor: "#EFF6FF",
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 16,
+    backgroundColor: colors.primarySoft,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
   },
   aiNoteText: {
-    fontSize: 13,
-    color: "#1E40AF",
+    ...typography.caption,
+    color: colors.primary,
   },
   generatingContainer: {
     alignItems: "center",
-    paddingVertical: 48,
+    paddingVertical: spacing.xxl,
   },
   generatingText: {
-    fontSize: 15,
-    color: "#6B7280",
-    marginTop: 16,
+    ...typography.body,
+    color: colors.textSecondary,
+    marginTop: spacing.md,
+  },
+  // Review - Hero image
+  heroImageContainer: {
+    width: "100%",
+    height: 220,
+    borderRadius: borderRadius.lg,
+    overflow: "hidden",
+    marginBottom: spacing.md,
+    ...shadows.lg,
+  },
+  heroImage: {
+    width: "100%",
+    height: "100%",
+  },
+  heroImageOverlay: {
+    position: "absolute",
+    top: spacing.sm,
+    left: spacing.sm,
+    backgroundColor: colors.primaryLight,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.xs,
+  },
+  heroImageLabel: {
+    ...typography.smallBold,
+    color: colors.white,
   },
   // Review
   photoCarousel: {
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   carouselPhoto: {
-    width: 220,
-    height: 160,
-    borderRadius: 12,
-    marginRight: 10,
+    width: 120,
+    height: 90,
+    borderRadius: borderRadius.md,
+    marginRight: spacing.sm + 2,
   },
   reviewTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 4,
+    ...typography.h2,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
   },
   reviewPrice: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#2563EB",
-    marginBottom: 16,
+    color: colors.primaryLight,
+    marginBottom: spacing.md,
   },
-  reviewDetails: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 12,
-    padding: 18,
-    marginBottom: 16,
+  reviewCard: {
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg - 4,
+    marginBottom: spacing.md,
+    ...shadows.md,
   },
   reviewRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 8,
+    paddingVertical: spacing.sm + 2,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: colors.borderLight,
   },
   reviewLabel: {
-    fontSize: 14,
-    color: "#6B7280",
+    ...typography.caption,
+    color: colors.textSecondary,
   },
   reviewValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#111827",
+    ...typography.captionBold,
+    color: colors.textPrimary,
   },
   reviewDescSection: {
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   reviewDescLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#111827",
-    marginBottom: 8,
+    ...typography.bodyBold,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
   },
   reviewDescText: {
-    fontSize: 15,
-    color: "#374151",
-    lineHeight: 24,
+    ...typography.body,
+    color: colors.textSecondary,
   },
   // Navigation buttons
   navButtons: {
-    marginTop: 28,
+    marginTop: spacing.lg,
   },
   nextButton: {
-    backgroundColor: "#2563EB",
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: colors.primaryLight,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
     alignItems: "center",
+    ...shadows.sm,
   },
   nextButtonText: {
-    color: "#FFFFFF",
+    color: colors.white,
+    ...typography.bodyBold,
     fontSize: 17,
-    fontWeight: "600",
   },
   publishButton: {
-    backgroundColor: "#2563EB",
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: colors.accent,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
     alignItems: "center",
+    ...shadows.sm,
   },
   publishButtonText: {
-    color: "#FFFFFF",
+    color: colors.white,
+    ...typography.bodyBold,
     fontSize: 17,
-    fontWeight: "600",
   },
   buttonDisabled: {
     opacity: 0.7,

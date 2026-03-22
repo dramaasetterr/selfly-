@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
-  FlatList,
   ActivityIndicator,
   Alert,
   Platform,
@@ -18,6 +17,7 @@ import type { Showing, ShowingAvailability } from "@selfly/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
+import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 
 const WEB_APP_URL = process.env.EXPO_PUBLIC_WEB_APP_URL || "https://selfly.app";
 
@@ -84,7 +84,6 @@ export default function ShowingsScreen() {
 
   const fetchData = useCallback(async () => {
     if (!user) return;
-    // Get the user's listing
     const { data: listing } = await supabase
       .from("listings")
       .select("id")
@@ -99,7 +98,6 @@ export default function ShowingsScreen() {
     }
     setListingId(listing.id);
 
-    // Fetch availability and showings in parallel
     const [availRes, showingsRes] = await Promise.all([
       supabase
         .from("showing_availability")
@@ -123,7 +121,6 @@ export default function ShowingsScreen() {
     fetchData();
   }, [fetchData]);
 
-  // Load time windows for selected date from existing slots
   useEffect(() => {
     const dateStr = formatDate(selectedDate);
     const slotsForDate = existingSlots.filter((s) => s.date === dateStr);
@@ -160,7 +157,6 @@ export default function ShowingsScreen() {
 
     const dateStr = formatDate(selectedDate);
 
-    // Delete existing slots for this date that aren't booked
     await supabase
       .from("showing_availability")
       .delete()
@@ -169,7 +165,6 @@ export default function ShowingsScreen() {
       .eq("date", dateStr)
       .eq("is_booked", false);
 
-    // Insert new slots
     if (timeWindows.length > 0) {
       const rows = timeWindows.map((tw) => ({
         user_id: user.id,
@@ -181,7 +176,6 @@ export default function ShowingsScreen() {
       await supabase.from("showing_availability").insert(rows);
     }
 
-    // Check if this is the first availability — advance pipeline
     const { count } = await supabase
       .from("showing_availability")
       .select("*", { count: "exact", head: true })
@@ -227,7 +221,7 @@ export default function ShowingsScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2563EB" />
+          <ActivityIndicator size="large" color={colors.primaryLight} />
         </View>
       </SafeAreaView>
     );
@@ -236,11 +230,10 @@ export default function ShowingsScreen() {
   if (!listingId) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
+        <View style={styles.headerRow}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backButton}>{"< Back"}</Text>
+            <Text style={styles.backText}>{"\u2190"} Back</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Manage Showings</Text>
         </View>
         <View style={styles.loadingContainer}>
           <Text style={styles.emptyText}>Create a listing first to manage showings.</Text>
@@ -252,12 +245,11 @@ export default function ShowingsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backButton}>{"< Back"}</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>Manage Showings</Text>
-        </View>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Text style={styles.backText}>{"\u2190"} Back</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.title}>Manage Showings</Text>
 
         {/* Booking Link */}
         <View style={styles.linkCard}>
@@ -274,18 +266,18 @@ export default function ShowingsScreen() {
         <Text style={styles.sectionTitle}>Set Availability</Text>
 
         {/* Date Strip */}
-        <FlatList
+        <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          data={days}
-          keyExtractor={(item) => formatDate(item)}
           contentContainerStyle={styles.dateStrip}
-          renderItem={({ item }) => {
+        >
+          {days.map((item) => {
             const label = formatDateLabel(item);
             const isSelected = formatDate(item) === formatDate(selectedDate);
             const hasSlots = existingSlots.some((s) => s.date === formatDate(item));
             return (
               <TouchableOpacity
+                key={formatDate(item)}
                 style={[styles.datePill, isSelected && styles.datePillSelected]}
                 onPress={() => setSelectedDate(item)}
               >
@@ -301,13 +293,13 @@ export default function ShowingsScreen() {
                 {hasSlots && !isSelected && <View style={styles.slotDot} />}
               </TouchableOpacity>
             );
-          }}
-        />
+          })}
+        </ScrollView>
 
         {/* Time Windows */}
         <View style={styles.timeSection}>
           {timeWindows.map((tw, index) => (
-            <View key={index} style={styles.timeRow}>
+            <View key={index} style={styles.timeCard}>
               <TouchableOpacity
                 style={styles.timePickerButton}
                 onPress={() => setShowTimePicker({ index, field: "startTime" })}
@@ -357,7 +349,7 @@ export default function ShowingsScreen() {
             disabled={saving}
           >
             {saving ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
+              <ActivityIndicator color={colors.white} size="small" />
             ) : (
               <Text style={styles.saveButtonText}>Save Availability</Text>
             )}
@@ -368,7 +360,9 @@ export default function ShowingsScreen() {
         <Text style={styles.sectionTitle}>Your Showings</Text>
 
         {upcoming.length === 0 && past.length === 0 && (
-          <Text style={styles.emptyText}>No showings booked yet. Share your booking link to get started!</Text>
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyText}>No showings booked yet. Share your booking link to get started!</Text>
+          </View>
         )}
 
         {upcoming.length > 0 && (
@@ -383,7 +377,7 @@ export default function ShowingsScreen() {
                 <View style={styles.showingCardHeader}>
                   <Text style={styles.showingDate}>{showing.showing_date}</Text>
                   <View style={styles.badgeConfirmed}>
-                    <Text style={styles.badgeText}>Confirmed</Text>
+                    <Text style={styles.badgeConfirmedText}>Confirmed</Text>
                   </View>
                 </View>
                 <Text style={styles.showingTime}>
@@ -410,8 +404,8 @@ export default function ShowingsScreen() {
               >
                 <View style={styles.showingCardHeader}>
                   <Text style={styles.showingDate}>{showing.showing_date}</Text>
-                  <View style={[styles.badgeConfirmed, styles.badgeCompleted]}>
-                    <Text style={[styles.badgeText, styles.badgeTextCompleted]}>
+                  <View style={styles.badgeCompleted}>
+                    <Text style={styles.badgeCompletedText}>
                       {showing.status === "cancelled" ? "Cancelled" : "Completed"}
                     </Text>
                   </View>
@@ -433,266 +427,276 @@ export default function ShowingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 28,
+    padding: spacing.lg,
   },
   scrollContent: {
-    paddingHorizontal: 28,
-    paddingTop: 24,
-    paddingBottom: 40,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
+  headerRow: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
   },
   backButton: {
-    fontSize: 16,
-    color: "#2563EB",
+    marginBottom: spacing.sm,
+    alignSelf: "flex-start",
+  },
+  backText: {
+    ...typography.body,
+    color: colors.primaryLight,
     fontWeight: "500",
-    marginRight: 16,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#111827",
+    ...typography.h1,
+    color: colors.textPrimary,
+    marginBottom: spacing.lg,
   },
   linkCard: {
-    backgroundColor: "#EFF6FF",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 28,
-    borderWidth: 1,
-    borderColor: "#BFDBFE",
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+    ...shadows.md,
   },
   linkLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1E40AF",
-    marginBottom: 8,
+    ...typography.captionBold,
+    color: colors.primary,
+    marginBottom: spacing.sm,
   },
   linkUrl: {
-    fontSize: 13,
-    color: "#2563EB",
-    marginBottom: 12,
+    ...typography.caption,
+    color: colors.primaryLight,
+    marginBottom: spacing.md,
     fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+    backgroundColor: colors.primarySoft,
+    padding: spacing.sm,
+    borderRadius: borderRadius.sm,
+    overflow: "hidden",
   },
   copyButton: {
-    backgroundColor: "#2563EB",
-    borderRadius: 8,
-    paddingVertical: 10,
+    backgroundColor: colors.primaryLight,
+    borderRadius: borderRadius.sm,
+    paddingVertical: spacing.sm + 2,
     alignItems: "center",
   },
   copyButtonText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "600",
+    color: colors.white,
+    ...typography.captionBold,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 16,
+    ...typography.h3,
+    color: colors.textPrimary,
+    marginBottom: spacing.md,
   },
   dateStrip: {
-    paddingBottom: 16,
+    paddingBottom: spacing.md,
   },
   datePill: {
-    width: 60,
-    paddingVertical: 10,
-    borderRadius: 12,
-    backgroundColor: "#F3F4F6",
+    width: 62,
+    paddingVertical: spacing.sm + 2,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.card,
     alignItems: "center",
-    marginRight: 8,
+    marginRight: spacing.sm,
+    ...shadows.sm,
   },
   datePillSelected: {
-    backgroundColor: "#2563EB",
+    backgroundColor: colors.primaryLight,
   },
   datePillWeekday: {
-    fontSize: 11,
+    ...typography.small,
     fontWeight: "500",
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
   datePillDay: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#111827",
+    color: colors.textPrimary,
     marginVertical: 2,
   },
   datePillMonth: {
-    fontSize: 11,
+    ...typography.small,
     fontWeight: "500",
-    color: "#6B7280",
+    color: colors.textSecondary,
   },
   datePillTextSelected: {
-    color: "#FFFFFF",
+    color: colors.white,
   },
   slotDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#2563EB",
-    marginTop: 4,
+    backgroundColor: colors.accent,
+    marginTop: spacing.xs,
   },
   timeSection: {
-    marginBottom: 28,
+    marginBottom: spacing.lg,
   },
-  timeRow: {
+  timeCard: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: spacing.sm + 2,
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.md,
+    padding: spacing.sm,
+    ...shadows.sm,
   },
   timePickerButton: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+    backgroundColor: colors.borderLight,
+    borderRadius: borderRadius.sm,
+    paddingVertical: spacing.md - 2,
+    paddingHorizontal: spacing.md,
   },
   timePickerText: {
-    fontSize: 15,
-    color: "#111827",
+    ...typography.body,
+    color: colors.textPrimary,
     textAlign: "center",
   },
   timeSeparator: {
-    marginHorizontal: 10,
-    fontSize: 14,
-    color: "#6B7280",
+    marginHorizontal: spacing.sm + 2,
+    ...typography.caption,
+    color: colors.textSecondary,
   },
   removeButton: {
-    marginLeft: 10,
+    marginLeft: spacing.sm,
     width: 32,
     height: 32,
-    borderRadius: 16,
-    backgroundColor: "#FEE2E2",
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.errorLight,
     justifyContent: "center",
     alignItems: "center",
   },
   removeButtonText: {
     fontSize: 16,
-    color: "#DC2626",
+    color: colors.error,
     fontWeight: "600",
   },
   timeOptionsContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
     maxHeight: 200,
-    marginBottom: 10,
+    marginBottom: spacing.sm + 2,
+    ...shadows.md,
   },
   timeOptionsScroll: {
-    padding: 4,
+    padding: spacing.xs,
   },
   timeOption: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: colors.borderLight,
   },
   timeOptionText: {
-    fontSize: 15,
-    color: "#111827",
+    ...typography.body,
+    color: colors.textPrimary,
   },
   addTimeButton: {
     borderWidth: 1.5,
-    borderColor: "#2563EB",
+    borderColor: colors.primaryLight,
     borderStyle: "dashed",
-    borderRadius: 8,
-    paddingVertical: 12,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md - 2,
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   addTimeButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#2563EB",
+    ...typography.captionBold,
+    color: colors.primaryLight,
   },
   saveButton: {
-    backgroundColor: "#2563EB",
-    borderRadius: 10,
-    paddingVertical: 14,
+    backgroundColor: colors.primaryLight,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
     alignItems: "center",
+    ...shadows.sm,
   },
   saveButtonDisabled: {
     opacity: 0.6,
   },
   saveButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.white,
+    ...typography.bodyBold,
   },
   subsectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#6B7280",
-    marginBottom: 12,
+    ...typography.bodyBold,
+    color: colors.textSecondary,
+    marginBottom: spacing.md,
   },
   showingCard: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    ...shadows.md,
   },
   showingCardPast: {
-    opacity: 0.7,
+    opacity: 0.65,
   },
   showingCardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 6,
+    marginBottom: spacing.xs + 2,
   },
   showingDate: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#111827",
+    ...typography.bodyBold,
+    color: colors.textPrimary,
   },
   badgeConfirmed: {
-    backgroundColor: "#DCFCE7",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    backgroundColor: colors.accentLight,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
   },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#16A34A",
+  badgeConfirmedText: {
+    ...typography.smallBold,
+    color: colors.accentDark,
   },
   badgeCompleted: {
-    backgroundColor: "#F3F4F6",
+    backgroundColor: colors.borderLight,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
   },
-  badgeTextCompleted: {
-    color: "#6B7280",
+  badgeCompletedText: {
+    ...typography.smallBold,
+    color: colors.textSecondary,
   },
   showingTime: {
-    fontSize: 14,
-    color: "#374151",
-    marginBottom: 8,
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
   },
   showingBuyer: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#111827",
+    ...typography.bodyBold,
+    color: colors.textPrimary,
   },
   showingContact: {
-    fontSize: 13,
-    color: "#6B7280",
+    ...typography.caption,
+    color: colors.textSecondary,
     marginTop: 2,
   },
+  emptyCard: {
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    alignItems: "center",
+    ...shadows.sm,
+  },
   emptyText: {
-    fontSize: 15,
-    color: "#9CA3AF",
+    ...typography.body,
+    color: colors.textMuted,
     textAlign: "center",
-    paddingVertical: 24,
   },
 });

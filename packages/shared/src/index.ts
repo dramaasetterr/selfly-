@@ -81,6 +81,7 @@ export interface ListingInput {
   property_type: PropertyType;
   hoa: boolean;
   hoa_fee?: number;
+  features?: string;
   title: string;
   description: string;
   photos: string[];
@@ -98,6 +99,7 @@ export interface Listing {
   property_type: PropertyType;
   hoa: boolean;
   hoa_fee?: number;
+  features?: string;
   title: string;
   description: string;
   photos: string[];
@@ -166,6 +168,7 @@ export interface PricingInput {
   bathrooms: number;
   year_built: number;
   condition: PropertyCondition;
+  features?: string;
 }
 
 export interface PricingResult {

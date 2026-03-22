@@ -14,11 +14,13 @@ import type { Offer } from "@selfly/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
+import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 
 function ScoreBadge({ score }: { score: number }) {
-  const color = score >= 8 ? "#22C55E" : score >= 5 ? "#F59E0B" : "#EF4444";
+  const color = score >= 8 ? colors.success : score >= 5 ? colors.warning : colors.error;
+  const bg = score >= 8 ? colors.accentLight : score >= 5 ? colors.amberLight : colors.errorLight;
   return (
-    <View style={[styles.scoreBadge, { backgroundColor: color + "20", borderColor: color }]}>
+    <View style={[styles.scoreBadge, { backgroundColor: bg, borderColor: color }]}>
       <Text style={[styles.scoreBadgeText, { color }]}>{score}/10</Text>
     </View>
   );
@@ -40,7 +42,6 @@ export default function OffersScreen() {
   const fetchOffers = async () => {
     if (!user) return;
 
-    // Get user's listing
     const { data: listing } = await supabase
       .from("listings")
       .select("id, price")
@@ -68,7 +69,7 @@ export default function OffersScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2563EB" />
+          <ActivityIndicator size="large" color={colors.primaryLight} />
         </View>
       </SafeAreaView>
     );
@@ -77,13 +78,11 @@ export default function OffersScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Text style={styles.backText}>‹ Back</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>Offers</Text>
-          <View style={styles.backButton} />
-        </View>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Text style={styles.backText}>{"\u2190"} Back</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.title}>Offers</Text>
 
         <TouchableOpacity
           style={styles.addButton}
@@ -104,7 +103,9 @@ export default function OffersScreen() {
 
         {offers.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📋</Text>
+            <View style={styles.emptyIconCircle}>
+              <Text style={styles.emptyIcon}>📋</Text>
+            </View>
             <Text style={styles.emptyTitle}>No Offers Yet</Text>
             <Text style={styles.emptyText}>
               When you receive a buyer offer, add it here for AI-powered analysis and scoring.
@@ -146,10 +147,10 @@ export default function OffersScreen() {
                     {
                       color:
                         offer.score! >= 8
-                          ? "#22C55E"
+                          ? colors.success
                           : offer.score! >= 5
-                          ? "#F59E0B"
-                          : "#EF4444",
+                          ? colors.warning
+                          : colors.error,
                     },
                   ]}
                 >
@@ -167,7 +168,7 @@ export default function OffersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -175,128 +176,123 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   scrollContent: {
-    paddingHorizontal: 28,
-    paddingTop: 24,
-    paddingBottom: 40,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 24,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
   },
   backButton: {
-    width: 60,
+    marginBottom: spacing.sm,
+    alignSelf: "flex-start",
   },
   backText: {
-    fontSize: 17,
-    color: "#2563EB",
+    ...typography.body,
+    color: colors.primaryLight,
     fontWeight: "500",
   },
   title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#111827",
-    textAlign: "center",
+    ...typography.h1,
+    color: colors.textPrimary,
+    marginBottom: spacing.lg,
   },
   addButton: {
-    backgroundColor: "#2563EB",
-    borderRadius: 12,
-    paddingVertical: 14,
+    backgroundColor: colors.primaryLight,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: spacing.md,
+    ...shadows.sm,
   },
   addButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.white,
+    ...typography.bodyBold,
   },
   compareButton: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.md,
     borderWidth: 1.5,
-    borderColor: "#2563EB",
-    paddingVertical: 14,
+    borderColor: colors.primaryLight,
+    paddingVertical: spacing.md,
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   compareButtonText: {
-    color: "#2563EB",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.primaryLight,
+    ...typography.bodyBold,
   },
   emptyState: {
     alignItems: "center",
-    paddingTop: 60,
+    paddingTop: spacing.xxl + spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.primarySoft,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: spacing.md,
   },
   emptyIcon: {
-    fontSize: 48,
-    marginBottom: 16,
+    fontSize: 36,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 8,
+    ...typography.h2,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
   },
   emptyText: {
-    fontSize: 15,
-    color: "#6B7280",
+    ...typography.body,
+    color: colors.textSecondary,
     textAlign: "center",
     lineHeight: 22,
-    paddingHorizontal: 20,
   },
   offerCard: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    ...shadows.md,
   },
   offerCardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   offerLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#6B7280",
+    ...typography.captionBold,
+    color: colors.textSecondary,
   },
   scoreBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+    borderWidth: 1.5,
   },
   scoreBadgeText: {
-    fontSize: 13,
-    fontWeight: "700",
+    ...typography.captionBold,
   },
   offerPrice: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 6,
+    ...typography.h2,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs + 2,
   },
   offerDetails: {
     flexDirection: "row",
     alignItems: "center",
   },
   offerDetailText: {
-    fontSize: 14,
-    color: "#6B7280",
+    ...typography.caption,
+    color: colors.textSecondary,
   },
   offerDetailDot: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginHorizontal: 6,
+    ...typography.caption,
+    color: colors.textMuted,
+    marginHorizontal: spacing.xs + 2,
   },
   offerScoreLabel: {
-    fontSize: 13,
-    fontWeight: "600",
-    marginTop: 6,
+    ...typography.captionBold,
+    marginTop: spacing.xs + 2,
   },
 });

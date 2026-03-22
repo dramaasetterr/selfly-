@@ -16,6 +16,7 @@ import { CLOSING_STEPS, type CustomCost } from "@selfly/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
+import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 
 interface ChecklistItem {
   id: string;
@@ -63,7 +64,6 @@ export default function ClosingScreen() {
   const loadData = useCallback(async () => {
     if (!user) return;
 
-    // Get user's active listing
     const { data: listing } = await supabase
       .from("listings")
       .select("id, price")
@@ -79,7 +79,6 @@ export default function ClosingScreen() {
 
     setListingId(listing.id);
 
-    // Load or initialize checklist
     const { data: existingChecklist } = await supabase
       .from("closing_checklist")
       .select("*")
@@ -90,7 +89,6 @@ export default function ClosingScreen() {
     if (existingChecklist && existingChecklist.length > 0) {
       setChecklist(existingChecklist);
     } else {
-      // Initialize checklist items
       const items = CLOSING_STEPS.map((step) => ({
         user_id: user.id,
         listing_id: listing.id,
@@ -109,7 +107,6 @@ export default function ClosingScreen() {
       if (inserted) setChecklist(inserted);
     }
 
-    // Load or initialize calculator
     const { data: existingCalc } = await supabase
       .from("closing_calculator")
       .select("*")
@@ -128,7 +125,6 @@ export default function ClosingScreen() {
         custom_costs: existingCalc.custom_costs ?? [],
       });
     } else {
-      // Try to get accepted offer price and concessions
       let salePrice = listing.price ?? 0;
       let concessions = 0;
       const { data: bestOffer } = await supabase
@@ -204,11 +200,9 @@ export default function ClosingScreen() {
     );
     setChecklist(updated);
 
-    // Check if all complete
     const allDone = updated.every((c) => c.completed);
     if (allDone && !celebrated) {
       setCelebrated(true);
-      // Advance pipeline stage
       await supabase
         .from("profiles")
         .update({ current_stage: "close_the_deal" })
@@ -261,7 +255,6 @@ export default function ClosingScreen() {
     }));
   };
 
-  // Calculate totals
   const transferTaxAmount = (calculator.sale_price * calculator.transfer_tax_pct) / 100;
   const customTotal = calculator.custom_costs.reduce((sum, c) => sum + (c.amount || 0), 0);
   const totalDeductions =
@@ -279,7 +272,7 @@ export default function ClosingScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2563EB" />
+          <ActivityIndicator size="large" color={colors.primaryLight} />
         </View>
       </SafeAreaView>
     );
@@ -287,14 +280,13 @@ export default function ClosingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Text style={styles.backText}>{"< Back"}</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>Close the Deal</Text>
-        </View>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Text style={styles.backText}>{"\u2190"} Back</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.title}>Close the Deal</Text>
 
         {/* Celebration */}
         {allComplete && (
@@ -308,7 +300,7 @@ export default function ClosingScreen() {
         )}
 
         {/* Section A: Progress Bar */}
-        <View style={styles.progressSection}>
+        <View style={styles.progressCard}>
           <View style={styles.progressTrack}>
             <View style={[styles.progressFill, { width: `${progressPct}%` }]} />
           </View>
@@ -352,7 +344,7 @@ export default function ClosingScreen() {
         ))}
 
         {/* Section C: Closing Calculator */}
-        <Text style={[styles.sectionTitle, { marginTop: 32 }]}>Closing Calculator</Text>
+        <Text style={[styles.sectionTitle, { marginTop: spacing.xl }]}>Closing Calculator</Text>
         <View style={styles.calcCard}>
           <CalcRow
             label="Sale Price"
@@ -407,7 +399,7 @@ export default function ClosingScreen() {
                 value={cost.label}
                 onChangeText={(v) => updateCustomCost(i, "label", v)}
                 placeholder="Cost name"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.textMuted}
               />
               <TextInput
                 style={styles.customCostAmount}
@@ -415,7 +407,7 @@ export default function ClosingScreen() {
                 onChangeText={(v) => updateCustomCost(i, "amount", v)}
                 keyboardType="numeric"
                 placeholder="$0"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.textMuted}
               />
               <TouchableOpacity onPress={() => removeCustomCost(i)} style={styles.removeCost}>
                 <Text style={styles.removeCostText}>×</Text>
@@ -444,7 +436,7 @@ export default function ClosingScreen() {
           </View>
 
           <TouchableOpacity
-            style={styles.saveCalcButton}
+            style={[styles.saveCalcButton, saving && { opacity: 0.6 }]}
             onPress={saveCalculator}
             disabled={saving}
           >
@@ -479,7 +471,7 @@ function CalcRow({
           value={value ? String(value) : ""}
           onChangeText={(v) => onChange(parseFloat(v) || 0)}
           keyboardType="numeric"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.textMuted}
         />
         {suffix && <Text style={styles.calcSuffix}>{suffix}</Text>}
       </View>
@@ -488,210 +480,321 @@ function CalcRow({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFFFF" },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  scrollContent: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 60 },
-  header: { marginBottom: 20 },
-  backButton: { marginBottom: 8 },
-  backText: { fontSize: 16, color: "#2563EB", fontWeight: "500" },
-  title: { fontSize: 26, fontWeight: "700", color: "#111827" },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scrollContent: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: 60,
+  },
+  backButton: {
+    marginBottom: spacing.sm,
+    alignSelf: "flex-start",
+  },
+  backText: {
+    ...typography.body,
+    color: colors.primaryLight,
+    fontWeight: "500",
+  },
+  title: {
+    ...typography.h1,
+    color: colors.textPrimary,
+    marginBottom: spacing.lg,
+  },
 
   // Celebration
   celebrationCard: {
-    backgroundColor: "#ECFDF5",
-    borderRadius: 16,
-    padding: 28,
+    backgroundColor: colors.accentLight,
+    borderRadius: borderRadius.xl,
+    padding: spacing.lg + 4,
     alignItems: "center",
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: "#A7F3D0",
+    marginBottom: spacing.lg,
+    ...shadows.md,
   },
-  celebrationEmoji: { fontSize: 48, marginBottom: 12 },
-  celebrationTitle: { fontSize: 24, fontWeight: "700", color: "#065F46", marginBottom: 4 },
-  celebrationText: { fontSize: 16, color: "#047857", fontWeight: "500" },
+  celebrationEmoji: { fontSize: 48, marginBottom: spacing.md },
+  celebrationTitle: {
+    ...typography.h1,
+    color: colors.accentDark,
+    marginBottom: spacing.xs,
+  },
+  celebrationText: {
+    ...typography.bodyBold,
+    color: colors.accent,
+  },
 
   // Progress
-  progressSection: { marginBottom: 20 },
+  progressCard: {
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    ...shadows.sm,
+  },
   progressTrack: {
-    height: 12,
-    backgroundColor: "#E5E7EB",
-    borderRadius: 6,
+    height: 10,
+    backgroundColor: colors.borderLight,
+    borderRadius: borderRadius.full,
     overflow: "hidden",
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "#2563EB",
-    borderRadius: 6,
+    backgroundColor: colors.primaryLight,
+    borderRadius: borderRadius.full,
   },
-  progressLabel: { fontSize: 14, color: "#6B7280", fontWeight: "500" },
+  progressLabel: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    fontWeight: "500",
+  },
 
   // Guide button
   guideButton: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#EFF6FF",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: "#BFDBFE",
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    ...shadows.md,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primaryLight,
   },
-  guideButtonText: { fontSize: 16, fontWeight: "600", color: "#2563EB" },
-  guideChevron: { fontSize: 22, color: "#2563EB", fontWeight: "300" },
+  guideButtonText: {
+    ...typography.bodyBold,
+    color: colors.primaryLight,
+  },
+  guideChevron: {
+    fontSize: 22,
+    color: colors.primaryLight,
+    fontWeight: "300",
+  },
 
   // Section
-  sectionTitle: { fontSize: 18, fontWeight: "700", color: "#111827", marginBottom: 12 },
+  sectionTitle: {
+    ...typography.h3,
+    color: colors.textPrimary,
+    marginBottom: spacing.md,
+  },
 
   // Checklist
   checklistCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    ...shadows.sm,
   },
   checklistCardDone: {
-    backgroundColor: "#F0FDF4",
-    borderColor: "#BBF7D0",
+    backgroundColor: colors.accentLight,
   },
   checkbox: {
     width: 28,
     height: 28,
-    borderRadius: 8,
+    borderRadius: borderRadius.sm,
     borderWidth: 2,
-    borderColor: "#D1D5DB",
+    borderColor: colors.border,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 14,
+    marginRight: spacing.md,
   },
   checkboxDone: {
-    backgroundColor: "#2563EB",
-    borderColor: "#2563EB",
+    backgroundColor: colors.primaryLight,
+    borderColor: colors.primaryLight,
   },
-  checkIcon: { color: "#FFFFFF", fontSize: 14, fontWeight: "700" },
+  checkIcon: {
+    color: colors.white,
+    ...typography.captionBold,
+  },
   checklistContent: { flex: 1 },
-  checklistLabel: { fontSize: 15, fontWeight: "600", color: "#111827" },
-  checklistLabelDone: { color: "#065F46" },
-  completedAt: { fontSize: 12, color: "#6B7280", marginTop: 2 },
-  greenCheck: { fontSize: 18, color: "#16A34A", fontWeight: "700" },
+  checklistLabel: {
+    ...typography.bodyBold,
+    fontSize: 15,
+    color: colors.textPrimary,
+  },
+  checklistLabelDone: {
+    color: colors.accentDark,
+  },
+  completedAt: {
+    ...typography.small,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  greenCheck: {
+    fontSize: 18,
+    color: colors.accent,
+    fontWeight: "700",
+  },
 
   // Calculator
   calcCard: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    ...shadows.md,
   },
   calcRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
-  calcLabel: { fontSize: 14, color: "#374151", flex: 1 },
-  calcInputWrap: { flexDirection: "row", alignItems: "center" },
-  calcPrefix: { fontSize: 14, color: "#6B7280", marginRight: 2 },
-  calcSuffix: { fontSize: 14, color: "#6B7280", marginLeft: 2 },
+  calcLabel: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    flex: 1,
+  },
+  calcInputWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  calcPrefix: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginRight: 2,
+  },
+  calcSuffix: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginLeft: 2,
+  },
   calcInput: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#111827",
-    backgroundColor: "#FFFFFF",
+    ...typography.captionBold,
+    color: colors.textPrimary,
+    backgroundColor: colors.borderLight,
     borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    borderColor: colors.border,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.sm,
     minWidth: 100,
     textAlign: "right",
   },
   calcSubheader: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#6B7280",
+    ...typography.smallBold,
+    color: colors.textSecondary,
     textTransform: "uppercase",
     letterSpacing: 0.5,
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   calcDivider: {
     height: 1,
-    backgroundColor: "#E5E7EB",
-    marginVertical: 16,
+    backgroundColor: colors.border,
+    marginVertical: spacing.md,
   },
   calcComputedRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
-  calcComputedLabel: { fontSize: 13, color: "#9CA3AF", fontStyle: "italic" },
-  calcComputedValue: { fontSize: 13, color: "#9CA3AF", fontStyle: "italic" },
+  calcComputedLabel: {
+    ...typography.caption,
+    color: colors.textMuted,
+    fontStyle: "italic",
+  },
+  calcComputedValue: {
+    ...typography.caption,
+    color: colors.textMuted,
+    fontStyle: "italic",
+  },
   calcTotalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
-  calcTotalLabel: { fontSize: 15, fontWeight: "600", color: "#374151" },
-  calcTotalValue: { fontSize: 15, fontWeight: "600", color: "#DC2626" },
+  calcTotalLabel: {
+    ...typography.bodyBold,
+    color: colors.textSecondary,
+  },
+  calcTotalValue: {
+    ...typography.bodyBold,
+    color: colors.error,
+  },
   netProceedsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#F0FDF4",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    alignItems: "center",
+    backgroundColor: colors.accentLight,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
   },
-  netProceedsLabel: { fontSize: 16, fontWeight: "700", color: "#065F46" },
-  netProceedsValue: { fontSize: 22, fontWeight: "700", color: "#16A34A" },
+  netProceedsLabel: {
+    ...typography.bodyBold,
+    color: colors.accentDark,
+  },
+  netProceedsValue: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: colors.accent,
+  },
 
   // Custom costs
   customCostRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   customCostLabel: {
     flex: 1,
-    fontSize: 14,
-    color: "#111827",
-    backgroundColor: "#FFFFFF",
+    ...typography.caption,
+    color: colors.textPrimary,
+    backgroundColor: colors.borderLight,
     borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginRight: 8,
+    borderColor: colors.border,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.sm,
+    marginRight: spacing.sm,
   },
   customCostAmount: {
     width: 100,
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#111827",
-    backgroundColor: "#FFFFFF",
+    ...typography.captionBold,
+    color: colors.textPrimary,
+    backgroundColor: colors.borderLight,
     borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    borderColor: colors.border,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.sm,
     textAlign: "right",
   },
-  removeCost: { marginLeft: 8, padding: 4 },
-  removeCostText: { fontSize: 20, color: "#DC2626", fontWeight: "600" },
+  removeCost: {
+    marginLeft: spacing.sm,
+    padding: spacing.xs,
+  },
+  removeCostText: {
+    fontSize: 20,
+    color: colors.error,
+    fontWeight: "600",
+  },
   addCostButton: {
-    paddingVertical: 10,
+    paddingVertical: spacing.sm + 2,
     alignItems: "center",
   },
-  addCostText: { fontSize: 14, fontWeight: "600", color: "#2563EB" },
+  addCostText: {
+    ...typography.captionBold,
+    color: colors.primaryLight,
+  },
   saveCalcButton: {
-    backgroundColor: "#2563EB",
-    borderRadius: 12,
-    paddingVertical: 14,
+    backgroundColor: colors.primaryLight,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
     alignItems: "center",
+    ...shadows.sm,
   },
-  saveCalcText: { color: "#FFFFFF", fontSize: 16, fontWeight: "600" },
+  saveCalcText: {
+    color: colors.white,
+    ...typography.bodyBold,
+  },
 });

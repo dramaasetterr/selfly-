@@ -15,14 +15,16 @@ import type { Offer } from "@selfly/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
+import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 
 function ScoreBadge({ score, isBest }: { score: number; isBest: boolean }) {
-  const color = score >= 8 ? "#22C55E" : score >= 5 ? "#F59E0B" : "#EF4444";
+  const color = score >= 8 ? colors.success : score >= 5 ? colors.warning : colors.error;
+  const bg = isBest ? colors.accentLight : "transparent";
   return (
     <View
       style={[
         styles.cellScoreBadge,
-        { backgroundColor: isBest ? "#F0FDF4" : "transparent", borderColor: color },
+        { backgroundColor: bg, borderColor: color },
       ]}
     >
       <Text style={[styles.cellScoreText, { color }]}>{score}/10</Text>
@@ -33,7 +35,7 @@ function ScoreBadge({ score, isBest }: { score: number; isBest: boolean }) {
 interface CompareRow {
   label: string;
   getValue: (o: Offer) => string;
-  getBest: (offers: Offer[]) => number; // index of best
+  getBest: (offers: Offer[]) => number;
 }
 
 const COMPARE_ROWS: CompareRow[] = [
@@ -103,7 +105,7 @@ const COMPARE_ROWS: CompareRow[] = [
     label: "Closing Date",
     getValue: (o) =>
       o.closing_date ? new Date(o.closing_date).toLocaleDateString() : "-",
-    getBest: () => -1, // no "best" for dates
+    getBest: () => -1,
   },
   {
     label: "Concessions",
@@ -155,7 +157,7 @@ export default function OfferCompareScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2563EB" />
+          <ActivityIndicator size="large" color={colors.primaryLight} />
         </View>
       </SafeAreaView>
     );
@@ -164,13 +166,11 @@ export default function OfferCompareScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerFixed}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Text style={styles.backText}>‹ Back</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>Compare Offers</Text>
-          <View style={styles.backButton} />
-        </View>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Text style={styles.backText}>{"\u2190"} Back</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.title}>Compare Offers</Text>
 
         {bestOverallIndex >= 0 && (
           <View style={styles.bestBanner}>
@@ -184,7 +184,7 @@ export default function OfferCompareScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View>
+          <View style={styles.tableWrap}>
             {/* Column Headers */}
             <View style={styles.tableRow}>
               <View style={styles.labelCell}>
@@ -195,7 +195,7 @@ export default function OfferCompareScreen() {
                   key={i}
                   style={[
                     styles.valueCell,
-                    i === bestOverallIndex && styles.bestColumn,
+                    i === bestOverallIndex && styles.bestColumnHeader,
                   ]}
                 >
                   <Text style={styles.columnHeader}>Offer #{i + 1}</Text>
@@ -255,7 +255,7 @@ export default function OfferCompareScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -263,106 +263,101 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerFixed: {
-    paddingHorizontal: 28,
-    paddingTop: 24,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
   },
   backButton: {
-    width: 60,
+    marginBottom: spacing.sm,
+    alignSelf: "flex-start",
   },
   backText: {
-    fontSize: 17,
-    color: "#2563EB",
+    ...typography.body,
+    color: colors.primaryLight,
     fontWeight: "500",
   },
   title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#111827",
-    textAlign: "center",
+    ...typography.h1,
+    color: colors.textPrimary,
+    marginBottom: spacing.md,
   },
   bestBanner: {
-    backgroundColor: "#F0FDF4",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#BBF7D0",
+    backgroundColor: colors.accentLight,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
     alignItems: "center",
+    ...shadows.sm,
   },
   bestBannerText: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#166534",
+    ...typography.bodyBold,
+    color: colors.accentDark,
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 40,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.xxl,
+  },
+  tableWrap: {
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    overflow: "hidden",
+    ...shadows.md,
   },
   tableRow: {
     flexDirection: "row",
   },
   rowEven: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.borderLight,
   },
   rowOdd: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.card,
   },
   labelCell: {
     width: 110,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
+    paddingVertical: spacing.md - 2,
+    paddingHorizontal: spacing.sm + 2,
     justifyContent: "center",
     borderRightWidth: 1,
-    borderRightColor: "#E5E7EB",
+    borderRightColor: colors.border,
   },
   labelCellText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#6B7280",
+    ...typography.captionBold,
+    color: colors.textSecondary,
   },
   valueCell: {
     width: 130,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
+    paddingVertical: spacing.md - 2,
+    paddingHorizontal: spacing.sm + 2,
     justifyContent: "center",
     alignItems: "center",
     borderRightWidth: 1,
-    borderRightColor: "#E5E7EB",
+    borderRightColor: colors.border,
   },
-  bestColumn: {
-    backgroundColor: "#F0FDF420",
+  bestColumnHeader: {
+    backgroundColor: colors.accentLight + "40",
   },
   bestValue: {
-    backgroundColor: "#F0FDF4",
+    backgroundColor: colors.accentLight,
   },
   bestValueText: {
-    color: "#166534",
+    color: colors.accentDark,
     fontWeight: "700",
   },
   valueCellText: {
-    fontSize: 14,
-    color: "#111827",
+    ...typography.caption,
+    color: colors.textPrimary,
     textAlign: "center",
   },
   columnHeader: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#2563EB",
+    ...typography.captionBold,
+    color: colors.primaryLight,
   },
   cellScoreBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
     borderWidth: 1.5,
   },
   cellScoreText: {
-    fontSize: 14,
-    fontWeight: "700",
+    ...typography.captionBold,
   },
 });

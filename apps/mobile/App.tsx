@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
+import OnboardingScreen, { ONBOARDING_KEY } from "./src/screens/OnboardingScreen";
 import WelcomeScreen from "./src/screens/WelcomeScreen";
 import SignUpScreen from "./src/screens/SignUpScreen";
 import LoginScreen from "./src/screens/LoginScreen";
@@ -21,9 +23,20 @@ import OfferAnalysisScreen from "./src/screens/OfferAnalysisScreen";
 import OfferCompareScreen from "./src/screens/OfferCompareScreen";
 import ClosingScreen from "./src/screens/ClosingScreen";
 import ClosingGuideScreen from "./src/screens/ClosingGuideScreen";
+import PrepHomeScreen from "./src/screens/PrepHomeScreen";
+import MarketplaceScreen from "./src/screens/MarketplaceScreen";
+import ListingDetailScreen from "./src/screens/ListingDetailScreen";
+import BookShowingScreen from "./src/screens/BookShowingScreen";
+import SyndicationScreen from "./src/screens/SyndicationScreen";
+import UpgradeScreen from "./src/screens/UpgradeScreen";
+import ProfileScreen from "./src/screens/ProfileScreen";
+import MessagesScreen from "./src/screens/MessagesScreen";
+import ConversationScreen from "./src/screens/ConversationScreen";
+import ContactSellerScreen from "./src/screens/ContactSellerScreen";
 import type { PricingInput, PricingResult, Document, OfferAnalysis, OfferInput } from "@selfly/shared";
 
 export type AuthStackParamList = {
+  Onboarding: undefined;
   Welcome: undefined;
   SignUp: undefined;
   Login: undefined;
@@ -31,6 +44,7 @@ export type AuthStackParamList = {
 
 export type AppStackParamList = {
   Home: undefined;
+  PrepHome: undefined;
   Pricing: undefined;
   PricingResults: { input: PricingInput; result: PricingResult };
   ListingBuilder: undefined;
@@ -49,20 +63,31 @@ export type AppStackParamList = {
   OfferCompare: { listingId: string };
   Closing: undefined;
   ClosingGuide: { listingId: string };
+  Marketplace: undefined;
+  ListingDetail: { listingId: string };
+  BookShowing: { listingId: string };
+  Syndication: undefined;
+  Messages: undefined;
+  Conversation: { listingId: string; otherPartyId: string; otherPartyName: string };
+  ContactSeller: { listingId: string };
+  Upgrade: undefined;
+  Profile: undefined;
 };
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const AppStack = createNativeStackNavigator<AppStackParamList>();
 
-function AuthNavigator() {
+function AuthNavigator({ hasSeenOnboarding }: { hasSeenOnboarding: boolean }) {
   return (
     <AuthStack.Navigator
+      initialRouteName={hasSeenOnboarding ? "Welcome" : "Onboarding"}
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: "#FFFFFF" },
         animation: "slide_from_right",
       }}
     >
+      <AuthStack.Screen name="Onboarding" component={OnboardingScreen} />
       <AuthStack.Screen name="Welcome" component={WelcomeScreen} />
       <AuthStack.Screen name="SignUp" component={SignUpScreen} />
       <AuthStack.Screen name="Login" component={LoginScreen} />
@@ -79,6 +104,7 @@ function AppNavigator() {
       }}
     >
       <AppStack.Screen name="Home" component={HomeScreen} />
+      <AppStack.Screen name="PrepHome" component={PrepHomeScreen} />
       <AppStack.Screen name="Pricing" component={PricingScreen} />
       <AppStack.Screen name="PricingResults" component={PricingResultsScreen} />
       <AppStack.Screen name="ListingBuilder" component={ListingBuilderScreen} />
@@ -92,14 +118,30 @@ function AppNavigator() {
       <AppStack.Screen name="OfferCompare" component={OfferCompareScreen} />
       <AppStack.Screen name="Closing" component={ClosingScreen} />
       <AppStack.Screen name="ClosingGuide" component={ClosingGuideScreen} />
+      <AppStack.Screen name="Marketplace" component={MarketplaceScreen} />
+      <AppStack.Screen name="ListingDetail" component={ListingDetailScreen} />
+      <AppStack.Screen name="BookShowing" component={BookShowingScreen} />
+      <AppStack.Screen name="Syndication" component={SyndicationScreen} />
+      <AppStack.Screen name="Messages" component={MessagesScreen} />
+      <AppStack.Screen name="Conversation" component={ConversationScreen} />
+      <AppStack.Screen name="ContactSeller" component={ContactSellerScreen} />
+      <AppStack.Screen name="Upgrade" component={UpgradeScreen} />
+      <AppStack.Screen name="Profile" component={ProfileScreen} />
     </AppStack.Navigator>
   );
 }
 
 function RootNavigator() {
-  const { session, loading } = useAuth();
+  const { session, loading: authLoading } = useAuth();
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
 
-  if (loading) {
+  useEffect(() => {
+    AsyncStorage.getItem(ONBOARDING_KEY)
+      .then((value) => setHasSeenOnboarding(value === "true"))
+      .catch(() => setHasSeenOnboarding(false));
+  }, []);
+
+  if (authLoading || hasSeenOnboarding === null) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#FFFFFF" }}>
         <ActivityIndicator size="large" color="#2563EB" />
@@ -107,7 +149,11 @@ function RootNavigator() {
     );
   }
 
-  return session ? <AppNavigator /> : <AuthNavigator />;
+  return session ? (
+    <AppNavigator />
+  ) : (
+    <AuthNavigator hasSeenOnboarding={hasSeenOnboarding} />
+  );
 }
 
 export default function App() {

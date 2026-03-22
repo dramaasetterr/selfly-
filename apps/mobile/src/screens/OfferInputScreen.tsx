@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  KeyboardAvoidingView,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -19,6 +20,7 @@ import { FINANCING_TYPES } from "@selfly/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
+import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -112,159 +114,165 @@ export default function OfferInputScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Text style={styles.backText}>‹ Back</Text>
+            <Text style={styles.backText}>{"\u2190"} Back</Text>
           </TouchableOpacity>
+
           <Text style={styles.title}>New Offer</Text>
-          <View style={styles.backButton} />
-        </View>
 
-        {listingPrice > 0 && (
-          <View style={styles.listingRef}>
-            <Text style={styles.listingRefLabel}>Your Listing Price</Text>
-            <Text style={styles.listingRefPrice}>
-              ${listingPrice.toLocaleString()}
-            </Text>
+          {listingPrice > 0 && (
+            <View style={styles.listingRef}>
+              <Text style={styles.listingRefLabel}>Your Listing Price</Text>
+              <Text style={styles.listingRefPrice}>
+                ${listingPrice.toLocaleString()}
+              </Text>
+            </View>
+          )}
+
+          <Text style={styles.label}>Offered Price *</Text>
+          <TextInput
+            style={styles.input}
+            value={offeredPrice}
+            onChangeText={setOfferedPrice}
+            placeholder="e.g. 350000"
+            keyboardType="numeric"
+            placeholderTextColor={colors.textMuted}
+          />
+
+          <Text style={styles.label}>Financing Type *</Text>
+          <View style={styles.chipRow}>
+            {FINANCING_TYPES.map((type) => (
+              <TouchableOpacity
+                key={type}
+                style={[
+                  styles.chip,
+                  financingType === type && styles.chipSelected,
+                ]}
+                onPress={() => setFinancingType(type)}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    financingType === type && styles.chipTextSelected,
+                  ]}
+                >
+                  {type.toUpperCase()}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
-        )}
 
-        <Text style={styles.label}>Offered Price *</Text>
-        <TextInput
-          style={styles.input}
-          value={offeredPrice}
-          onChangeText={setOfferedPrice}
-          placeholder="e.g. 350000"
-          keyboardType="numeric"
-          placeholderTextColor="#9CA3AF"
-        />
+          <Text style={styles.label}>Down Payment %</Text>
+          <TextInput
+            style={styles.input}
+            value={downPaymentPct}
+            onChangeText={setDownPaymentPct}
+            placeholder="e.g. 20"
+            keyboardType="numeric"
+            placeholderTextColor={colors.textMuted}
+          />
 
-        <Text style={styles.label}>Financing Type *</Text>
-        <View style={styles.chipRow}>
-          {FINANCING_TYPES.map((type) => (
+          <Text style={styles.label}>Inspection Contingency</Text>
+          <View style={styles.toggleRow}>
             <TouchableOpacity
-              key={type}
-              style={[
-                styles.chip,
-                financingType === type && styles.chipSelected,
-              ]}
-              onPress={() => setFinancingType(type)}
+              style={[styles.toggleBtn, inspectionContingency && styles.toggleBtnActive]}
+              onPress={() => setInspectionContingency(true)}
             >
               <Text
-                style={[
-                  styles.chipText,
-                  financingType === type && styles.chipTextSelected,
-                ]}
+                style={[styles.toggleText, inspectionContingency && styles.toggleTextActive]}
               >
-                {type.toUpperCase()}
+                Yes
               </Text>
             </TouchableOpacity>
-          ))}
-        </View>
-
-        <Text style={styles.label}>Down Payment %</Text>
-        <TextInput
-          style={styles.input}
-          value={downPaymentPct}
-          onChangeText={setDownPaymentPct}
-          placeholder="e.g. 20"
-          keyboardType="numeric"
-          placeholderTextColor="#9CA3AF"
-        />
-
-        <Text style={styles.label}>Inspection Contingency</Text>
-        <View style={styles.toggleRow}>
-          <TouchableOpacity
-            style={[styles.toggleBtn, inspectionContingency && styles.toggleBtnActive]}
-            onPress={() => setInspectionContingency(true)}
-          >
-            <Text
-              style={[styles.toggleText, inspectionContingency && styles.toggleTextActive]}
+            <TouchableOpacity
+              style={[styles.toggleBtn, !inspectionContingency && styles.toggleBtnActive]}
+              onPress={() => setInspectionContingency(false)}
             >
-              Yes
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.toggleBtn, !inspectionContingency && styles.toggleBtnActive]}
-            onPress={() => setInspectionContingency(false)}
-          >
-            <Text
-              style={[styles.toggleText, !inspectionContingency && styles.toggleTextActive]}
+              <Text
+                style={[styles.toggleText, !inspectionContingency && styles.toggleTextActive]}
+              >
+                No
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.label}>Appraisal Contingency</Text>
+          <View style={styles.toggleRow}>
+            <TouchableOpacity
+              style={[styles.toggleBtn, appraisalContingency && styles.toggleBtnActive]}
+              onPress={() => setAppraisalContingency(true)}
             >
-              No
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={styles.label}>Appraisal Contingency</Text>
-        <View style={styles.toggleRow}>
-          <TouchableOpacity
-            style={[styles.toggleBtn, appraisalContingency && styles.toggleBtnActive]}
-            onPress={() => setAppraisalContingency(true)}
-          >
-            <Text
-              style={[styles.toggleText, appraisalContingency && styles.toggleTextActive]}
+              <Text
+                style={[styles.toggleText, appraisalContingency && styles.toggleTextActive]}
+              >
+                Yes
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.toggleBtn, !appraisalContingency && styles.toggleBtnActive]}
+              onPress={() => setAppraisalContingency(false)}
             >
-              Yes
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={[styles.toggleText, !appraisalContingency && styles.toggleTextActive]}
+              >
+                No
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.label}>Closing Date</Text>
+          <TextInput
+            style={styles.input}
+            value={closingDate}
+            onChangeText={setClosingDate}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor={colors.textMuted}
+          />
+
+          <Text style={styles.label}>Seller Concessions Requested</Text>
+          <TextInput
+            style={styles.input}
+            value={sellerConcessions}
+            onChangeText={setSellerConcessions}
+            placeholder="e.g. $5,000 toward closing costs"
+            placeholderTextColor={colors.textMuted}
+          />
+
+          <Text style={styles.label}>Notes (optional)</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            value={notes}
+            onChangeText={setNotes}
+            placeholder="Any additional details about this offer"
+            placeholderTextColor={colors.textMuted}
+            multiline
+            numberOfLines={3}
+          />
+
           <TouchableOpacity
-            style={[styles.toggleBtn, !appraisalContingency && styles.toggleBtnActive]}
-            onPress={() => setAppraisalContingency(false)}
+            style={[styles.submitButton, analyzing && styles.submitButtonDisabled]}
+            onPress={handleSubmit}
+            disabled={analyzing}
           >
-            <Text
-              style={[styles.toggleText, !appraisalContingency && styles.toggleTextActive]}
-            >
-              No
-            </Text>
+            {analyzing ? (
+              <View style={styles.analyzingRow}>
+                <ActivityIndicator color={colors.white} size="small" />
+                <Text style={styles.submitButtonText}>  Analyzing with AI...</Text>
+              </View>
+            ) : (
+              <Text style={styles.submitButtonText}>Analyze Offer</Text>
+            )}
           </TouchableOpacity>
-        </View>
-
-        <Text style={styles.label}>Closing Date</Text>
-        <TextInput
-          style={styles.input}
-          value={closingDate}
-          onChangeText={setClosingDate}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor="#9CA3AF"
-        />
-
-        <Text style={styles.label}>Seller Concessions Requested</Text>
-        <TextInput
-          style={styles.input}
-          value={sellerConcessions}
-          onChangeText={setSellerConcessions}
-          placeholder="e.g. $5,000 toward closing costs"
-          placeholderTextColor="#9CA3AF"
-        />
-
-        <Text style={styles.label}>Notes (optional)</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          value={notes}
-          onChangeText={setNotes}
-          placeholder="Any additional details about this offer"
-          placeholderTextColor="#9CA3AF"
-          multiline
-          numberOfLines={3}
-        />
-
-        <TouchableOpacity
-          style={[styles.submitButton, analyzing && styles.submitButtonDisabled]}
-          onPress={handleSubmit}
-          disabled={analyzing}
-        >
-          {analyzing ? (
-            <View style={styles.analyzingRow}>
-              <ActivityIndicator color="#FFFFFF" size="small" />
-              <Text style={styles.submitButtonText}>  Analyzing with AI...</Text>
-            </View>
-          ) : (
-            <Text style={styles.submitButtonText}>Analyze Offer</Text>
-          )}
-        </TouchableOpacity>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -272,67 +280,62 @@ export default function OfferInputScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    paddingHorizontal: 28,
-    paddingTop: 24,
-    paddingBottom: 40,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 24,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: 120,
   },
   backButton: {
-    width: 60,
+    marginBottom: spacing.sm,
+    alignSelf: "flex-start",
   },
   backText: {
-    fontSize: 17,
-    color: "#2563EB",
+    ...typography.body,
+    color: colors.primaryLight,
     fontWeight: "500",
   },
   title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#111827",
-    textAlign: "center",
+    ...typography.h1,
+    color: colors.textPrimary,
+    marginBottom: spacing.lg,
   },
   listingRef: {
-    backgroundColor: "#EFF6FF",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
     alignItems: "center",
+    ...shadows.md,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primaryLight,
   },
   listingRefLabel: {
-    fontSize: 13,
-    color: "#2563EB",
-    fontWeight: "500",
-    marginBottom: 4,
+    ...typography.captionBold,
+    color: colors.primaryLight,
+    marginBottom: spacing.xs,
   },
   listingRefPrice: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#2563EB",
+    color: colors.primaryLight,
   },
   label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-    marginBottom: 6,
-    marginTop: 16,
+    ...typography.captionBold,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs + 2,
+    marginTop: spacing.md,
   },
   input: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: "#111827",
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md - 2,
+    ...typography.body,
+    color: colors.textPrimary,
   },
   textArea: {
     minHeight: 80,
@@ -341,67 +344,66 @@ const styles = StyleSheet.create({
   chipRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: spacing.sm,
   },
   chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 10,
-    backgroundColor: "#F3F4F6",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
   },
   chipSelected: {
-    backgroundColor: "#2563EB",
-    borderColor: "#2563EB",
+    backgroundColor: colors.primaryLight,
+    borderColor: colors.primaryLight,
   },
   chipText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
+    ...typography.captionBold,
+    color: colors.textSecondary,
   },
   chipTextSelected: {
-    color: "#FFFFFF",
+    color: colors.white,
   },
   toggleRow: {
     flexDirection: "row",
-    gap: 8,
+    gap: spacing.sm,
   },
   toggleBtn: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 10,
-    backgroundColor: "#F3F4F6",
+    paddingVertical: spacing.md - 2,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
     alignItems: "center",
   },
   toggleBtnActive: {
-    backgroundColor: "#2563EB",
-    borderColor: "#2563EB",
+    backgroundColor: colors.primaryLight,
+    borderColor: colors.primaryLight,
   },
   toggleText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#374151",
+    ...typography.bodyBold,
+    color: colors.textSecondary,
   },
   toggleTextActive: {
-    color: "#FFFFFF",
+    color: colors.white,
   },
   submitButton: {
-    backgroundColor: "#2563EB",
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: colors.primaryLight,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
     alignItems: "center",
-    marginTop: 28,
+    marginTop: spacing.lg,
+    ...shadows.sm,
   },
   submitButtonDisabled: {
     opacity: 0.7,
   },
   submitButtonText: {
-    color: "#FFFFFF",
+    color: colors.white,
+    ...typography.bodyBold,
     fontSize: 17,
-    fontWeight: "600",
   },
   analyzingRow: {
     flexDirection: "row",

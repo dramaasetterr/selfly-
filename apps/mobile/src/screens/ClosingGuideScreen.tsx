@@ -15,6 +15,7 @@ import type { ClosingGuideStep } from "@selfly/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
+import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -35,7 +36,6 @@ export default function ClosingGuideScreen() {
       setError(null);
 
       try {
-        // Check cache first (unless refreshing)
         if (!forceRefresh) {
           const { data: cached } = await supabase
             .from("closing_guides")
@@ -51,7 +51,6 @@ export default function ClosingGuideScreen() {
           }
         }
 
-        // Get remaining steps
         const { data: checklist } = await supabase
           .from("closing_checklist")
           .select("step_label, completed")
@@ -69,14 +68,12 @@ export default function ClosingGuideScreen() {
           return;
         }
 
-        // Get listing details
         const { data: listing } = await supabase
           .from("listings")
           .select("address, price")
           .eq("id", listingId)
           .single();
 
-        // Try to determine state from listing address or documents
         let state = "";
         const { data: doc } = await supabase
           .from("documents")
@@ -102,7 +99,6 @@ export default function ClosingGuideScreen() {
         const data = await response.json();
         setGuide(data.guide);
 
-        // Cache in Supabase (upsert)
         const { data: existing } = await supabase
           .from("closing_guides")
           .select("id")
@@ -139,19 +135,18 @@ export default function ClosingGuideScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Text style={styles.backText}>{"< Back"}</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>What to Expect</Text>
-          <Text style={styles.subtitle}>
-            Your personalized closing guide, powered by AI
-          </Text>
-        </View>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Text style={styles.backText}>{"\u2190"} Back</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.title}>What to Expect</Text>
+        <Text style={styles.subtitle}>
+          Your personalized closing guide, powered by AI
+        </Text>
 
         {loading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#2563EB" />
+            <ActivityIndicator size="large" color={colors.primaryLight} />
             <Text style={styles.loadingText}>Generating your closing guide...</Text>
           </View>
         )}
@@ -210,96 +205,169 @@ export default function ClosingGuideScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFFFF" },
-  scrollContent: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 60 },
-  header: { marginBottom: 24 },
-  backButton: { marginBottom: 8 },
-  backText: { fontSize: 16, color: "#2563EB", fontWeight: "500" },
-  title: { fontSize: 26, fontWeight: "700", color: "#111827" },
-  subtitle: { fontSize: 14, color: "#6B7280", marginTop: 4 },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  scrollContent: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: 60,
+  },
+  backButton: {
+    marginBottom: spacing.sm,
+    alignSelf: "flex-start",
+  },
+  backText: {
+    ...typography.body,
+    color: colors.primaryLight,
+    fontWeight: "500",
+  },
+  title: {
+    ...typography.h1,
+    color: colors.textPrimary,
+  },
+  subtitle: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+    marginBottom: spacing.lg,
+  },
 
-  loadingContainer: { alignItems: "center", paddingVertical: 60 },
-  loadingText: { fontSize: 14, color: "#6B7280", marginTop: 12 },
+  loadingContainer: {
+    alignItems: "center",
+    paddingVertical: spacing.xxl + spacing.md,
+  },
+  loadingText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginTop: spacing.md,
+  },
 
   errorCard: {
-    backgroundColor: "#FEF2F2",
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: colors.errorLight,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#FECACA",
   },
-  errorText: { fontSize: 14, color: "#DC2626", textAlign: "center", marginBottom: 12 },
-  retryButton: {
-    backgroundColor: "#DC2626",
-    borderRadius: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+  errorText: {
+    ...typography.caption,
+    color: colors.error,
+    textAlign: "center",
+    marginBottom: spacing.md,
   },
-  retryText: { color: "#FFFFFF", fontWeight: "600", fontSize: 14 },
+  retryButton: {
+    backgroundColor: colors.error,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm + 2,
+  },
+  retryText: {
+    color: colors.white,
+    ...typography.captionBold,
+  },
 
   emptyCard: {
-    backgroundColor: "#F0FDF4",
-    borderRadius: 12,
-    padding: 24,
+    backgroundColor: colors.accentLight,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#BBF7D0",
+    ...shadows.sm,
   },
-  emptyText: { fontSize: 16, color: "#065F46", fontWeight: "500", textAlign: "center" },
+  emptyText: {
+    ...typography.bodyBold,
+    color: colors.accentDark,
+    textAlign: "center",
+  },
 
   guideCard: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+    ...shadows.md,
   },
-  stepHeader: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
+  stepHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: spacing.md,
+  },
   stepNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#2563EB",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.primaryLight,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: spacing.md,
+    ...shadows.sm,
   },
-  stepNumberText: { color: "#FFFFFF", fontWeight: "700", fontSize: 14 },
-  stepTitle: { fontSize: 17, fontWeight: "700", color: "#111827", flex: 1 },
-  explanation: { fontSize: 14, color: "#374151", lineHeight: 22, marginBottom: 14 },
-  metaRow: { flexDirection: "row", marginBottom: 14 },
+  stepNumberText: {
+    color: colors.white,
+    ...typography.bodyBold,
+  },
+  stepTitle: {
+    ...typography.h3,
+    color: colors.textPrimary,
+    flex: 1,
+  },
+  explanation: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    lineHeight: 22,
+    marginBottom: spacing.md,
+  },
+  metaRow: {
+    flexDirection: "row",
+    marginBottom: spacing.md,
+  },
   metaItem: {
-    backgroundColor: "#EFF6FF",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: colors.primarySoft,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
   },
-  metaLabel: { fontSize: 11, color: "#6B7280", fontWeight: "600", textTransform: "uppercase" },
-  metaValue: { fontSize: 13, color: "#2563EB", fontWeight: "600", marginTop: 2 },
+  metaLabel: {
+    ...typography.smallBold,
+    color: colors.textSecondary,
+    textTransform: "uppercase",
+  },
+  metaValue: {
+    ...typography.captionBold,
+    color: colors.primaryLight,
+    marginTop: 2,
+  },
   actionBox: {
-    backgroundColor: "#FFFBEB",
-    borderRadius: 10,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: "#FDE68A",
+    backgroundColor: colors.amberLight,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.amber,
   },
   actionLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#92400E",
+    ...typography.smallBold,
+    color: colors.amberDark,
     textTransform: "uppercase",
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
-  actionText: { fontSize: 14, color: "#78350F", lineHeight: 20 },
+  actionText: {
+    ...typography.caption,
+    color: colors.amberDark,
+    lineHeight: 20,
+  },
 
   refreshButton: {
-    backgroundColor: "#F3F4F6",
-    borderRadius: 12,
-    paddingVertical: 14,
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
     alignItems: "center",
-    marginTop: 8,
+    marginTop: spacing.sm,
+    ...shadows.sm,
   },
-  refreshText: { fontSize: 15, fontWeight: "600", color: "#6B7280" },
+  refreshText: {
+    ...typography.bodyBold,
+    color: colors.textSecondary,
+  },
 });

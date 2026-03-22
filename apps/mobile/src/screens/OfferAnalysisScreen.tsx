@@ -16,10 +16,11 @@ import type { OfferAnalysis, Offer } from "@selfly/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import type { AppStackParamList } from "../../App";
+import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 
 function ScoreCircle({ score }: { score: number }) {
-  const color = score >= 8 ? "#22C55E" : score >= 5 ? "#F59E0B" : "#EF4444";
-  const bgColor = score >= 8 ? "#F0FDF4" : score >= 5 ? "#FFFBEB" : "#FEF2F2";
+  const color = score >= 8 ? colors.success : score >= 5 ? colors.warning : colors.error;
+  const bgColor = score >= 8 ? colors.accentLight : score >= 5 ? colors.amberLight : colors.errorLight;
   return (
     <View style={[styles.scoreCircle, { borderColor: color, backgroundColor: bgColor }]}>
       <Text style={[styles.scoreNumber, { color }]}>{score}</Text>
@@ -97,7 +98,6 @@ export default function OfferAnalysisScreen() {
 
       if (error) throw error;
 
-      // Check if this is the first saved offer — advance pipeline
       const { count } = await supabase
         .from("offers")
         .select("*", { count: "exact", head: true })
@@ -126,7 +126,7 @@ export default function OfferAnalysisScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2563EB" />
+          <ActivityIndicator size="large" color={colors.primaryLight} />
         </View>
       </SafeAreaView>
     );
@@ -135,21 +135,19 @@ export default function OfferAnalysisScreen() {
   if (!analysis) return null;
 
   const scoreColor =
-    analysis.score >= 8 ? "#22C55E" : analysis.score >= 5 ? "#F59E0B" : "#EF4444";
+    analysis.score >= 8 ? colors.success : analysis.score >= 5 ? colors.warning : colors.error;
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Text style={styles.backText}>‹ Back</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>Analysis</Text>
-          <View style={styles.backButton} />
-        </View>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Text style={styles.backText}>{"\u2190"} Back</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.title}>Offer Analysis</Text>
 
         {/* Score */}
-        <View style={styles.scoreSection}>
+        <View style={styles.scoreCard}>
           <ScoreCircle score={analysis.score} />
           <Text style={[styles.scoreLabel, { color: scoreColor }]}>
             {analysis.score_label}
@@ -159,7 +157,9 @@ export default function OfferAnalysisScreen() {
         {/* Summary */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Summary</Text>
-          <Text style={styles.summaryText}>{analysis.summary}</Text>
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryText}>{analysis.summary}</Text>
+          </View>
         </View>
 
         {/* Red Flags */}
@@ -169,7 +169,9 @@ export default function OfferAnalysisScreen() {
             <View style={styles.redFlagsContainer}>
               {analysis.red_flags.map((flag, i) => (
                 <View key={i} style={styles.redFlagRow}>
-                  <Text style={styles.redFlagIcon}>⚠️</Text>
+                  <View style={styles.redFlagIconWrap}>
+                    <Text style={styles.redFlagIcon}>!</Text>
+                  </View>
                   <Text style={styles.redFlagText}>{flag}</Text>
                 </View>
               ))}
@@ -193,17 +195,19 @@ export default function OfferAnalysisScreen() {
                 <Text style={styles.counterChangesLabel}>Suggested Changes</Text>
                 {analysis.counter_offer.suggested_changes.map((change, i) => (
                   <View key={i} style={styles.counterChangeRow}>
-                    <Text style={styles.counterBullet}>•</Text>
+                    <View style={styles.counterBulletDot} />
                     <Text style={styles.counterChangeText}>{change}</Text>
                   </View>
                 ))}
               </View>
             )}
 
-            <Text style={styles.counterReasoningLabel}>Reasoning</Text>
-            <Text style={styles.counterReasoningText}>
-              {analysis.counter_offer.reasoning}
-            </Text>
+            <View style={styles.counterReasoningWrap}>
+              <Text style={styles.counterReasoningLabel}>Reasoning</Text>
+              <Text style={styles.counterReasoningText}>
+                {analysis.counter_offer.reasoning}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -215,7 +219,7 @@ export default function OfferAnalysisScreen() {
             disabled={saving}
           >
             {saving ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
+              <ActivityIndicator color={colors.white} size="small" />
             ) : (
               <Text style={styles.saveButtonText}>Save Offer</Text>
             )}
@@ -229,7 +233,7 @@ export default function OfferAnalysisScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -237,169 +241,189 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   scrollContent: {
-    paddingHorizontal: 28,
-    paddingTop: 24,
-    paddingBottom: 40,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 24,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
   },
   backButton: {
-    width: 60,
+    marginBottom: spacing.sm,
+    alignSelf: "flex-start",
   },
   backText: {
-    fontSize: 17,
-    color: "#2563EB",
+    ...typography.body,
+    color: colors.primaryLight,
     fontWeight: "500",
   },
   title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#111827",
-    textAlign: "center",
+    ...typography.h1,
+    color: colors.textPrimary,
+    marginBottom: spacing.lg,
   },
-  scoreSection: {
+  scoreCard: {
     alignItems: "center",
-    marginBottom: 32,
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.xl,
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    ...shadows.lg,
   },
   scoreCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 4,
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    borderWidth: 5,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   scoreNumber: {
-    fontSize: 44,
+    fontSize: 48,
     fontWeight: "800",
   },
   scoreDenom: {
-    fontSize: 16,
-    fontWeight: "600",
+    ...typography.bodyBold,
     marginTop: -4,
   },
   scoreLabel: {
-    fontSize: 18,
+    ...typography.h3,
     fontWeight: "700",
   },
   section: {
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   sectionTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 10,
+    ...typography.h3,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm + 2,
+  },
+  summaryCard: {
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    ...shadows.sm,
   },
   summaryText: {
-    fontSize: 15,
-    color: "#374151",
+    ...typography.body,
+    color: colors.textSecondary,
     lineHeight: 23,
   },
   redFlagsContainer: {
-    backgroundColor: "#FEF2F2",
-    borderRadius: 12,
-    padding: 14,
+    backgroundColor: colors.errorLight,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
     borderWidth: 1,
     borderColor: "#FECACA",
   },
   redFlagRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 8,
+    marginBottom: spacing.sm,
+  },
+  redFlagIconWrap: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: colors.error,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: spacing.sm + 2,
+    marginTop: 1,
   },
   redFlagIcon: {
-    fontSize: 16,
-    marginRight: 8,
-    marginTop: 1,
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: "800",
   },
   redFlagText: {
     flex: 1,
-    fontSize: 14,
-    color: "#991B1B",
+    ...typography.caption,
+    color: colors.errorDark,
     lineHeight: 20,
   },
   counterCard: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    ...shadows.md,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primaryLight,
   },
   counterPriceRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 14,
-    paddingBottom: 14,
+    marginBottom: spacing.md,
+    paddingBottom: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: colors.borderLight,
   },
   counterPriceLabel: {
-    fontSize: 14,
-    color: "#6B7280",
+    ...typography.caption,
+    color: colors.textSecondary,
     fontWeight: "500",
   },
   counterPrice: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#2563EB",
+    color: colors.primaryLight,
   },
   counterChanges: {
-    marginBottom: 14,
+    marginBottom: spacing.md,
   },
   counterChangesLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-    marginBottom: 8,
+    ...typography.captionBold,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
   },
   counterChangeRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
-  counterBullet: {
-    fontSize: 14,
-    color: "#2563EB",
-    marginRight: 8,
-    fontWeight: "700",
+  counterBulletDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.primaryLight,
+    marginRight: spacing.sm + 2,
+    marginTop: 7,
   },
   counterChangeText: {
     flex: 1,
-    fontSize: 14,
-    color: "#374151",
+    ...typography.caption,
+    color: colors.textSecondary,
     lineHeight: 20,
   },
+  counterReasoningWrap: {
+    backgroundColor: colors.primarySoft,
+    borderRadius: borderRadius.sm,
+    padding: spacing.md,
+  },
   counterReasoningLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-    marginBottom: 6,
+    ...typography.captionBold,
+    color: colors.primary,
+    marginBottom: spacing.xs + 2,
   },
   counterReasoningText: {
-    fontSize: 14,
-    color: "#6B7280",
+    ...typography.caption,
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   saveButton: {
-    backgroundColor: "#22C55E",
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: colors.accent,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
     alignItems: "center",
-    marginTop: 8,
+    marginTop: spacing.sm,
+    ...shadows.sm,
   },
   saveButtonDisabled: {
     opacity: 0.7,
   },
   saveButtonText: {
-    color: "#FFFFFF",
+    color: colors.white,
+    ...typography.bodyBold,
     fontSize: 17,
-    fontWeight: "600",
   },
 });

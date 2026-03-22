@@ -8,30 +8,47 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
 } from "react-native";
-import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AppStackParamList } from "../../App";
 import type { PricingInput, PropertyCondition } from "@selfly/shared";
+import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 
-const CONDITIONS: PropertyCondition[] = ["Excellent", "Good", "Fair", "Needs Work"];
+const CONDITIONS: PropertyCondition[] = [
+  "Excellent",
+  "Good",
+  "Fair",
+  "Needs Work",
+];
+
+const CONDITION_ICONS: Record<PropertyCondition, string> = {
+  Excellent: "\u2728",
+  Good: "\u{1F44D}",
+  Fair: "\u{1F6E0}",
+  "Needs Work": "\u{1F527}",
+};
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
-type Props = NativeStackScreenProps<AppStackParamList, "Pricing">;
-
-export default function PricingScreen({ navigation }: Props) {
+export default function PricingScreen() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const [address, setAddress] = useState("");
   const [sqft, setSqft] = useState("");
   const [bedrooms, setBedrooms] = useState("");
   const [bathrooms, setBathrooms] = useState("");
   const [yearBuilt, setYearBuilt] = useState("");
   const [condition, setCondition] = useState<PropertyCondition>("Good");
+  const [features, setFeatures] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async () => {
+    setErrorMessage(null);
+
     if (!address || !sqft || !bedrooms || !bathrooms || !yearBuilt) {
-      Alert.alert("Missing Fields", "Please fill in all property details.");
+      setErrorMessage("Please fill in all property details to get an accurate pricing estimate.");
       return;
     }
 
@@ -42,6 +59,7 @@ export default function PricingScreen({ navigation }: Props) {
       bathrooms: parseInt(bathrooms, 10),
       year_built: parseInt(yearBuilt, 10),
       condition,
+      ...(features.trim() ? { features: features.trim() } : {}),
     };
 
     setLoading(true);
@@ -59,7 +77,9 @@ export default function PricingScreen({ navigation }: Props) {
       const result = await res.json();
       navigation.navigate("PricingResults", { input, result });
     } catch {
-      Alert.alert("Error", "Could not generate pricing. Please try again.");
+      setErrorMessage(
+        "Could not generate pricing. Please check your connection and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -67,99 +87,195 @@ export default function PricingScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButtonTouch}
+          >
+            <Text style={styles.backText}>{"\u2190"} Back</Text>
+          </TouchableOpacity>
+        </View>
 
         <Text style={styles.title}>Price Your Home</Text>
+        <Text style={styles.subtitle}>
+          Get an AI-powered pricing recommendation based on your property details
+        </Text>
 
-        <View style={styles.note}>
-          <Text style={styles.noteText}>
-            Live market comp data coming soon. Pricing is based on AI analysis of your property details.
+        {/* Info Card */}
+        <View style={styles.infoCard}>
+          <Text style={styles.infoIcon}>{"\u{1F4A1}"}</Text>
+          <Text style={styles.infoText}>
+            Live market comp data coming soon. Pricing is based on AI analysis
+            of your property details.
           </Text>
         </View>
 
-        <Text style={styles.label}>Address</Text>
-        <TextInput
-          style={styles.input}
-          value={address}
-          onChangeText={setAddress}
-          placeholder="123 Main St, City, State"
-          placeholderTextColor="#9CA3AF"
-        />
+        {/* Error Message */}
+        {errorMessage && (
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorIcon}>{"\u26A0"}</Text>
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          </View>
+        )}
 
-        <Text style={styles.label}>Square Footage</Text>
-        <TextInput
-          style={styles.input}
-          value={sqft}
-          onChangeText={setSqft}
-          placeholder="e.g. 2000"
-          placeholderTextColor="#9CA3AF"
-          keyboardType="numeric"
-        />
-
-        <View style={styles.row}>
-          <View style={styles.halfField}>
-            <Text style={styles.label}>Bedrooms</Text>
+        {/* Form */}
+        <View style={styles.formSection}>
+          <Text style={styles.label}>Address</Text>
+          <View style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
-              value={bedrooms}
-              onChangeText={setBedrooms}
-              placeholder="3"
-              placeholderTextColor="#9CA3AF"
+              value={address}
+              onChangeText={setAddress}
+              placeholder="123 Main St, City, State"
+              placeholderTextColor={colors.textMuted}
+            />
+          </View>
+
+          <Text style={styles.label}>Square Footage</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input}
+              value={sqft}
+              onChangeText={setSqft}
+              placeholder="e.g. 2000"
+              placeholderTextColor={colors.textMuted}
               keyboardType="numeric"
             />
           </View>
-          <View style={styles.halfField}>
-            <Text style={styles.label}>Bathrooms</Text>
+
+          <View style={styles.row}>
+            <View style={styles.halfField}>
+              <Text style={styles.label}>Bedrooms</Text>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  value={bedrooms}
+                  onChangeText={setBedrooms}
+                  placeholder="3"
+                  placeholderTextColor={colors.textMuted}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+            <View style={styles.halfField}>
+              <Text style={styles.label}>Bathrooms</Text>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  value={bathrooms}
+                  onChangeText={setBathrooms}
+                  placeholder="2"
+                  placeholderTextColor={colors.textMuted}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+          </View>
+
+          <Text style={styles.label}>Year Built</Text>
+          <View style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
-              value={bathrooms}
-              onChangeText={setBathrooms}
-              placeholder="2"
-              placeholderTextColor="#9CA3AF"
+              value={yearBuilt}
+              onChangeText={setYearBuilt}
+              placeholder="e.g. 1995"
+              placeholderTextColor={colors.textMuted}
               keyboardType="numeric"
+            />
+          </View>
+
+          <Text style={styles.label}>Condition</Text>
+          <View style={styles.conditionRow}>
+            {CONDITIONS.map((c) => {
+              const isActive = condition === c;
+              return (
+                <TouchableOpacity
+                  key={c}
+                  style={[
+                    styles.conditionPill,
+                    isActive && styles.conditionPillActive,
+                  ]}
+                  onPress={() => setCondition(c)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.conditionIcon}>
+                    {CONDITION_ICONS[c]}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.conditionText,
+                      isActive && styles.conditionTextActive,
+                    ]}
+                  >
+                    {c}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          <Text style={styles.label}>Describe Your Home's Best Features</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={[styles.input, styles.featuresInput]}
+              value={features}
+              onChangeText={setFeatures}
+              placeholder="e.g., finished basement, pool, vaulted ceilings, renovated kitchen, large backyard, new roof..."
+              placeholderTextColor={colors.textMuted}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
             />
           </View>
         </View>
 
-        <Text style={styles.label}>Year Built</Text>
-        <TextInput
-          style={styles.input}
-          value={yearBuilt}
-          onChangeText={setYearBuilt}
-          placeholder="e.g. 1995"
-          placeholderTextColor="#9CA3AF"
-          keyboardType="numeric"
-        />
-
-        <Text style={styles.label}>Condition</Text>
-        <View style={styles.conditionRow}>
-          {CONDITIONS.map((c) => (
-            <TouchableOpacity
-              key={c}
-              style={[styles.conditionChip, condition === c && styles.conditionChipActive]}
-              onPress={() => setCondition(c)}
-            >
-              <Text style={[styles.conditionText, condition === c && styles.conditionTextActive]}>
-                {c}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
+        {/* Submit Button */}
         <TouchableOpacity
           style={[styles.submitButton, loading && styles.submitButtonDisabled]}
           onPress={handleSubmit}
           disabled={loading}
+          activeOpacity={0.8}
         >
           {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <View style={styles.loadingRow}>
+              <ActivityIndicator color={colors.textOnPrimary} />
+              <Text style={styles.submitText}>Analyzing...</Text>
+            </View>
           ) : (
-            <Text style={styles.submitText}>Get AI Pricing</Text>
+            <Text style={styles.submitText}>
+              {"\u{1F916}"} Get AI Pricing
+            </Text>
           )}
         </TouchableOpacity>
+
+        {/* Tip Cards */}
+        <View style={styles.tipsSection}>
+          <Text style={styles.tipsTitle}>Pricing Tips</Text>
+          <View style={styles.tipCard}>
+            <Text style={styles.tipIcon}>{"\u{1F3AF}"}</Text>
+            <View style={styles.tipContent}>
+              <Text style={styles.tipHeading}>Price it right from the start</Text>
+              <Text style={styles.tipText}>
+                Homes priced correctly from day one sell faster and often for more than overpriced homes that sit on the market.
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tipCard}>
+            <Text style={styles.tipIcon}>{"\u{1F4C8}"}</Text>
+            <View style={styles.tipContent}>
+              <Text style={styles.tipHeading}>Consider your timeline</Text>
+              <Text style={styles.tipText}>
+                If you need to sell quickly, pricing slightly below market can generate multiple offers and potentially a bidding war.
+              </Text>
+            </View>
+          </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -168,59 +284,116 @@ export default function PricingScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.background,
   },
   scrollContent: {
-    paddingHorizontal: 28,
-    paddingTop: 16,
-    paddingBottom: 40,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
   },
-  backButton: {
-    marginBottom: 8,
+  header: {
+    marginBottom: spacing.sm,
+  },
+  backButtonTouch: {
     alignSelf: "flex-start",
+    paddingVertical: spacing.xs,
   },
   backText: {
-    fontSize: 16,
-    color: "#2563EB",
-    fontWeight: "500",
+    ...typography.bodyBold,
+    color: colors.primaryLight,
   },
   title: {
-    fontSize: 26,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 16,
+    ...typography.h1,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
   },
-  note: {
-    backgroundColor: "#EFF6FF",
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 24,
+  subtitle: {
+    ...typography.body,
+    color: colors.textSecondary,
+    marginBottom: spacing.lg,
   },
-  noteText: {
-    fontSize: 14,
-    color: "#1E40AF",
+
+  // Info card
+  infoCard: {
+    backgroundColor: colors.primarySoft,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.primaryLight + "30",
+  },
+  infoIcon: {
+    fontSize: 18,
+    marginRight: spacing.sm,
+    marginTop: 1,
+  },
+  infoText: {
+    ...typography.caption,
+    color: colors.primary,
+    flex: 1,
     lineHeight: 20,
   },
+
+  // Error banner
+  errorBanner: {
+    backgroundColor: colors.errorLight,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.error + "40",
+  },
+  errorIcon: {
+    fontSize: 16,
+    marginRight: spacing.sm,
+    marginTop: 1,
+  },
+  errorText: {
+    ...typography.caption,
+    color: colors.errorDark,
+    flex: 1,
+    lineHeight: 20,
+  },
+
+  // Form
+  formSection: {
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.md,
+  },
   label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-    marginBottom: 6,
-    marginTop: 12,
+    ...typography.captionBold,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+    marginTop: spacing.md,
+  },
+  inputWrapper: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background,
+    overflow: "hidden",
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: "#111827",
-    backgroundColor: "#FFFFFF",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 4,
+    ...typography.body,
+    color: colors.textPrimary,
+  },
+  featuresInput: {
+    minHeight: 100,
+    paddingTop: spacing.sm + 4,
   },
   row: {
     flexDirection: "row",
-    gap: 12,
+    gap: spacing.sm,
   },
   halfField: {
     flex: 1,
@@ -228,42 +401,94 @@ const styles = StyleSheet.create({
   conditionRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    marginTop: 4,
+    gap: spacing.sm,
+    marginTop: spacing.xs,
   },
-  conditionChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    backgroundColor: "#FFFFFF",
+  conditionPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    borderRadius: borderRadius.full,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    gap: spacing.xs,
   },
-  conditionChipActive: {
-    backgroundColor: "#2563EB",
-    borderColor: "#2563EB",
+  conditionPillActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  conditionIcon: {
+    fontSize: 14,
   },
   conditionText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#374151",
+    ...typography.captionBold,
+    color: colors.textSecondary,
   },
   conditionTextActive: {
-    color: "#FFFFFF",
+    color: colors.textOnPrimary,
   },
+
+  // Submit
   submitButton: {
-    backgroundColor: "#2563EB",
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
     alignItems: "center",
-    marginTop: 28,
+    marginTop: spacing.lg,
+    ...shadows.md,
   },
   submitButtonDisabled: {
     opacity: 0.7,
   },
   submitText: {
-    color: "#FFFFFF",
+    ...typography.bodyBold,
+    color: colors.textOnPrimary,
     fontSize: 17,
-    fontWeight: "600",
+  },
+  loadingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+
+  // Tips
+  tipsSection: {
+    marginTop: spacing.xl,
+  },
+  tipsTitle: {
+    ...typography.h3,
+    color: colors.textPrimary,
+    marginBottom: spacing.md,
+  },
+  tipCard: {
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.sm,
+  },
+  tipIcon: {
+    fontSize: 22,
+    marginRight: spacing.sm,
+    marginTop: 2,
+  },
+  tipContent: {
+    flex: 1,
+  },
+  tipHeading: {
+    ...typography.captionBold,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  tipText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    lineHeight: 20,
   },
 });
