@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
-import type { ShowingAvailability, BookShowingInput } from "@selfly/shared";
+import type { ShowingAvailability, BookShowingInput } from '@/shared';
 
 /* ─── types ─────────────────────────────────────────────────────────── */
 
@@ -582,3 +582,4 @@ function MapPinIcon() {
     </svg>
   );
 }
+
