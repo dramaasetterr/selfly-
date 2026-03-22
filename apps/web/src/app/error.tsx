@@ -1,22 +1,13 @@
 "use client";
 
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+export default function Error({ error, reset }: { error: Error; reset: () => void }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: "2rem", fontFamily: "system-ui, sans-serif" }}>
-      <h1 style={{ fontSize: "2rem", fontWeight: 700, marginBottom: "1rem", color: "#0F172A" }}>Something went wrong</h1>
-      <p style={{ color: "#475569", marginBottom: "2rem" }}>We're sorry for the inconvenience. Please try again.</p>
-      <button
-        onClick={() => reset()}
-        style={{ padding: "0.75rem 2rem", backgroundColor: "#2563EB", color: "#fff", border: "none", borderRadius: "0.5rem", fontSize: "1rem", cursor: "pointer" }}
-      >
-        Try Again
-      </button>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', fontFamily: 'sans-serif' }}>
+      <div style={{ textAlign: 'center' }}>
+        <h1 style={{ fontSize: '48px', marginBottom: '16px' }}>500</h1>
+        <p style={{ fontSize: '18px', color: '#666' }}>Something went wrong</p>
+        <button onClick={reset} style={{ color: '#2563EB', marginTop: '16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>Try Again</button>
+      </div>
     </div>
   );
 }
