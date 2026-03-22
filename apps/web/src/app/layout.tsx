@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -41,3 +42,4 @@ export default function RootLayout({
     </html>
   );
 }
+
