@@ -183,12 +183,10 @@ export default function PrepHomeScreen() {
           .maybeSingle();
 
         if (error) {
-          console.warn('Failed to load prep checklist', error.message);
         } else if (data?.items) {
           setChecklist((prev) => ({ ...prev, ...(data.items as ChecklistState) }));
         }
       } catch (err) {
-        console.warn('Prep checklist load error', err);
       } finally {
         setLoading(false);
       }
@@ -206,7 +204,6 @@ export default function PrepHomeScreen() {
           { onConflict: 'user_id' },
         );
       } catch (err) {
-        console.warn('Prep checklist save error', err);
       } finally {
         setSaving(false);
       }

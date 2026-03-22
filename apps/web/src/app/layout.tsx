@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Selfly - For Sale By Owner",
-  description: "List and sell your property directly, no agent needed.",
+  title: "Selfly - Sell Your Home Without an Agent",
+  description:
+    "The AI-powered For Sale By Owner platform. Save thousands in commission with smart pricing, document generation, offer analysis, and more.",
 };
 
 export default function RootLayout({
@@ -11,8 +13,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className="scroll-smooth">
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

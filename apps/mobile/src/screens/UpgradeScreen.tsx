@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -11,9 +11,10 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AppStackParamList } from "../../App";
+import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 
@@ -86,12 +87,27 @@ const TIERS: Tier[] = [
 
 export default function UpgradeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+  const { user } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<Plan>("seller_pro");
   const [email, setEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
-  const currentPlan: Plan = "free"; // TODO: read from profile
+  const [currentPlan, setCurrentPlan] = useState<Plan>("free");
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!user) return;
+      (async () => {
+        const { data } = await supabase
+          .from("profiles")
+          .select("plan")
+          .eq("id", user.id)
+          .single();
+        if (data?.plan) setCurrentPlan(data.plan as Plan);
+      })();
+    }, [user])
+  );
 
   const handleUpgrade = (plan: Plan) => {
     setSelectedPlan(plan);
@@ -108,13 +124,18 @@ export default function UpgradeScreen() {
 
     setSaving(true);
     try {
-      const { error } = await supabase.from("waitlist").insert({
-        email: email.trim().toLowerCase(),
-        plan: selectedPlan,
-        created_at: new Date().toISOString(),
+      const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+      const res = await fetch(`${API_BASE}/api/waitlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          plan: selectedPlan,
+          source: "app",
+        }),
       });
 
-      if (error) throw error;
+      if (!res.ok) throw new Error("Failed to join waitlist");
       setConfirmed(true);
     } catch {
       Alert.alert("Error", "Could not save your email. Please try again.");
@@ -219,7 +240,7 @@ export default function UpgradeScreen() {
         })}
       </ScrollView>
 
-      {/* Coming Soon Modal */}
+      {/* Waitlist Modal */}
       <Modal
         visible={modalVisible}
         transparent
@@ -245,10 +266,10 @@ export default function UpgradeScreen() {
             ) : (
               <>
                 <Text style={styles.modalIcon}>{"\uD83D\uDE80"}</Text>
-                <Text style={styles.modalTitle}>Coming Soon</Text>
+                <Text style={styles.modalTitle}>Get Early Access</Text>
                 <Text style={styles.modalSubtitle}>
-                  Payment processing is being set up. Enter your email to be
-                  notified when it's ready.
+                  We're finalizing the {planLabel} plan. Enter your email and
+                  we'll notify you the moment it's available.
                 </Text>
 
                 <TextInput

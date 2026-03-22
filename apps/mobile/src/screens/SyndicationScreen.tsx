@@ -171,7 +171,6 @@ export default function SyndicationScreen() {
           .maybeSingle();
         if (data) setListing(data as ListingSummary);
       } catch (err) {
-        console.warn('Failed to fetch user listing:', err);
       }
     })();
   }, [user]);

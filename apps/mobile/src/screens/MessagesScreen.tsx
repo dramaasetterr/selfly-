@@ -76,7 +76,6 @@ export default function MessagesScreen() {
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.warn("Failed to fetch messages:", error.message);
         setLoading(false);
         return;
       }
@@ -142,7 +141,6 @@ export default function MessagesScreen() {
 
       setConversations(sorted);
     } catch (err) {
-      console.warn("Messages fetch error:", err);
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
+  Image,
   SafeAreaView,
   ScrollView,
   Share,
@@ -9,6 +11,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AppStackParamList } from '../../App';
@@ -24,7 +28,7 @@ interface Listing {
   address: string;
   city: string;
   state: string;
-  zip: string;
+  zip_code: string;
   price: number;
   bedrooms: number;
   bathrooms: number;
@@ -61,12 +65,10 @@ export default function ListingDetailScreen() {
           .single();
 
         if (error) {
-          console.warn('Failed to fetch listing:', error.message);
         } else {
           setListing(data as Listing);
         }
       } catch (err) {
-        console.warn('Listing detail fetch error:', err);
       } finally {
         setLoading(false);
       }
@@ -80,7 +82,6 @@ export default function ListingDetailScreen() {
         message: `Check out this listing: ${listing.address}, ${listing.city}, ${listing.state} - $${listing.price?.toLocaleString()}`,
       });
     } catch (err) {
-      console.warn('Share error:', err);
     }
   };
 
@@ -139,11 +140,9 @@ export default function ListingDetailScreen() {
                   setActivePhotoIndex(idx);
                 }}
               >
-                {photos.map((_, i) => (
-                  <View key={i} style={styles.carouselSlide}>
-                    <View style={styles.photoPlaceholder}>
-                      <Text style={styles.photoPlaceholderText}>📷 Photo {i + 1}</Text>
-                    </View>
+                {photos.map((url, i) => (
+                  <View key={i} style={[styles.carouselSlide, { width: SCREEN_WIDTH }]}>
+                    <Image source={{ uri: url }} style={styles.carouselImage} resizeMode="cover" />
                   </View>
                 ))}
               </ScrollView>
@@ -170,7 +169,7 @@ export default function ListingDetailScreen() {
           <Text style={styles.priceHero}>${listing.price?.toLocaleString()}</Text>
           <Text style={styles.addressHero}>{listing.address}</Text>
           <Text style={styles.cityStateHero}>
-            {listing.city}, {listing.state} {listing.zip}
+            {listing.city}, {listing.state} {listing.zip_code}
           </Text>
         </View>
 
@@ -319,18 +318,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   carouselSlide: {
-    width: 400, // will be overridden by layout
+    width: SCREEN_WIDTH,
     height: 260,
   },
-  photoPlaceholder: {
-    flex: 1,
-    backgroundColor: colors.primarySoft,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  photoPlaceholderText: {
-    fontSize: 20,
-    color: colors.textSecondary,
+  carouselImage: {
+    width: '100%',
+    height: '100%',
   },
   noPhotoPlaceholder: {
     flex: 1,

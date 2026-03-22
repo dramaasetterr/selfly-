@@ -188,23 +188,6 @@ export default function HomeScreen() {
         <TouchableOpacity
           style={styles.buyerCard}
           activeOpacity={0.7}
-          onPress={() => {
-            // Future feature: saved listings
-          }}
-        >
-          <View style={[styles.buyerCardIconWrap, { backgroundColor: colors.amberLight }]}>
-            <Text style={styles.buyerCardIcon}>{"\u2764\uFE0F"}</Text>
-          </View>
-          <View style={styles.buyerCardTextGroup}>
-            <Text style={styles.buyerCardTitle}>Your Saved Listings</Text>
-            <Text style={styles.buyerCardSubtitle}>0 saved homes</Text>
-          </View>
-          <Text style={styles.buyerCardArrow}>{"\u2192"}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.buyerCard}
-          activeOpacity={0.7}
           onPress={() => navigation.navigate("Showings")}
         >
           <View style={[styles.buyerCardIconWrap, { backgroundColor: colors.accentLight }]}>

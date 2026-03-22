@@ -27,7 +27,7 @@ interface ListingSummary {
   address: string;
   city: string;
   state: string;
-  zip: string;
+  zip_code: string;
   price: number;
   user_id: string;
 }
@@ -74,17 +74,15 @@ export default function ContactSellerScreen() {
       try {
         const { data, error: fetchError } = await supabase
           .from("listings")
-          .select("id, address, city, state, zip, price, user_id")
+          .select("id, address, city, state, zip_code, price, user_id")
           .eq("id", listingId)
           .single();
 
         if (fetchError) {
-          console.warn("Failed to fetch listing:", fetchError.message);
         } else {
           setListing(data as ListingSummary);
         }
       } catch (err) {
-        console.warn("Listing fetch error:", err);
       } finally {
         setLoadingListing(false);
       }
@@ -209,7 +207,7 @@ export default function ContactSellerScreen() {
                       {listing.address}
                     </Text>
                     <Text style={styles.listingLocation}>
-                      {listing.city}, {listing.state} {listing.zip}
+                      {listing.city}, {listing.state} {listing.zip_code}
                     </Text>
                     <Text style={styles.listingPrice}>
                       ${listing.price?.toLocaleString()}

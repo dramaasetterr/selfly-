@@ -23,6 +23,7 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
+import AddressAutocomplete from "../components/AddressAutocomplete";
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 const MAX_PHOTOS = 25;
@@ -163,7 +164,6 @@ export default function ListingBuilderScreen({ navigation }: Props) {
         .upload(fileName, blob, { contentType: photo.mimeType || "image/jpeg" });
 
       if (error) {
-        console.error("Upload error:", error);
         continue;
       }
 
@@ -341,12 +341,19 @@ export default function ListingBuilderScreen({ navigation }: Props) {
   const renderStep1 = () => (
     <>
       <Text style={styles.label}>Address</Text>
-      <TextInput
-        style={styles.input}
+      <AddressAutocomplete
         value={address}
         onChangeText={setAddress}
-        placeholder="123 Main St, City, State"
-        placeholderTextColor={colors.textMuted}
+        placeholder="Start typing an address..."
+        onSelect={({ address: addr, city, state, zip }) => {
+          setAddress(`${addr}, ${city}, ${state} ${zip}`);
+        }}
+        onPropertyData={(data) => {
+          if (data.sqft && !sqft) setSqft(String(data.sqft));
+          if (data.bedrooms && !bedrooms) setBedrooms(String(data.bedrooms));
+          if (data.bathrooms && !bathrooms) setBathrooms(String(data.bathrooms));
+          if (data.year_built && !yearBuilt) setYearBuilt(String(data.year_built));
+        }}
       />
 
       <View style={styles.row}>

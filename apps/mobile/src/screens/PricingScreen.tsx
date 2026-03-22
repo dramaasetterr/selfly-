@@ -14,6 +14,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AppStackParamList } from "../../App";
 import type { PricingInput, PropertyCondition } from "@selfly/shared";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
+import AddressAutocomplete from "../components/AddressAutocomplete";
 
 const CONDITIONS: PropertyCondition[] = [
   "Excellent",
@@ -111,8 +112,8 @@ export default function PricingScreen() {
         <View style={styles.infoCard}>
           <Text style={styles.infoIcon}>{"\u{1F4A1}"}</Text>
           <Text style={styles.infoText}>
-            Live market comp data coming soon. Pricing is based on AI analysis
-            of your property details.
+            Pricing is based on AI analysis of your property details and local
+            market patterns. Start typing your address to auto-fill details.
           </Text>
         </View>
 
@@ -127,15 +128,20 @@ export default function PricingScreen() {
         {/* Form */}
         <View style={styles.formSection}>
           <Text style={styles.label}>Address</Text>
-          <View style={styles.inputWrapper}>
-            <TextInput
-              style={styles.input}
-              value={address}
-              onChangeText={setAddress}
-              placeholder="123 Main St, City, State"
-              placeholderTextColor={colors.textMuted}
-            />
-          </View>
+          <AddressAutocomplete
+            value={address}
+            onChangeText={setAddress}
+            placeholder="Start typing an address..."
+            onSelect={({ address: addr, city, state, zip }) => {
+              setAddress(`${addr}, ${city}, ${state} ${zip}`);
+            }}
+            onPropertyData={(data) => {
+              if (data.sqft && !sqft) setSqft(String(data.sqft));
+              if (data.bedrooms && !bedrooms) setBedrooms(String(data.bedrooms));
+              if (data.bathrooms && !bathrooms) setBathrooms(String(data.bathrooms));
+              if (data.year_built && !yearBuilt) setYearBuilt(String(data.year_built));
+            }}
+          />
 
           <Text style={styles.label}>Square Footage</Text>
           <View style={styles.inputWrapper}>

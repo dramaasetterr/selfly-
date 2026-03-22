@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -91,12 +92,10 @@ export default function MarketplaceScreen() {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.warn('Failed to fetch listings:', error.message);
       } else {
         setListings((data as Listing[]) || []);
       }
     } catch (err) {
-      console.warn('Marketplace fetch error:', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -124,7 +123,12 @@ export default function MarketplaceScreen() {
     }
     // Property type
     if (propertyFilter !== 'All') {
-      if (l.property_type?.toLowerCase() !== propertyFilter.toLowerCase()) return false;
+      const typeMap: Record<string, string> = {
+        'House': 'single_family',
+        'Condo': 'condo',
+        'Townhouse': 'townhouse',
+      };
+      if (l.property_type !== typeMap[propertyFilter]) return false;
     }
     // Price
     if (!matchesPriceFilter(l.price, priceFilter)) return false;
@@ -137,15 +141,13 @@ export default function MarketplaceScreen() {
 
   const renderListingCard = ({ item }: { item: Listing }) => (
     <View style={styles.listingCard}>
-      {/* Photo placeholder */}
+      {/* Photo */}
       <View style={styles.photoContainer}>
         {item.photos && item.photos.length > 0 ? (
-          <View style={styles.photoPlaceholder}>
-            <Text style={styles.photoPlaceholderText}>📷</Text>
-          </View>
+          <Image source={{ uri: item.photos[0] }} style={styles.photoImage} resizeMode="cover" />
         ) : (
           <View style={styles.gradientPlaceholder}>
-            <Text style={styles.gradientPlaceholderText}>🏠</Text>
+            <Text style={styles.gradientPlaceholderText}>{"\uD83C\uDFE0"}</Text>
           </View>
         )}
         <View style={styles.typeBadge}>
@@ -159,9 +161,11 @@ export default function MarketplaceScreen() {
         <Text style={styles.address} numberOfLines={1}>
           {item.address}
         </Text>
-        <Text style={styles.cityState} numberOfLines={1}>
-          {item.city}, {item.state}
-        </Text>
+        {(item.city || item.state) ? (
+          <Text style={styles.cityState} numberOfLines={1}>
+            {[item.city, item.state].filter(Boolean).join(', ')}
+          </Text>
+        ) : null}
 
         {/* Stats badges */}
         <View style={styles.statsRow}>
@@ -399,14 +403,9 @@ const styles = StyleSheet.create({
     height: 180,
     position: 'relative',
   },
-  photoPlaceholder: {
-    flex: 1,
-    backgroundColor: colors.primarySoft,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  photoPlaceholderText: {
-    fontSize: 48,
+  photoImage: {
+    width: '100%',
+    height: '100%',
   },
   gradientPlaceholder: {
     flex: 1,

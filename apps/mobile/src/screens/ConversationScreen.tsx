@@ -103,7 +103,6 @@ export default function ConversationScreen() {
         .order("created_at", { ascending: true });
 
       if (error) {
-        console.warn("Failed to fetch messages:", error.message);
       } else {
         setMessages((data as Message[]) || []);
       }
@@ -117,7 +116,6 @@ export default function ConversationScreen() {
         .eq("receiver_id", user.id)
         .eq("read", false);
     } catch (err) {
-      console.warn("Conversation fetch error:", err);
     } finally {
       setLoading(false);
     }
@@ -198,11 +196,9 @@ export default function ConversationScreen() {
       });
 
       if (error) {
-        console.warn("Failed to send message:", error.message);
         setText(content); // Restore text on failure
       }
     } catch (err) {
-      console.warn("Send error:", err);
       setText(content);
     } finally {
       setSending(false);

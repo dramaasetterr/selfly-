@@ -296,14 +296,14 @@ export default function DocumentsScreen() {
             <View style={styles.listingBannerContent}>
               <Text style={styles.listingBannerTitle}>No listing found</Text>
               <Text style={styles.listingBannerText}>
-                Create a listing first to generate personalized documents, or generate with sample data.
+                Create a listing first to generate documents for your property, or preview with example data.
               </Text>
               <TouchableOpacity
                 style={styles.sampleDataButton}
                 onPress={() => setUseSampleData(true)}
               >
                 <Text style={styles.sampleDataButtonText}>
-                  Try with sample data
+                  Preview with Example Data
                 </Text>
               </TouchableOpacity>
             </View>
@@ -315,7 +315,7 @@ export default function DocumentsScreen() {
             <Text style={styles.sampleBannerIcon}>{"\u{1F9EA}"}</Text>
             <View style={{ flex: 1 }}>
               <Text style={styles.sampleBannerText}>
-                Using sample property data
+                Using example property data
               </Text>
               <Text style={styles.sampleBannerSub}>
                 {SAMPLE_PROPERTY.address}

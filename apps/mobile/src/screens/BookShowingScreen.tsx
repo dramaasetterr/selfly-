@@ -75,7 +75,6 @@ export default function BookShowingScreen() {
           .single();
         if (data) setListing(data as ListingSummary);
       } catch (err) {
-        console.warn('Failed to fetch listing summary:', err);
       }
     })();
   }, [listingId]);
@@ -110,7 +109,6 @@ export default function BookShowingScreen() {
           }
         }
       } catch (err) {
-        console.warn('Failed to fetch availability:', err);
       } finally {
         setLoadingSlots(false);
       }
