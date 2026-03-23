@@ -27,7 +27,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#2563EB"
+        "backgroundColor": "#F5F0E8"
       },
       "package": "com.selfly.app",
       "versionCode": 1,
