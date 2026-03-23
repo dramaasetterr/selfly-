@@ -8,7 +8,7 @@
     "scheme": "chiavo",
     "userInterfaceStyle": "light",
     "splash": {
-      "backgroundColor": "#2563EB",
+      "backgroundColor": "#FEF7E4",
       "resizeMode": "contain"
     },
     "assetBundlePatterns": [
@@ -27,7 +27,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#2563EB"
+        "backgroundColor": "#FEF7E4"
       },
       "package": "com.selfly.app",
       "versionCode": 1,

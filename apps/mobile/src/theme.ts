@@ -1,38 +1,38 @@
-// Premium color palette
+// Chiavo brand palette — cream/navy/gold
 export const colors = {
   // Primary gradient endpoints
-  primary: '#1E3A5F',      // Deep navy
-  primaryLight: '#2563EB',  // Bright blue
-  primarySoft: '#EFF6FF',   // Very light blue bg
+  primary: '#1C1C28',
+  primaryLight: '#C4A265',
+  primarySoft: '#F9F3E8',
 
   // Accent
-  accent: '#10B981',        // Emerald green
-  accentLight: '#D1FAE5',   // Light emerald bg
-  accentDark: '#065F46',    // Dark emerald text
+  accent: '#C4A265',
+  accentLight: '#E8D5B0',
+  accentDark: '#A88B4A',
 
   // Warm accents
-  amber: '#F59E0B',
-  amberLight: '#FEF3C7',
-  amberDark: '#92400E',
+  amber: '#C4A265',
+  amberLight: '#F9F3E8',
+  amberDark: '#A88B4A',
 
   // Status
-  success: '#22C55E',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  errorLight: '#FEE2E2',
-  errorDark: '#991B1B',
+  success: '#2D7A4F',
+  warning: '#C4A265',
+  error: '#B03A3A',
+  errorLight: '#FAEAEA',
+  errorDark: '#8A2C2C',
 
   // Neutrals
   white: '#FFFFFF',
-  background: '#F8FAFC',    // Subtle cool gray bg
+  background: '#FEF7E4',
   card: '#FFFFFF',
-  border: '#E2E8F0',
-  borderLight: '#F1F5F9',
+  border: '#E5E0D8',
+  borderLight: '#F0EBE3',
 
   // Text
-  textPrimary: '#0F172A',   // Near black
-  textSecondary: '#475569',  // Medium gray
-  textMuted: '#94A3B8',     // Light gray
+  textPrimary: '#1C1C28',
+  textSecondary: '#5A5A6E',
+  textMuted: '#8E8E9F',
   textOnPrimary: '#FFFFFF',
   textOnAccent: '#FFFFFF',
 };
