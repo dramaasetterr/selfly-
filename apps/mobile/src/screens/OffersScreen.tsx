@@ -127,7 +127,7 @@ export default function OffersScreen() {
         {fetchError ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconCircle}>
-              <Text style={styles.emptyIcon}>{'\u25C6'}</Text>
+              <Text style={styles.emptyIcon}>⚠️</Text>
             </View>
             <Text style={styles.emptyTitle}>Something Went Wrong</Text>
             <Text style={styles.emptyText}>
@@ -144,7 +144,7 @@ export default function OffersScreen() {
         ) : offers.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconCircle}>
-              <Text style={styles.emptyIcon}>{'\u2014'}</Text>
+              <Text style={styles.emptyIcon}>📋</Text>
             </View>
             <Text style={styles.emptyTitle}>No Offers Yet</Text>
             <Text style={styles.emptyText}>

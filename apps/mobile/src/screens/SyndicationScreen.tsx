@@ -58,7 +58,7 @@ interface PlatformInfo {
 const PLATFORMS: PlatformInfo[] = [
   {
     key: 'chiavo',
-    icon: '\u2022',
+    icon: '🏠',
     name: 'Chiavo Marketplace',
     getStatus: (listing) => (listing?.status === 'active' ? 'listed' : 'not_listed'),
     instructions: [
@@ -68,7 +68,7 @@ const PLATFORMS: PlatformInfo[] = [
   },
   {
     key: 'zillow',
-    icon: '\u2022',
+    icon: '🔵',
     name: 'Zillow / Trulia',
     getStatus: () => 'not_listed',
     instructions: [
@@ -83,7 +83,7 @@ const PLATFORMS: PlatformInfo[] = [
   },
   {
     key: 'realtor',
-    icon: '\u2022',
+    icon: '🔴',
     name: 'Realtor.com',
     getStatus: () => 'not_listed',
     instructions: [
@@ -98,7 +98,7 @@ const PLATFORMS: PlatformInfo[] = [
   },
   {
     key: 'facebook',
-    icon: '\u2022',
+    icon: '📘',
     name: 'Facebook Marketplace',
     getStatus: () => 'not_listed',
     instructions: [
@@ -113,7 +113,7 @@ const PLATFORMS: PlatformInfo[] = [
   },
   {
     key: 'mls',
-    icon: '\u2022',
+    icon: '🏢',
     name: 'Flat-Fee MLS',
     getStatus: () => 'not_listed',
     instructions: [
@@ -135,7 +135,7 @@ const PLATFORMS: PlatformInfo[] = [
   },
   {
     key: 'craigslist',
-    icon: '\u2022',
+    icon: '📋',
     name: 'Craigslist',
     getStatus: () => 'not_listed',
     instructions: [
@@ -256,7 +256,7 @@ export default function SyndicationScreen() {
 
         {/* Copy All button */}
         <TouchableOpacity style={styles.copyAllButton} onPress={copyListingDetails}>
-          <Text style={styles.copyAllIcon}>{'\u2192'}</Text>
+          <Text style={styles.copyAllIcon}>📋</Text>
           <Text style={styles.copyAllText}>Copy All Listing Details</Text>
         </TouchableOpacity>
 
@@ -278,7 +278,7 @@ export default function SyndicationScreen() {
                   <Text style={styles.platformName}>{platform.name}</Text>
                   {status === 'listed' ? (
                     <View style={styles.statusListed}>
-                      <Text style={styles.statusListedText}>{'\u2713'} Already Listed</Text>
+                      <Text style={styles.statusListedText}>✅ Already Listed</Text>
                     </View>
                   ) : (
                     <View style={styles.statusNotListed}>
@@ -304,7 +304,7 @@ export default function SyndicationScreen() {
                     style={styles.copyButton}
                     onPress={copyListingDetails}
                   >
-                    <Text style={styles.copyButtonText}>{'\u2192'} Copy Listing Details</Text>
+                    <Text style={styles.copyButtonText}>📋 Copy Listing Details</Text>
                   </TouchableOpacity>
                 </View>
               )}

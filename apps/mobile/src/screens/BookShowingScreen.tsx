@@ -166,7 +166,7 @@ export default function BookShowingScreen() {
       <SafeAreaView style={styles.container}>
         <ScrollView contentContainerStyle={styles.successContainer}>
           <View style={styles.successCard}>
-            <Text style={styles.successIcon}>{'\u2713'}</Text>
+            <Text style={styles.successIcon}>✅</Text>
             <Text style={styles.successTitle}>Showing Booked!</Text>
             <Text style={styles.successBody}>
               Your showing has been confirmed. You'll receive a confirmation email shortly.
@@ -229,7 +229,7 @@ export default function BookShowingScreen() {
         {/* Property reference card */}
         {listing && (
           <View style={styles.propertyCard}>
-            <Text style={styles.propertyIcon}>{'\u2302'}</Text>
+            <Text style={styles.propertyIcon}>🏠</Text>
             <View style={styles.propertyInfo}>
               <Text style={styles.propertyAddress}>{listing.address}</Text>
               <Text style={styles.propertyCity}>

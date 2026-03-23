@@ -48,7 +48,7 @@ interface PrepItem {
 const PREP_ITEMS: PrepItem[] = [
   {
     id: 'declutter',
-    emoji: '\u2726',
+    emoji: '📦',
     title: 'Declutter & Depersonalize',
     tips: [
       'Remove personal photos and memorabilia from walls and shelves',
@@ -60,7 +60,7 @@ const PREP_ITEMS: PrepItem[] = [
   },
   {
     id: 'deep_clean',
-    emoji: '\u2726',
+    emoji: '✨',
     title: 'Deep Clean Everything',
     tips: [
       'Hire professional cleaners for a top-to-bottom deep clean',
@@ -72,7 +72,7 @@ const PREP_ITEMS: PrepItem[] = [
   },
   {
     id: 'minor_repairs',
-    emoji: '\u25C6',
+    emoji: '🔧',
     title: 'Make Minor Repairs',
     tips: [
       'Fix leaky faucets and running toilets',
@@ -84,7 +84,7 @@ const PREP_ITEMS: PrepItem[] = [
   },
   {
     id: 'fresh_paint',
-    emoji: '\u25C6',
+    emoji: '🎨',
     title: 'Fresh Paint',
     tips: [
       'Paint main rooms in warm neutral tones (Agreeable Gray, Alabaster)',
@@ -96,7 +96,7 @@ const PREP_ITEMS: PrepItem[] = [
   },
   {
     id: 'curb_appeal',
-    emoji: '\u2022',
+    emoji: '🏡',
     title: 'Boost Curb Appeal',
     tips: [
       'Mow, edge, and fertilize the lawn — green grass sells',
@@ -108,7 +108,7 @@ const PREP_ITEMS: PrepItem[] = [
   },
   {
     id: 'staging',
-    emoji: '\u2014',
+    emoji: '🛋️',
     title: 'Stage Key Rooms',
     tips: [
       'Focus on the living room, kitchen, and master bedroom first',
@@ -120,7 +120,7 @@ const PREP_ITEMS: PrepItem[] = [
   },
   {
     id: 'lighting',
-    emoji: '\u2726',
+    emoji: '💡',
     title: 'Improve Lighting',
     tips: [
       'Open all blinds and curtains before every showing',
@@ -132,7 +132,7 @@ const PREP_ITEMS: PrepItem[] = [
   },
   {
     id: 'photos',
-    emoji: '\u25C6',
+    emoji: '📸',
     title: 'Take Pre-Listing Photos',
     tips: [
       'Photograph every room only after cleaning and staging',
@@ -257,7 +257,7 @@ export default function PrepHomeScreen() {
         {/* ---- Hero ---- */}
         <View style={styles.hero}>
           <View style={styles.heroIconWrap}>
-            <Text style={styles.heroIcon}>{'\u2302'}</Text>
+            <Text style={styles.heroIcon}>🏠</Text>
           </View>
           <Text style={styles.heroTitle}>Let's Get Your Home{'\n'}Market-Ready</Text>
           <Text style={styles.heroSubtitle}>
@@ -286,7 +286,7 @@ export default function PrepHomeScreen() {
           </View>
           {allDone ? (
             <Text style={styles.progressHint}>
-              {'\u2014'}  Amazing {'\u2014'} your home is ready to shine!
+              🎉  Amazing — your home is ready to shine!
             </Text>
           ) : (
             <Text style={styles.progressHint}>
@@ -300,7 +300,7 @@ export default function PrepHomeScreen() {
         {/* ---- Celebration ---- */}
         {allDone && (
           <View style={styles.celebrationCard}>
-            <Text style={styles.celebrationEmoji}>{'\u2726'}</Text>
+            <Text style={styles.celebrationEmoji}>🎊</Text>
             <Text style={styles.celebrationTitle}>Home Prep Complete!</Text>
             <Text style={styles.celebrationBody}>
               You've tackled every step. Your home is positioned to impress

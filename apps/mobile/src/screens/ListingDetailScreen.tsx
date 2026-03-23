@@ -173,7 +173,7 @@ export default function ListingDetailScreen() {
             </>
           ) : (
             <View style={styles.noPhotoPlaceholder}>
-              <Text style={styles.noPhotoText}>{'\u2302'}</Text>
+              <Text style={styles.noPhotoText}>🏠</Text>
               <Text style={styles.noPhotoLabel}>No photos available</Text>
             </View>
           )}
@@ -265,7 +265,7 @@ export default function ListingDetailScreen() {
 
         {/* Make an Offer info */}
         <View style={styles.offerInfoCard}>
-          <Text style={styles.offerInfoIcon}>{'\u25C6'}</Text>
+          <Text style={styles.offerInfoIcon}>💰</Text>
           <Text style={styles.offerInfoTitle}>Interested in Making an Offer?</Text>
           <Text style={styles.offerInfoBody}>
             This is a For Sale By Owner (FSBO) listing. To make an offer, schedule a showing
