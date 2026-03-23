@@ -1,52 +1,40 @@
-// Chiavo brand palette — luxury cream/navy/gold
+// Premium color palette
 export const colors = {
   // Primary gradient endpoints
-  primary: '#1C1C28',        // Navy (was #1E3A5F)
-  primaryLight: '#C4A265',   // Gold (was #2563EB)
-  primarySoft: '#F9F3E8',    // Gold bg (was #EFF6FF)
+  primary: '#1E3A5F',      // Deep navy
+  primaryLight: '#2563EB',  // Bright blue
+  primarySoft: '#EFF6FF',   // Very light blue bg
 
   // Accent
-  accent: '#C4A265',         // Gold (was #10B981)
-  accentLight: '#E8D5B0',    // Gold muted (was #D1FAE5)
-  accentDark: '#A88B4A',     // Gold dark (was #065F46)
+  accent: '#10B981',        // Emerald green
+  accentLight: '#D1FAE5',   // Light emerald bg
+  accentDark: '#065F46',    // Dark emerald text
 
   // Warm accents
-  amber: '#C4A265',
-  amberLight: '#F9F3E8',
-  amberDark: '#A88B4A',
+  amber: '#F59E0B',
+  amberLight: '#FEF3C7',
+  amberDark: '#92400E',
 
   // Status
-  success: '#2D7A4F',
-  warning: '#C4A265',
-  error: '#B03A3A',
-  errorLight: '#FAEAEA',
-  errorDark: '#8A2C2C',
+  success: '#22C55E',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  errorLight: '#FEE2E2',
+  errorDark: '#991B1B',
 
   // Neutrals
   white: '#FFFFFF',
-  background: '#FEF7E4',     // Matches logo background exactly
+  background: '#F8FAFC',    // Subtle cool gray bg
   card: '#FFFFFF',
-  border: '#E5E0D8',
-  borderLight: '#F0EBE3',
+  border: '#E2E8F0',
+  borderLight: '#F1F5F9',
 
   // Text
-  textPrimary: '#1C1C28',
-  textSecondary: '#5A5A6E',
-  textMuted: '#8E8E9F',
+  textPrimary: '#0F172A',   // Near black
+  textSecondary: '#475569',  // Medium gray
+  textMuted: '#94A3B8',     // Light gray
   textOnPrimary: '#FFFFFF',
-  textOnAccent: '#1C1C28',
-
-  // New brand tokens (bonus, screens can use these too)
-  cream: '#FEF7E4',
-  creamLight: '#FAF6EF',
-  navy: '#1C1C28',
-  navyLight: '#2D2D3D',
-  gold: '#C4A265',
-  goldLight: '#D4B87A',
-  goldDark: '#A88B4A',
-  goldMuted: '#E8D5B0',
-  goldBg: '#F9F3E8',
-  successLight: '#E6F4EC',
+  textOnAccent: '#FFFFFF',
 };
 
 export const shadows = {

@@ -8,7 +8,7 @@
     "scheme": "chiavo",
     "userInterfaceStyle": "light",
     "splash": {
-      "backgroundColor": "#FEF7E4",
+      "backgroundColor": "#2563EB",
       "resizeMode": "contain"
     },
     "assetBundlePatterns": [
@@ -20,14 +20,13 @@
       "buildNumber": "1",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Chiavo needs access to your photo library to add photos of your property to your listing.",
-        "NSCameraUsageDescription": "Chiavo needs camera access to take photos of your property for your listing.",
-        "ITSAppUsesNonExemptEncryption": false
+        "NSCameraUsageDescription": "Chiavo needs camera access to take photos of your property for your listing."
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FEF7E4"
+        "backgroundColor": "#2563EB"
       },
       "package": "com.selfly.app",
       "versionCode": 1,

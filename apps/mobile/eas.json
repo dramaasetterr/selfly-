@@ -19,11 +19,7 @@
   },
   "submit": {
     "production": {
-      "ios": {
-        "appleId": "dramaasetterr@aol.com",
-        "ascAppId": "6760981630",
-        "appleTeamId": "L58XT2H479"
-      }
+      "ios": {}
     }
   }
 }
