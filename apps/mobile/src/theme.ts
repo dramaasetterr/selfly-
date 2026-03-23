@@ -24,7 +24,7 @@ export const colors = {
 
   // Neutrals
   white: '#FFFFFF',
-  background: '#F7F0DD',     // Matches logo background exactly
+  background: '#FEF7E4',     // Matches logo background exactly
   card: '#FFFFFF',
   border: '#E5E0D8',
   borderLight: '#F0EBE3',
@@ -37,7 +37,7 @@ export const colors = {
   textOnAccent: '#1C1C28',
 
   // New brand tokens (bonus, screens can use these too)
-  cream: '#F7F0DD',
+  cream: '#FEF7E4',
   creamLight: '#FAF6EF',
   navy: '#1C1C28',
   navyLight: '#2D2D3D',

@@ -83,7 +83,7 @@ function AuthNavigator({ hasSeenOnboarding }: { hasSeenOnboarding: boolean }) {
       initialRouteName={hasSeenOnboarding ? "Welcome" : "Onboarding"}
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: "#F5F0E8" },
+        contentStyle: { backgroundColor: "#FEF7E4" },
         animation: "slide_from_right",
       }}
     >
@@ -100,7 +100,7 @@ function AppNavigator() {
     <AppStack.Navigator
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: "#F5F0E8" },
+        contentStyle: { backgroundColor: "#FEF7E4" },
       }}
     >
       <AppStack.Screen name="Home" component={HomeScreen} />
@@ -143,7 +143,7 @@ function RootNavigator() {
 
   if (authLoading || hasSeenOnboarding === null) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F5F0E8" }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#FEF7E4" }}>
         <ActivityIndicator size="large" color="#C4A265" />
       </View>
     );
