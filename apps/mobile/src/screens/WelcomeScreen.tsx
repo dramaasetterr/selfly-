@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: colors.navy,
     letterSpacing: 2,
-    fontFamily: 'PlayfairDisplay-Bold',
+    // fontFamily will be set when custom fonts are loaded
   },
   tagline: {
     ...typography.h3,

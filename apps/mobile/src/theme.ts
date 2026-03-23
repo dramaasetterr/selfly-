@@ -89,16 +89,16 @@ export const borderRadius = {
 };
 
 export const fonts = {
-  heading: 'PlayfairDisplay',       // Loaded via expo-font
-  headingBold: 'PlayfairDisplay-Bold',
-  body: 'System',                   // System sans-serif
+  heading: undefined as string | undefined,  // System serif until custom font is bundled
+  headingBold: undefined as string | undefined,
+  body: undefined as string | undefined,
 };
 
 export const typography = {
-  hero: { fontSize: 34, fontWeight: '800' as const, letterSpacing: -0.5, fontFamily: fonts.headingBold },
-  h1: { fontSize: 28, fontWeight: '700' as const, letterSpacing: -0.3, fontFamily: fonts.headingBold },
-  h2: { fontSize: 22, fontWeight: '700' as const, fontFamily: fonts.heading },
-  h3: { fontSize: 18, fontWeight: '600' as const, fontFamily: fonts.heading },
+  hero: { fontSize: 34, fontWeight: '800' as const, letterSpacing: -0.5 },
+  h1: { fontSize: 28, fontWeight: '700' as const, letterSpacing: -0.3 },
+  h2: { fontSize: 22, fontWeight: '700' as const },
+  h3: { fontSize: 18, fontWeight: '600' as const },
   body: { fontSize: 16, fontWeight: '400' as const, lineHeight: 24 },
   bodyBold: { fontSize: 16, fontWeight: '600' as const },
   caption: { fontSize: 14, fontWeight: '400' as const },
