@@ -88,7 +88,7 @@ export default function Home() {
       <nav className="sticky top-0 z-50 bg-cream/90 backdrop-blur border-b border-gold-muted/30">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
           <a href="#" className="flex items-center gap-3">
-            <Image src="/logo.png" alt="Chiavo" width={140} height={40} className="h-10 w-auto" />
+            <Image src="/logo.png" alt="Chiavo" width={280} height={80} className="h-16 w-auto" />
           </a>
           <div className="hidden sm:flex items-center gap-8 text-sm font-medium text-navy-light">
             <a href="#how-it-works" className="hover:text-gold transition">
