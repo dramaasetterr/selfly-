@@ -8,7 +8,7 @@
     "scheme": "chiavo",
     "userInterfaceStyle": "light",
     "splash": {
-      "backgroundColor": "#2563EB",
+      "backgroundColor": "#F5F0E8",
       "resizeMode": "contain"
     },
     "assetBundlePatterns": [
@@ -20,7 +20,8 @@
       "buildNumber": "1",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Chiavo needs access to your photo library to add photos of your property to your listing.",
-        "NSCameraUsageDescription": "Chiavo needs camera access to take photos of your property for your listing."
+        "NSCameraUsageDescription": "Chiavo needs camera access to take photos of your property for your listing.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
