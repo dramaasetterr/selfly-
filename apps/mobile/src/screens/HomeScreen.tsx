@@ -20,21 +20,21 @@ import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 type Mode = "selling" | "buying";
 
 const STAGE_ICONS: Record<PipelineStage, string> = {
-  prep_your_home: "\uD83C\uDFE0",
-  price_it: "\uD83D\uDCB0",
-  create_listing: "\uD83D\uDCDD",
-  manage_showings: "\uD83D\uDCC5",
-  review_offers: "\uD83D\uDCCB",
-  close_the_deal: "\uD83C\uDF89",
+  prep_your_home: "\u2302",
+  price_it: "\u2736",
+  create_listing: "\u270E",
+  manage_showings: "\u25A3",
+  review_offers: "\u2637",
+  close_the_deal: "\u2714",
 };
 
 const STAGE_COLORS: Record<PipelineStage, string> = {
-  prep_your_home: "#DBEAFE",
-  price_it: "#FEF3C7",
-  create_listing: "#D1FAE5",
-  manage_showings: "#E0E7FF",
-  review_offers: "#FCE7F3",
-  close_the_deal: "#FEF9C3",
+  prep_your_home: "#F9F3E8",
+  price_it: "#F5F0E8",
+  create_listing: "#F9F3E8",
+  manage_showings: "#F5F0E8",
+  review_offers: "#F9F3E8",
+  close_the_deal: "#F5F0E8",
 };
 
 const STAGE_DESCRIPTIONS: Record<PipelineStage, string> = {

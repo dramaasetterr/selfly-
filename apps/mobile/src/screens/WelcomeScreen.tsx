@@ -15,17 +15,17 @@ type Props = NativeStackScreenProps<AuthStackParamList, "Welcome">;
 
 const FEATURES = [
   {
-    icon: "\uD83D\uDCB0",
+    icon: "$",
     title: "Save $20,000+",
     subtitle: "Average commission saved",
   },
   {
-    icon: "\u2728",
+    icon: "\u2726",
     title: "AI-Powered",
     subtitle: "Smart pricing & documents",
   },
   {
-    icon: "\u2705",
+    icon: "\u2713",
     title: "Step by Step",
     subtitle: "Guided from prep to close",
   },
@@ -99,7 +99,7 @@ export default function WelcomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.cream,
   },
   content: {
     flex: 1,
@@ -116,8 +116,9 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: 52,
     fontWeight: "800",
-    color: colors.primary,
-    letterSpacing: -1.5,
+    color: colors.navy,
+    letterSpacing: 2,
+    fontFamily: 'PlayfairDisplay-Bold',
   },
   tagline: {
     ...typography.h3,

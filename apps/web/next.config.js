@@ -9,10 +9,10 @@ const nextConfig = {
     // In monorepo, ensure Next.js uses React 19 (not React 18 from mobile workspace)
     config.resolve.alias = {
       ...config.resolve.alias,
-      react: path.resolve(__dirname, "node_modules/react"),
-      "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
-      "react/jsx-runtime": path.resolve(__dirname, "node_modules/react/jsx-runtime"),
-      "react/jsx-dev-runtime": path.resolve(__dirname, "node_modules/react/jsx-dev-runtime"),
+      react: path.resolve(__dirname, "../../node_modules/react"),
+      "react-dom": path.resolve(__dirname, "../../node_modules/react-dom"),
+      "react/jsx-runtime": path.resolve(__dirname, "../../node_modules/react/jsx-runtime"),
+      "react/jsx-dev-runtime": path.resolve(__dirname, "../../node_modules/react/jsx-dev-runtime"),
     };
     return config;
   },

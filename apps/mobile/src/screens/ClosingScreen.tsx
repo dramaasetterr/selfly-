@@ -337,7 +337,7 @@ export default function ClosingScreen() {
         {/* Celebration */}
         {allComplete && (
           <View style={styles.celebrationCard}>
-            <Text style={styles.celebrationEmoji}>🏠🎉</Text>
+            <Text style={styles.celebrationEmoji}>{'\u2302'} {'\u2726'}</Text>
             <Text style={styles.celebrationTitle}>Congratulations!</Text>
             <Text style={styles.celebrationText}>
               You sold your home — with Chiavo!
