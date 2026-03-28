@@ -33,7 +33,7 @@ import ProfileScreen from "./src/screens/ProfileScreen";
 import MessagesScreen from "./src/screens/MessagesScreen";
 import ConversationScreen from "./src/screens/ConversationScreen";
 import ContactSellerScreen from "./src/screens/ContactSellerScreen";
-import type { PricingInput, PricingResult, Document, OfferAnalysis, OfferInput } from "@chiavo/shared";
+import type { PricingInput, PricingResult, Document, OfferAnalysis, OfferInput } from "@chiavi/shared";
 
 export type AuthStackParamList = {
   Onboarding: undefined;

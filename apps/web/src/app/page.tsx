@@ -36,23 +36,23 @@ function useWaitlist() {
 const FAQ_ITEMS = [
   {
     q: "Do I need a realtor to sell my home?",
-    a: "No. Millions of homes are sold every year without a traditional real estate agent. Chiavo gives you the same professional tools agents use \u2014 AI pricing, document generation, showing management, and offer analysis \u2014 so you can sell confidently on your own and keep thousands in commission.",
+    a: "No. Millions of homes are sold every year without a traditional real estate agent. Chiavi gives you the same professional tools agents use \u2014 AI pricing, document generation, showing management, and offer analysis \u2014 so you can sell confidently on your own and keep thousands in commission.",
   },
   {
-    q: "What states is Chiavo available in?",
-    a: "Chiavo is available nationwide across all 50 US states. Our document generation engine produces state-specific disclosure forms, purchase agreements, and counter-offers tailored to your state\u2019s legal requirements.",
+    q: "What states is Chiavi available in?",
+    a: "Chiavi is available nationwide across all 50 US states. Our document generation engine produces state-specific disclosure forms, purchase agreements, and counter-offers tailored to your state\u2019s legal requirements.",
   },
   {
     q: "How does AI pricing work?",
     a: "Our AI pricing engine analyzes comparable recent sales, current market trends, property condition, special features, and regional price-per-square-foot data to generate a recommended list price, a sell-fast price, and a maximize price \u2014 giving you a data-driven range in seconds.",
   },
   {
-    q: "Is Chiavo really free to start?",
+    q: "Is Chiavi really free to start?",
     a: "Yes. The Free plan includes AI pricing analysis, a home prep checklist, and basic listing creation at no cost. When you\u2019re ready for advanced features like document generation, offer analysis, and showing management, upgrade to Seller Pro for a one-time $299 fee \u2014 no subscriptions, no hidden costs.",
   },
   {
-    q: "How much can I save by selling FSBO with Chiavo?",
-    a: "The typical real estate commission is 5\u20136% of the sale price. On a $350,000 home, that\u2019s up to $21,000. By selling FSBO with Chiavo, you keep that money in your pocket. Even our Full Service plan at $499 saves you over $20,000 compared to a traditional agent.",
+    q: "How much can I save by selling FSBO with Chiavi?",
+    a: "The typical real estate commission is 5\u20136% of the sale price. On a $350,000 home, that\u2019s up to $21,000. By selling FSBO with Chiavi, you keep that money in your pocket. Even our Full Service plan at $499 saves you over $20,000 compared to a traditional agent.",
   },
 ];
 
@@ -88,7 +88,7 @@ export default function Home() {
       <nav className="sticky top-0 z-50 bg-cream/90 backdrop-blur border-b border-gold-muted/30">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
           <a href="#" className="flex items-center gap-3">
-            <Image src="/logo.png" alt="Chiavo" width={280} height={80} className="h-16 w-auto" />
+            <Image src="/logo.png" alt="Chiavi" width={280} height={80} className="h-16 w-auto" />
           </a>
           <div className="hidden sm:flex items-center gap-8 text-sm font-medium text-navy-light">
             <a href="#how-it-works" className="hover:text-gold transition">
@@ -122,7 +122,7 @@ export default function Home() {
             <span className="text-gold">Keep Your Equity.</span>
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-navy-light leading-relaxed font-body">
-            Why pay a 6% commission when you can do it yourself? Chiavo is the AI-powered
+            Why pay a 6% commission when you can do it yourself? Chiavi is the AI-powered
             FSBO platform that guides you from pricing to closing &mdash; so you keep thousands
             more at the settlement table.
           </p>
@@ -188,7 +188,7 @@ export default function Home() {
             How It Works
           </h2>
           <p className="mt-4 text-center text-navy-light max-w-xl mx-auto">
-            Six simple steps from listing to closing &mdash; Chiavo handles the hard parts.
+            Six simple steps from listing to closing &mdash; Chiavi handles the hard parts.
           </p>
 
           <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -314,7 +314,7 @@ export default function Home() {
             Frequently Asked Questions
           </h2>
           <p className="mt-4 text-center text-navy-light max-w-xl mx-auto">
-            Everything you need to know about selling your home with Chiavo.
+            Everything you need to know about selling your home with Chiavi.
           </p>
           <div className="mt-12 border-t border-gold-muted/50">
             {FAQ_ITEMS.map((item) => (
@@ -331,7 +331,7 @@ export default function Home() {
             Join Thousands of Homeowners Saving on Commission
           </h2>
           <p className="mt-4 text-navy-light max-w-xl mx-auto">
-            FSBO sellers keep an average of 5&ndash;6% more equity at closing. Chiavo makes the process
+            FSBO sellers keep an average of 5&ndash;6% more equity at closing. Chiavi makes the process
             simple enough for anyone.
           </p>
 
@@ -372,7 +372,7 @@ export default function Home() {
             Get Early Access
           </h2>
           <p className="mt-4 text-gold-muted max-w-lg mx-auto">
-            Be the first to know when Chiavo launches in your area. No spam, ever.
+            Be the first to know when Chiavi launches in your area. No spam, ever.
           </p>
 
           <form
@@ -412,7 +412,7 @@ export default function Home() {
       {/* ─── FOOTER ─── */}
       <footer className="bg-cream border-t border-gold-muted/30 py-12">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6 text-sm text-navy-light/60">
-          <p>&copy; 2026 Chiavo. All rights reserved.</p>
+          <p>&copy; 2026 Chiavi. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <a href="#" className="hover:text-gold transition">
               Privacy Policy

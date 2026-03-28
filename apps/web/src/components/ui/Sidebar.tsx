@@ -30,7 +30,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="px-6 py-5 border-b border-gold-muted/20">
         <Link href="/dashboard">
-          <Image src="/logo.png" alt="Chiavo" width={200} height={56} className="h-12 w-auto" />
+          <Image src="/logo.png" alt="Chiavi" width={200} height={56} className="h-12 w-auto" />
         </Link>
       </div>
 

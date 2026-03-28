@@ -1,4 +1,4 @@
-// Chiavo brand palette — cream/navy/gold
+// Chiavi brand palette — cream/navy/gold
 export const colors = {
   // Primary gradient endpoints
   primary: '#1C1C28',

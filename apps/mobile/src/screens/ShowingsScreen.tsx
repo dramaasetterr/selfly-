@@ -21,7 +21,7 @@ import type { AppStackParamList } from "../../App";
 import { colors, shadows, spacing, borderRadius, typography } from "../theme";
 import TierGate from "../components/TierGate";
 
-const WEB_APP_URL = process.env.EXPO_PUBLIC_WEB_APP_URL || "https://chiavo.com";
+const WEB_APP_URL = process.env.EXPO_PUBLIC_WEB_APP_URL || "https://chiavi.com";
 
 function getNext30Days(): Date[] {
   const days: Date[] = [];

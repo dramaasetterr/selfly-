@@ -3,7 +3,7 @@ const path = require("path");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
-  transpilePackages: ["@chiavo/shared"],
+  transpilePackages: ["@chiavi/shared"],
   // Use standalone output for production deployment (Vercel handles this automatically)
   webpack: (config, { isServer }) => {
     // In monorepo, ensure Next.js uses React 19 (not React 18 from mobile workspace)

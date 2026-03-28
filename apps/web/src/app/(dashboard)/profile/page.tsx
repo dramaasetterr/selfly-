@@ -208,7 +208,7 @@ export default function ProfilePage() {
       <div className="bg-white rounded-2xl border border-gold-muted/30 p-6">
         <h2 className="font-heading font-bold text-navy text-lg mb-2">Account</h2>
         <p className="text-sm text-navy-light mb-4">
-          Sign out of your Chiavo account on this device.
+          Sign out of your Chiavi account on this device.
         </p>
         <button
           onClick={signOut}

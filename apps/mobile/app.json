@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Chiavo",
+    "name": "Chiavi",
     "slug": "selfly",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "chiavo",
+    "scheme": "chiavi",
     "userInterfaceStyle": "light",
     "splash": {
       "backgroundColor": "#FEF7E4",
@@ -19,8 +19,8 @@
       "bundleIdentifier": "com.selfly.app",
       "buildNumber": "1",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Chiavo needs access to your photo library to add photos of your property to your listing.",
-        "NSCameraUsageDescription": "Chiavo needs camera access to take photos of your property for your listing.",
+        "NSPhotoLibraryUsageDescription": "Chiavi needs access to your photo library to add photos of your property to your listing.",
+        "NSCameraUsageDescription": "Chiavi needs camera access to take photos of your property for your listing.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },

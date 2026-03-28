@@ -182,7 +182,7 @@ export default function UpgradePage() {
           Upgrade or downgrade at any time.
         </p>
         <p className="text-xs text-navy-light/50 mt-2">
-          Questions? Contact us at support@chiavo.com
+          Questions? Contact us at support@chiavi.com
         </p>
       </div>
     </div>
