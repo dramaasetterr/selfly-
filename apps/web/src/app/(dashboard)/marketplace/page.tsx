@@ -119,39 +119,45 @@ export default function MarketplacePage() {
       </div>
 
       {/* Search & Filters */}
-      <div className="bg-white rounded-2xl border border-gold-muted/30 p-4">
-        <div className="flex flex-col md:flex-row gap-3">
-          <div className="flex-1">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by address, city, or title..."
-              className="w-full px-4 py-2.5 border border-gold-muted/50 rounded-xl focus:ring-2 focus:ring-gold/40 focus:outline-none text-navy placeholder:text-navy-light/40 text-sm"
-            />
-          </div>
-          <select
-            value={propertyType}
-            onChange={(e) => setPropertyType(e.target.value)}
-            className="px-4 py-2.5 border border-gold-muted/50 rounded-xl focus:ring-2 focus:ring-gold/40 focus:outline-none text-navy bg-white text-sm"
-          >
+      <div className="space-y-4">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by address, city, or title..."
+          className="w-full px-5 py-3 bg-white border border-gold-muted/40 rounded-2xl focus:ring-2 focus:ring-gold/40 focus:outline-none text-navy placeholder:text-navy-light/40 text-sm shadow-sm"
+        />
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-2">
             {PROPERTY_TYPE_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
+              <button
+                key={opt.value}
+                onClick={() => setPropertyType(propertyType === opt.value ? "" : opt.value)}
+                className={`px-4 py-2 rounded-full text-xs font-semibold transition ${
+                  propertyType === opt.value
+                    ? "bg-navy text-cream shadow-md"
+                    : "bg-white text-navy border border-gold-muted/40 hover:border-gold hover:shadow-sm"
+                }`}
+              >
                 {opt.label}
-              </option>
+              </button>
             ))}
-          </select>
-          <select
-            value={priceRange}
-            onChange={(e) => setPriceRange(e.target.value)}
-            className="px-4 py-2.5 border border-gold-muted/50 rounded-xl focus:ring-2 focus:ring-gold/40 focus:outline-none text-navy bg-white text-sm"
-          >
+          </div>
+          <div className="flex flex-wrap gap-2">
             {PRICE_RANGES.map((opt) => (
-              <option key={opt.value} value={opt.value}>
+              <button
+                key={opt.value}
+                onClick={() => setPriceRange(priceRange === opt.value ? "" : opt.value)}
+                className={`px-4 py-2 rounded-full text-xs font-semibold transition ${
+                  priceRange === opt.value
+                    ? "bg-navy text-cream shadow-md"
+                    : "bg-white text-navy border border-gold-muted/40 hover:border-gold hover:shadow-sm"
+                }`}
+              >
                 {opt.label}
-              </option>
+              </button>
             ))}
-          </select>
+          </div>
         </div>
       </div>
 

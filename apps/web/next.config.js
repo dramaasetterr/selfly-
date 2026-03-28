@@ -4,6 +4,15 @@ const path = require("path");
 const nextConfig = {
   output: "standalone",
   transpilePackages: ["@chiavi/shared"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "ysrfxvdxiavyxygttppf.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
+  },
   // Use standalone output for production deployment (Vercel handles this automatically)
   webpack: (config, { isServer }) => {
     // In monorepo, ensure Next.js uses React 19 (not React 18 from mobile workspace)
