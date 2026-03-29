@@ -39,6 +39,20 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Email verification enforcement — redirect unverified users to /verify-email
+  // Allow access to /verify-email itself and auth pages
+  if (
+    user &&
+    !user.email_confirmed_at &&
+    request.nextUrl.pathname !== "/verify-email" &&
+    request.nextUrl.pathname !== "/login" &&
+    request.nextUrl.pathname !== "/signup"
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/verify-email";
+    return NextResponse.redirect(url);
+  }
+
   // If logged in and visiting auth pages, redirect to dashboard
   if (
     user &&

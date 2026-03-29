@@ -40,6 +40,9 @@ export default function SignUpPage() {
       return;
     }
 
+    // Send welcome email (fire-and-forget)
+    fetch("/api/welcome-email", { method: "POST" }).catch(() => {});
+
     router.push("/dashboard");
   };
 

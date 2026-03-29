@@ -9,9 +9,16 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="w-full max-w-md">
         {children}
       </div>
-      <p className="mt-12 text-sm text-navy-light/50">
-        &copy; 2026 Chiavi. All rights reserved.
-      </p>
+      <div className="mt-12 flex flex-col items-center gap-2">
+        <p className="text-sm text-navy-light/50">
+          &copy; 2026 Chiavi. All rights reserved.
+        </p>
+        <div className="flex items-center gap-4 text-xs text-navy-light/40">
+          <a href="/privacy" className="hover:text-gold transition">Privacy Policy</a>
+          <span>&middot;</span>
+          <a href="/terms" className="hover:text-gold transition">Terms of Service</a>
+        </div>
+      </div>
     </div>
   );
 }

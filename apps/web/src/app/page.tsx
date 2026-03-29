@@ -414,13 +414,13 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6 text-sm text-navy-light/60">
           <p>&copy; 2026 Chiavi. All rights reserved.</p>
           <div className="flex items-center gap-6">
-            <a href="#" className="hover:text-gold transition">
+            <a href="/privacy" className="hover:text-gold transition">
               Privacy Policy
             </a>
-            <a href="#" className="hover:text-gold transition">
+            <a href="/terms" className="hover:text-gold transition">
               Terms of Service
             </a>
-            <a href="#" className="hover:text-gold transition">
+            <a href="mailto:support@chiavi.com" className="hover:text-gold transition">
               Contact
             </a>
           </div>

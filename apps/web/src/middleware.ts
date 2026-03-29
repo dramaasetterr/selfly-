@@ -22,5 +22,6 @@ export const config = {
     "/upgrade/:path*",
     "/login",
     "/signup",
+    "/verify-email",
   ],
 };

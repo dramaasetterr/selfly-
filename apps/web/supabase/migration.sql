@@ -266,6 +266,7 @@ DO $$ BEGIN ALTER TABLE public.profiles ADD COLUMN full_name text NOT NULL DEFAU
 DO $$ BEGIN ALTER TABLE public.profiles ADD COLUMN avatar_url text; EXCEPTION WHEN duplicate_column THEN NULL; END $$;
 DO $$ BEGIN ALTER TABLE public.profiles ADD COLUMN phone text; EXCEPTION WHEN duplicate_column THEN NULL; END $$;
 DO $$ BEGIN ALTER TABLE public.profiles ADD COLUMN current_stage text NOT NULL DEFAULT 'prep_your_home'; EXCEPTION WHEN duplicate_column THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE public.profiles ADD COLUMN push_token text; EXCEPTION WHEN duplicate_column THEN NULL; END $$;
 
 -- --------------------------------------------------------------------------
 -- 3. Indexes

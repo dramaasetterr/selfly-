@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, NavigationContainerRef } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
+import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
+import { registerForPushNotifications } from "./src/lib/notifications";
 import OnboardingScreen, { ONBOARDING_KEY } from "./src/screens/OnboardingScreen";
 import WelcomeScreen from "./src/screens/WelcomeScreen";
 import SignUpScreen from "./src/screens/SignUpScreen";
@@ -95,7 +97,38 @@ function AuthNavigator({ hasSeenOnboarding }: { hasSeenOnboarding: boolean }) {
   );
 }
 
-function AppNavigator() {
+function AppNavigator({ navigationRef }: { navigationRef: React.RefObject<NavigationContainerRef<AppStackParamList>> }) {
+  useEffect(() => {
+    // Register for push notifications when authenticated
+    registerForPushNotifications();
+  }, []);
+
+  useEffect(() => {
+    // Handle notification taps — navigate to the relevant screen
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const data = response.notification.request.content.data;
+        if (!navigationRef.current) return;
+
+        if (data?.type === "message" && data?.listingId && data?.otherPartyId) {
+          navigationRef.current.navigate("Conversation", {
+            listingId: data.listingId as string,
+            otherPartyId: data.otherPartyId as string,
+            otherPartyName: (data.otherPartyName as string) ?? "User",
+          });
+        } else if (data?.type === "offer") {
+          navigationRef.current.navigate("Offers");
+        } else if (data?.type === "showing") {
+          navigationRef.current.navigate("Showings");
+        } else if (data?.type === "message") {
+          navigationRef.current.navigate("Messages");
+        }
+      }
+    );
+
+    return () => subscription.remove();
+  }, [navigationRef]);
+
   return (
     <AppStack.Navigator
       screenOptions={{
@@ -131,7 +164,7 @@ function AppNavigator() {
   );
 }
 
-function RootNavigator() {
+function RootNavigator({ navigationRef }: { navigationRef: React.RefObject<NavigationContainerRef<AppStackParamList>> }) {
   const { session, loading: authLoading } = useAuth();
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
 
@@ -150,17 +183,19 @@ function RootNavigator() {
   }
 
   return session ? (
-    <AppNavigator />
+    <AppNavigator navigationRef={navigationRef} />
   ) : (
     <AuthNavigator hasSeenOnboarding={hasSeenOnboarding} />
   );
 }
 
 export default function App() {
+  const navigationRef = useRef<NavigationContainerRef<AppStackParamList>>(null);
+
   return (
     <AuthProvider>
-      <NavigationContainer>
-        <RootNavigator />
+      <NavigationContainer ref={navigationRef}>
+        <RootNavigator navigationRef={navigationRef} />
         <StatusBar style="dark" />
       </NavigationContainer>
     </AuthProvider>
