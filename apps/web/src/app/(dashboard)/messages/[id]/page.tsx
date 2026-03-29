@@ -168,7 +168,7 @@ export default function ConversationPage() {
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       {/* Header */}
       <div className="flex items-center gap-4 mb-4">
-        <Link href="/dashboard/messages" className="text-gold-dark hover:text-gold text-sm">
+        <Link href="/messages" className="text-gold-dark hover:text-gold text-sm">
           &larr; Back
         </Link>
         <div className="w-9 h-9 rounded-full bg-gold-bg flex items-center justify-center text-sm font-semibold text-gold">

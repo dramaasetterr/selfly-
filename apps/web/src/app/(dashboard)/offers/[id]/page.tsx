@@ -107,7 +107,7 @@ export default function OfferDetailPage() {
   if (error && !offer) {
     return (
       <div className="space-y-4">
-        <Link href="/dashboard/offers" className="text-gold-dark hover:text-gold text-sm">&larr; Back to Offers</Link>
+        <Link href="/offers" className="text-gold-dark hover:text-gold text-sm">&larr; Back to Offers</Link>
         <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-red-700">{error}</div>
       </div>
     );
@@ -117,7 +117,7 @@ export default function OfferDetailPage() {
 
   return (
     <div className="space-y-6">
-      <Link href="/dashboard/offers" className="text-gold-dark hover:text-gold text-sm inline-block">
+      <Link href="/offers" className="text-gold-dark hover:text-gold text-sm inline-block">
         &larr; Back to Offers
       </Link>
 

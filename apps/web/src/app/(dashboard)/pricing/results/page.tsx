@@ -53,7 +53,7 @@ function PricingResultsContent() {
             It looks like there are no results to display. Run a new analysis to get started.
           </p>
           <Link
-            href="/dashboard/pricing"
+            href="/pricing"
             className="inline-block px-6 py-3 bg-gold hover:bg-gold-dark text-navy font-semibold rounded-xl transition"
           >
             Run New Analysis
@@ -160,13 +160,13 @@ function PricingResultsContent() {
       {/* Actions */}
       <div className="flex gap-4">
         <Link
-          href="/dashboard/pricing"
+          href="/pricing"
           className="px-6 py-3 bg-gold hover:bg-gold-dark text-navy font-semibold rounded-xl transition"
         >
           Run Another Analysis
         </Link>
         <Link
-          href="/dashboard/listing"
+          href="/listing"
           className="px-6 py-3 bg-navy hover:bg-navy-light text-cream rounded-xl font-semibold transition"
         >
           Create Listing

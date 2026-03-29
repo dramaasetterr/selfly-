@@ -138,7 +138,7 @@ export default function ClosingPage() {
           </p>
         </div>
         <Link
-          href="/dashboard/closing/guide"
+          href="/closing/guide"
           className="bg-navy hover:bg-navy-light text-cream rounded-xl px-5 py-2.5 text-sm font-semibold transition"
         >
           AI Closing Guide

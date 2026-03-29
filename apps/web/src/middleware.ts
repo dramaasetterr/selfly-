@@ -7,8 +7,19 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match all dashboard routes and auth routes
+    // Match all dashboard/app routes and auth routes
     "/dashboard/:path*",
+    "/prep/:path*",
+    "/pricing/:path*",
+    "/listing/:path*",
+    "/showings/:path*",
+    "/offers/:path*",
+    "/closing/:path*",
+    "/documents/:path*",
+    "/marketplace/:path*",
+    "/messages/:path*",
+    "/profile/:path*",
+    "/upgrade/:path*",
     "/login",
     "/signup",
   ],

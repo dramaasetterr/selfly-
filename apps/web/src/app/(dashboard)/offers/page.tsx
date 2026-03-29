@@ -84,7 +84,7 @@ export default function OffersPage() {
           </p>
         </div>
         <Link
-          href="/dashboard/offers/new"
+          href="/offers/new"
           className="bg-gold hover:bg-gold-dark text-navy font-semibold rounded-xl px-5 py-2.5 text-sm transition"
         >
           + New Offer
@@ -133,7 +133,7 @@ export default function OffersPage() {
           {filtered.map((offer) => (
             <Link
               key={offer.id}
-              href={`/dashboard/offers/${offer.id}`}
+              href={`/offers/${offer.id}`}
               className="block bg-white rounded-2xl border border-gold-muted/30 p-6 hover:shadow-md transition group"
             >
               <div className="flex items-start justify-between">
@@ -177,7 +177,7 @@ export default function OffersPage() {
       {offers.length >= 2 && (
         <div className="text-center">
           <Link
-            href="/dashboard/offers/compare"
+            href="/offers/compare"
             className="text-gold-dark hover:text-gold font-medium text-sm transition"
           >
             Compare Offers Side-by-Side &rarr;

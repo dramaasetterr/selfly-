@@ -93,7 +93,7 @@ export default function ClosingGuidePage() {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/dashboard/closing" className="text-gold-dark hover:text-gold text-sm">
+        <Link href="/closing" className="text-gold-dark hover:text-gold text-sm">
           &larr; Back to Closing
         </Link>
         <h1 className="font-heading font-bold text-navy text-2xl mt-2">AI Closing Guide</h1>

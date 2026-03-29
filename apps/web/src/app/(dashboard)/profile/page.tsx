@@ -195,7 +195,7 @@ export default function ProfilePage() {
           </div>
           {isFreeTier && (
             <Link
-              href="/dashboard/upgrade"
+              href="/upgrade"
               className="px-5 py-2.5 bg-navy hover:bg-navy-light text-cream rounded-xl font-semibold text-sm transition"
             >
               Upgrade Plan

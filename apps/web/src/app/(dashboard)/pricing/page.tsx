@@ -117,7 +117,7 @@ export default function PricingPage() {
         data: JSON.stringify(data),
       });
 
-      router.push(`/dashboard/pricing/results?${params.toString()}`);
+      router.push(`/pricing/results?${params.toString()}`);
     } catch (err: any) {
       setError(err.message || "Failed to get pricing. Please try again.");
     } finally {

@@ -97,7 +97,7 @@ export default function NewOfferPage() {
         console.warn("AI analysis request failed");
       }
 
-      router.push(`/dashboard/offers/${offer.id}`);
+      router.push(`/offers/${offer.id}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to submit offer");
       setSubmitting(false);

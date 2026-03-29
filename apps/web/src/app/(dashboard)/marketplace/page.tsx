@@ -211,7 +211,7 @@ export default function MarketplacePage() {
             return (
               <Link
                 key={listing.id}
-                href={`/dashboard/marketplace/${listing.id}`}
+                href={`/marketplace/${listing.id}`}
                 className="bg-white rounded-2xl border border-gold-muted/30 overflow-hidden hover:shadow-lg transition group"
               >
                 {/* Photo */}

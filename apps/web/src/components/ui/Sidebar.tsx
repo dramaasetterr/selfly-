@@ -8,18 +8,18 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const SELLER_NAV = [
   { href: "/dashboard", label: "Dashboard", icon: "\u2302" },
-  { href: "/dashboard/prep", label: "Prep Your Home", icon: "\u2726" },
-  { href: "/dashboard/pricing", label: "Price It", icon: "\u2736" },
-  { href: "/dashboard/listing", label: "Create Listing", icon: "\u270E" },
-  { href: "/dashboard/showings", label: "Showings", icon: "\u25A3" },
-  { href: "/dashboard/offers", label: "Offers", icon: "\u2637" },
-  { href: "/dashboard/closing", label: "Closing", icon: "\u2714" },
-  { href: "/dashboard/documents", label: "Documents", icon: "\u25C6" },
+  { href: "/prep", label: "Prep Your Home", icon: "\u2726" },
+  { href: "/pricing", label: "Price It", icon: "\u2736" },
+  { href: "/listing", label: "Create Listing", icon: "\u270E" },
+  { href: "/showings", label: "Showings", icon: "\u25A3" },
+  { href: "/offers", label: "Offers", icon: "\u2637" },
+  { href: "/closing", label: "Closing", icon: "\u2714" },
+  { href: "/documents", label: "Documents", icon: "\u25C6" },
 ];
 
 const SECONDARY_NAV = [
-  { href: "/dashboard/marketplace", label: "Marketplace", icon: "\u2616" },
-  { href: "/dashboard/messages", label: "Messages", icon: "\u2709" },
+  { href: "/marketplace", label: "Marketplace", icon: "\u2616" },
+  { href: "/messages", label: "Messages", icon: "\u2709" },
 ];
 
 export default function Sidebar() {
@@ -89,7 +89,7 @@ export default function Sidebar() {
               {user?.user_metadata?.full_name || user?.email || "User"}
             </p>
             <div className="flex gap-3">
-              <Link href="/dashboard/profile" onClick={() => setMobileOpen(false)} className="text-xs text-navy-light hover:text-gold transition">
+              <Link href="/profile" onClick={() => setMobileOpen(false)} className="text-xs text-navy-light hover:text-gold transition">
                 Profile
               </Link>
               <button onClick={signOut} className="text-xs text-navy-light hover:text-error transition">

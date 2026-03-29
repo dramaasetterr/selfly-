@@ -134,7 +134,7 @@ export default function MessagesPage() {
           {conversations.map((conv) => (
             <Link
               key={conv.id}
-              href={`/dashboard/messages/${encodeURIComponent(conv.id)}`}
+              href={`/messages/${encodeURIComponent(conv.id)}`}
               className="flex items-center gap-4 px-6 py-4 hover:bg-cream-light transition group"
             >
               {/* Avatar */}

@@ -149,7 +149,7 @@ export default function CompareOffersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/dashboard/offers" className="text-gold-dark hover:text-gold text-sm">
+        <Link href="/offers" className="text-gold-dark hover:text-gold text-sm">
           &larr; Back to Offers
         </Link>
         <h1 className="font-heading font-bold text-navy text-2xl mt-2">Compare Offers</h1>
