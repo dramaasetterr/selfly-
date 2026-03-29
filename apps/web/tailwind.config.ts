@@ -5,7 +5,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        cream: { DEFAULT: "#F0E6D0", light: "#F7F0E2" },
+        cream: { DEFAULT: "#F8EDD1", light: "#F8EDD1" },
         navy: { DEFAULT: "#1C1C28", light: "#2D2D3D" },
         gold: {
           DEFAULT: "#C4A265",
