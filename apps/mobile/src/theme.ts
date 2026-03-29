@@ -17,6 +17,7 @@ export const colors = {
 
   // Status
   success: '#2D7A4F',
+  successLight: '#E8F5E9',
   warning: '#C4A265',
   error: '#B03A3A',
   errorLight: '#FAEAEA',

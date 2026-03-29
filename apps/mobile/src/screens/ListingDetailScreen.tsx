@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   Image,
+  Linking,
   SafeAreaView,
   ScrollView,
   Share,
@@ -16,6 +18,7 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AppStackParamList } from '../../App';
+import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { colors, shadows, spacing, borderRadius, typography } from '../theme';
 
@@ -25,6 +28,7 @@ import { colors, shadows, spacing, borderRadius, typography } from '../theme';
 
 interface Listing {
   id: string;
+  user_id: string;
   address: string;
   city: string;
   state: string;
@@ -51,10 +55,12 @@ export default function ListingDetailScreen() {
   const route = useRoute<RouteProp<AppStackParamList, 'ListingDetail'>>();
   const { listingId } = route.params;
 
+  const { user } = useAuth();
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -78,6 +84,38 @@ export default function ListingDetailScreen() {
       }
     })();
   }, [listingId]);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('favorites').select('id').eq('user_id', user.id).eq('listing_id', listingId).then(({ data }) => {
+      if (data && data.length > 0) setIsSaved(true);
+    });
+  }, [user, listingId]);
+
+  const toggleSave = async () => {
+    if (!user) { Alert.alert('Sign In Required', 'Please sign in to save listings.'); return; }
+    setIsSaved(!isSaved);
+    if (isSaved) {
+      await supabase.from('favorites').delete().eq('user_id', user.id).eq('listing_id', listingId);
+    } else {
+      await supabase.from('favorites').insert({ user_id: user.id, listing_id: listingId });
+    }
+  };
+
+  const callSeller = async () => {
+    if (!listing) return;
+    try {
+      const { data } = await supabase.from('profiles').select('phone').eq('id', listing.user_id).single();
+      if (data?.phone) {
+        Linking.openURL(`tel:${data.phone}`);
+      } else {
+        Alert.alert('No Phone Number', 'This seller hasn\'t added a phone number. You can message them instead.', [
+          { text: 'Message', onPress: () => navigation.navigate('ContactSeller', { listingId: listing.id }) },
+          { text: 'Cancel', style: 'cancel' },
+        ]);
+      }
+    } catch { Alert.alert('Error', 'Could not fetch seller info.'); }
+  };
 
   const handleShare = async () => {
     if (!listing) return;
@@ -137,9 +175,14 @@ export default function ListingDetailScreen() {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <Text style={styles.backText}>← Back</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
-            <Text style={styles.shareText}>Share ↗</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: spacing.md }}>
+            <TouchableOpacity onPress={toggleSave} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Text style={{ fontSize: 22 }}>{isSaved ? '❤️' : '🤍'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
+              <Text style={styles.shareText}>Share ↗</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Photo carousel */}
@@ -245,22 +288,31 @@ export default function ListingDetailScreen() {
           )}
         </View>
 
+        {/* Action buttons */}
+        <View style={{ flexDirection: 'row', marginHorizontal: spacing.lg, gap: spacing.sm, marginBottom: spacing.md }}>
+          <TouchableOpacity
+            style={[styles.showingButton, { flex: 1, marginHorizontal: 0 }]}
+            activeOpacity={0.8}
+            onPress={callSeller}
+          >
+            <Text style={styles.showingButtonText}>📞 Call Seller</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.contactSellerButton, { flex: 1, marginHorizontal: 0 }]}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('ContactSeller', { listingId: listing.id })}
+          >
+            <Text style={styles.contactSellerButtonText}>✉️ Message</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Schedule Showing */}
         <TouchableOpacity
           style={styles.showingButton}
           activeOpacity={0.8}
           onPress={() => navigation.navigate('BookShowing', { listingId: listing.id })}
         >
-          <Text style={styles.showingButtonText}>Schedule a Showing</Text>
-        </TouchableOpacity>
-
-        {/* Contact Seller */}
-        <TouchableOpacity
-          style={styles.contactSellerButton}
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate('ContactSeller', { listingId: listing.id })}
-        >
-          <Text style={styles.contactSellerButtonText}>Contact Seller</Text>
+          <Text style={styles.showingButtonText}>📅 Schedule a Showing</Text>
         </TouchableOpacity>
 
         {/* Make an Offer info */}

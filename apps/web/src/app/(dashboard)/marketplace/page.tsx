@@ -49,6 +49,7 @@ export default function MarketplacePage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
 
   // Filters
   const [search, setSearch] = useState("");
@@ -76,6 +77,32 @@ export default function MarketplacePage() {
 
     fetchListings();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const supabase = createClient();
+    supabase.from("favorites").select("listing_id").eq("user_id", user.id).then(({ data }) => {
+      if (data) setSavedIds(new Set(data.map((f: any) => f.listing_id)));
+    });
+  }, [user]);
+
+  const toggleSave = async (e: React.MouseEvent, listingId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) return;
+    const supabase = createClient();
+    const isSaved = savedIds.has(listingId);
+    setSavedIds((prev) => {
+      const next = new Set(prev);
+      if (isSaved) next.delete(listingId); else next.add(listingId);
+      return next;
+    });
+    if (isSaved) {
+      await supabase.from("favorites").delete().eq("user_id", user.id).eq("listing_id", listingId);
+    } else {
+      await supabase.from("favorites").insert({ user_id: user.id, listing_id: listingId });
+    }
+  };
 
   const filtered = useMemo(() => {
     let result = listings;
@@ -200,6 +227,18 @@ export default function MarketplacePage() {
                     <div className="flex items-center justify-center h-full">
                       <span className="text-4xl text-navy-light/20">{"\u2302"}</span>
                     </div>
+                  )}
+                  {/* Save heart */}
+                  <button
+                    onClick={(e) => toggleSave(e, listing.id)}
+                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow hover:scale-110 transition z-10"
+                  >
+                    <span className="text-sm">{savedIds.has(listing.id) ? "❤️" : "🤍"}</span>
+                  </button>
+                  {listing.photos?.length > 1 && (
+                    <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded">
+                      📷 {listing.photos.length}
+                    </span>
                   )}
                 </div>
 
