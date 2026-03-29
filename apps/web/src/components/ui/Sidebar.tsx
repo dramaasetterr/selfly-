@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -24,16 +25,10 @@ const SECONDARY_NAV = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  return (
-    <aside className="w-64 bg-white border-r border-gold-muted/30 flex flex-col h-screen sticky top-0">
-      {/* Logo */}
-      <div className="px-6 py-5 border-b border-gold-muted/20">
-        <Link href="/dashboard">
-          <Image src="/logo.png" alt="Chiavi" width={200} height={56} className="h-12 w-auto" />
-        </Link>
-      </div>
-
+  const navContent = (
+    <>
       {/* Seller Pipeline */}
       <nav className="flex-1 overflow-y-auto py-4 px-3">
         <p className="px-3 mb-2 text-xs font-semibold text-navy-light/50 uppercase tracking-wider">
@@ -45,6 +40,7 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition mb-0.5 ${
                 active
                   ? "bg-gold-bg text-navy font-semibold"
@@ -68,6 +64,7 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition mb-0.5 ${
                 active
                   ? "bg-gold-bg text-navy font-semibold"
@@ -92,7 +89,7 @@ export default function Sidebar() {
               {user?.user_metadata?.full_name || user?.email || "User"}
             </p>
             <div className="flex gap-3">
-              <Link href="/dashboard/profile" className="text-xs text-navy-light hover:text-gold transition">
+              <Link href="/dashboard/profile" onClick={() => setMobileOpen(false)} className="text-xs text-navy-light hover:text-gold transition">
                 Profile
               </Link>
               <button onClick={signOut} className="text-xs text-navy-light hover:text-error transition">
@@ -102,6 +99,65 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile top bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-b border-gold-muted/30 flex items-center justify-between px-4 py-3">
+        <Link href="/dashboard">
+          <Image src="/logo.png" alt="Chiavi" width={140} height={40} className="h-9 w-auto" />
+        </Link>
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-cream transition"
+        >
+          {mobileOpen ? (
+            <svg className="w-6 h-6 text-navy" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6 text-navy" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-40 bg-navy/40 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
+      )}
+
+      {/* Mobile drawer */}
+      <aside
+        className={`md:hidden fixed top-0 left-0 z-50 w-72 bg-white h-screen flex flex-col transition-transform duration-300 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="px-6 py-5 border-b border-gold-muted/20 flex items-center justify-between">
+          <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
+            <Image src="/logo.png" alt="Chiavi" width={160} height={44} className="h-10 w-auto" />
+          </Link>
+          <button onClick={() => setMobileOpen(false)} className="p-1">
+            <svg className="w-5 h-5 text-navy-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        {navContent}
+      </aside>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-64 bg-white border-r border-gold-muted/30 flex-col h-screen sticky top-0">
+        <div className="px-6 py-5 border-b border-gold-muted/20">
+          <Link href="/dashboard">
+            <Image src="/logo.png" alt="Chiavi" width={200} height={56} className="h-12 w-auto" />
+          </Link>
+        </div>
+        {navContent}
+      </aside>
+    </>
   );
 }

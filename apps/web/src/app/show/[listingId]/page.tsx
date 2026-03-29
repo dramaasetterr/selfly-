@@ -327,7 +327,7 @@ export default function BookShowingPage() {
 
       {/* Booking content */}
       <section className="max-w-6xl mx-auto px-6 py-12 sm:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
 
           {/* Left: Time slots */}
           <div className="lg:col-span-2">

@@ -189,7 +189,7 @@ export default function ListingDetailPage() {
             <img
               src={photos[selectedPhoto]}
               alt={`Photo ${selectedPhoto + 1}`}
-              className="w-full h-[400px] object-cover"
+              className="w-full h-[240px] sm:h-[320px] md:h-[400px] object-cover"
             />
             {photos.length > 1 && (
               <>
@@ -223,7 +223,7 @@ export default function ListingDetailPage() {
                 <button
                   key={i}
                   onClick={() => setSelectedPhoto(i)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-colors ${
+                  className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-colors ${
                     i === selectedPhoto ? "border-gold" : "border-gold-muted/30 hover:border-gold/50"
                   }`}
                 >
@@ -244,7 +244,7 @@ export default function ListingDetailPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Main Info */}
         <div className="md:col-span-2 space-y-6">
           {/* Title & Price */}
@@ -263,7 +263,7 @@ export default function ListingDetailPage() {
                 </div>
               </div>
               {listing.price && (
-                <p className="font-heading font-bold text-gold-dark text-3xl">
+                <p className="font-heading font-bold text-gold-dark text-2xl sm:text-3xl">
                   {formatPrice(listing.price)}
                 </p>
               )}

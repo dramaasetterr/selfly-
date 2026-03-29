@@ -142,7 +142,7 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {/* Welcome */}
       <div>
-        <h1 className="font-heading font-bold text-navy text-3xl">
+        <h1 className="font-heading font-bold text-navy text-2xl sm:text-3xl">
           Welcome back, {firstName}
         </h1>
         <p className="text-navy-light mt-1">
@@ -151,9 +151,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Pipeline Progress */}
-      <div className="bg-white rounded-2xl border border-gold-muted/30 p-6">
-        <h2 className="font-heading font-bold text-navy text-lg mb-4">Your Pipeline</h2>
-        <div className="flex items-center gap-1 mb-6">
+      <div className="bg-white rounded-2xl border border-gold-muted/30 p-4 sm:p-6">
+        <h2 className="font-heading font-bold text-navy text-base sm:text-lg mb-4">Your Pipeline</h2>
+        <div className="flex items-center gap-0.5 sm:gap-1 mb-6">
           {PIPELINE_STAGES.map((stage, i) => {
             const isComplete = i < currentStageIndex;
             const isCurrent = i === currentStageIndex;
@@ -169,7 +169,7 @@ export default function DashboardPage() {
                   }`}
                 />
                 <span
-                  className={`text-[10px] font-medium text-center leading-tight ${
+                  className={`text-[9px] sm:text-[10px] font-medium text-center leading-tight hidden sm:block ${
                     isCurrent ? "text-gold-dark font-semibold" : isComplete ? "text-success" : "text-navy-light/50"
                   }`}
                 >
@@ -181,7 +181,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Stage Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {PIPELINE_STAGES.map((stage, i) => {
             const isComplete = i < currentStageIndex;
             const isCurrent = i === currentStageIndex;
@@ -224,18 +224,18 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Stats + Tip */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Stats */}
-        <div className="lg:col-span-2 grid grid-cols-3 gap-4">
+        <div className="lg:col-span-2 grid grid-cols-3 gap-3 sm:gap-4">
           {[
             { label: "Listings", value: stats.listings, icon: "\u270E" },
             { label: "Showings", value: stats.showings, icon: "\u25A3" },
             { label: "Offers", value: stats.offers, icon: "\u2637" },
           ].map((stat) => (
-            <div key={stat.label} className="bg-white rounded-2xl border border-gold-muted/30 p-6 text-center">
-              <span className="text-2xl block mb-2">{stat.icon}</span>
-              <p className="text-3xl font-bold text-navy">{stat.value}</p>
-              <p className="text-sm text-navy-light mt-1">{stat.label}</p>
+            <div key={stat.label} className="bg-white rounded-2xl border border-gold-muted/30 p-4 sm:p-6 text-center">
+              <span className="text-xl sm:text-2xl block mb-1 sm:mb-2">{stat.icon}</span>
+              <p className="text-2xl sm:text-3xl font-bold text-navy">{stat.value}</p>
+              <p className="text-xs sm:text-sm text-navy-light mt-1">{stat.label}</p>
             </div>
           ))}
         </div>

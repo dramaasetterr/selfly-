@@ -181,7 +181,7 @@ export default function ShowingsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-heading font-bold text-navy text-3xl">Showings</h1>
+        <h1 className="font-heading font-bold text-navy text-2xl sm:text-3xl">Showings</h1>
         <p className="text-navy-light mt-1">Manage property showing requests and schedule</p>
       </div>
 
@@ -192,7 +192,7 @@ export default function ShowingsPage() {
       )}
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         {[
           { label: "Total Showings", value: showings.length, color: "text-navy" },
           { label: "Pending", value: pendingShowings.length, color: "text-amber-600" },
@@ -207,9 +207,9 @@ export default function ShowingsPage() {
       </div>
 
       {/* Calendar */}
-      <div className="bg-white rounded-2xl border border-gold-muted/30 p-6">
+      <div className="bg-white rounded-2xl border border-gold-muted/30 p-3 sm:p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-heading font-bold text-navy text-lg">Calendar</h2>
+          <h2 className="font-heading font-bold text-navy text-base sm:text-lg">Calendar</h2>
           <div className="flex items-center gap-3">
             <button onClick={() => navigateMonth(-1)} className="p-1.5 rounded-lg hover:bg-gold-bg transition-colors">
               <svg className="w-5 h-5 text-navy" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -225,25 +225,26 @@ export default function ShowingsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-7 gap-px bg-gold-muted/20 rounded-xl overflow-hidden">
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-            <div key={day} className="bg-gold-bg p-2 text-center text-xs font-semibold text-navy-light">
-              {day}
+        <div className="grid grid-cols-7 gap-px bg-gold-muted/20 rounded-xl overflow-hidden text-center">
+          {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
+            <div key={i} className="bg-gold-bg p-1.5 sm:p-2 text-[10px] sm:text-xs font-semibold text-navy-light">
+              <span className="sm:hidden">{day}</span>
+              <span className="hidden sm:inline">{["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i]}</span>
             </div>
           ))}
           {calendarDays.map((day, i) => (
             <div
               key={i}
-              className={`bg-white p-2 min-h-[72px] ${
+              className={`bg-white p-1 sm:p-2 min-h-[48px] sm:min-h-[72px] ${
                 !day.isCurrentMonth ? "opacity-40" : ""
               }`}
             >
-              <span className="text-xs text-navy-light">{day.day}</span>
+              <span className="text-[10px] sm:text-xs text-navy-light">{day.day}</span>
               {day.showings.map((s) => (
                 <Link
                   key={s.id}
                   href={`/showings/${s.id}`}
-                  className={`block text-xs mt-1 px-1.5 py-0.5 rounded truncate ${STATUS_STYLES[s.status]}`}
+                  className={`block text-[10px] sm:text-xs mt-0.5 sm:mt-1 px-1 sm:px-1.5 py-0.5 rounded truncate ${STATUS_STYLES[s.status]}`}
                 >
                   {formatTime(s.time)}
                 </Link>

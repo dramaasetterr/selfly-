@@ -114,7 +114,7 @@ export default function MarketplacePage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="font-heading font-bold text-navy text-3xl">Marketplace</h1>
+        <h1 className="font-heading font-bold text-navy text-2xl sm:text-3xl">Marketplace</h1>
         <p className="text-navy-light mt-1">Browse active listings from sellers in your area.</p>
       </div>
 
@@ -178,7 +178,7 @@ export default function MarketplacePage() {
           <p className="text-navy-light">No listings match your criteria. Try adjusting your filters.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {filtered.map((listing) => {
             const photo = listing.photos?.[0];
             return (

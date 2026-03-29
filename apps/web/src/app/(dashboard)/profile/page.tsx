@@ -112,7 +112,7 @@ export default function ProfilePage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="font-heading font-bold text-navy text-3xl">Your Profile</h1>
+        <h1 className="font-heading font-bold text-navy text-2xl sm:text-3xl">Your Profile</h1>
         <p className="text-navy-light mt-1">Manage your account details and subscription plan.</p>
       </div>
 

@@ -216,11 +216,11 @@ export default function CompareOffersPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gold-muted/20">
-                      <th className="text-left px-6 py-4 text-navy-light/60 font-medium w-40">
+                      <th className="text-left px-3 sm:px-6 py-3 sm:py-4 text-navy-light/60 font-medium min-w-[100px] sm:w-40">
                         Criteria
                       </th>
                       {compared.map((o) => (
-                        <th key={o.id} className="text-left px-6 py-4 text-navy font-semibold">
+                        <th key={o.id} className="text-left px-3 sm:px-6 py-3 sm:py-4 text-navy font-semibold text-sm sm:text-base">
                           {o.buyer_name}
                         </th>
                       ))}
@@ -229,11 +229,11 @@ export default function CompareOffersPage() {
                   <tbody>
                     {/* Price */}
                     <tr className="border-b border-gold-muted/10">
-                      <td className="px-6 py-3 text-navy-light/60 font-medium">Offer Price</td>
+                      <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-navy-light/60 font-medium text-xs sm:text-sm">Offer Price</td>
                       {compared.map((o) => (
                         <td
                           key={o.id}
-                          className={`px-6 py-3 font-semibold ${
+                          className={`px-3 sm:px-6 py-2.5 sm:py-3 font-semibold text-sm ${
                             isBest("price", o.offer_price, compared)
                               ? "text-gold-dark bg-gold-bg/50"
                               : "text-navy"
@@ -246,9 +246,9 @@ export default function CompareOffersPage() {
 
                     {/* Financing */}
                     <tr className="border-b border-gold-muted/10">
-                      <td className="px-6 py-3 text-navy-light/60 font-medium">Financing</td>
+                      <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-navy-light/60 font-medium text-xs sm:text-sm">Financing</td>
                       {compared.map((o) => (
-                        <td key={o.id} className="px-6 py-3 text-navy capitalize">
+                        <td key={o.id} className="px-3 sm:px-6 py-2.5 sm:py-3 text-navy capitalize text-sm">
                           {o.financing_type}
                         </td>
                       ))}
@@ -256,7 +256,7 @@ export default function CompareOffersPage() {
 
                     {/* Down Payment */}
                     <tr className="border-b border-gold-muted/10">
-                      <td className="px-6 py-3 text-navy-light/60 font-medium">Down Payment</td>
+                      <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-navy-light/60 font-medium text-xs sm:text-sm">Down Payment</td>
                       {compared.map((o) => (
                         <td
                           key={o.id}
@@ -273,7 +273,7 @@ export default function CompareOffersPage() {
 
                     {/* Contingencies */}
                     <tr className="border-b border-gold-muted/10">
-                      <td className="px-6 py-3 text-navy-light/60 font-medium">Contingencies</td>
+                      <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-navy-light/60 font-medium text-xs sm:text-sm">Contingencies</td>
                       {compared.map((o) => (
                         <td
                           key={o.id}
@@ -292,9 +292,9 @@ export default function CompareOffersPage() {
 
                     {/* Closing Date */}
                     <tr className="border-b border-gold-muted/10">
-                      <td className="px-6 py-3 text-navy-light/60 font-medium">Closing Date</td>
+                      <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-navy-light/60 font-medium text-xs sm:text-sm">Closing Date</td>
                       {compared.map((o) => (
-                        <td key={o.id} className="px-6 py-3 text-navy">
+                        <td key={o.id} className="px-3 sm:px-6 py-2.5 sm:py-3 text-navy text-sm">
                           {o.closing_date
                             ? new Date(o.closing_date).toLocaleDateString("en-US", {
                                 month: "short",
@@ -308,7 +308,7 @@ export default function CompareOffersPage() {
 
                     {/* AI Score */}
                     <tr>
-                      <td className="px-6 py-3 text-navy-light/60 font-medium">AI Score</td>
+                      <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-navy-light/60 font-medium text-xs sm:text-sm">AI Score</td>
                       {compared.map((o) => {
                         const score = analyses[o.id]?.overall_score;
                         return (
@@ -328,7 +328,7 @@ export default function CompareOffersPage() {
 
                     {/* Status */}
                     <tr className="border-t border-gold-muted/20">
-                      <td className="px-6 py-3 text-navy-light/60 font-medium">Status</td>
+                      <td className="px-3 sm:px-6 py-2.5 sm:py-3 text-navy-light/60 font-medium text-xs sm:text-sm">Status</td>
                       {compared.map((o) => (
                         <td key={o.id} className="px-6 py-3">
                           <span

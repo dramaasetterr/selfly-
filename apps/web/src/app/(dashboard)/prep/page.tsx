@@ -163,7 +163,7 @@ export default function PrepPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="font-heading font-bold text-navy text-3xl">Prep Your Home</h1>
+        <h1 className="font-heading font-bold text-navy text-2xl sm:text-3xl">Prep Your Home</h1>
         <p className="text-navy-light mt-1">
           Complete these tasks to get your home show-ready and maximize your selling price.
         </p>

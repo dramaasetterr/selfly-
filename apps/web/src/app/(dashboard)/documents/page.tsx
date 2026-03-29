@@ -126,7 +126,7 @@ export default function DocumentsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-heading font-bold text-navy text-3xl">Documents</h1>
+        <h1 className="font-heading font-bold text-navy text-2xl sm:text-3xl">Documents</h1>
         <p className="text-navy-light mt-1">Generate and manage your real estate documents</p>
       </div>
 
@@ -140,7 +140,7 @@ export default function DocumentsPage() {
       <div className="bg-white rounded-2xl border border-gold-muted/30 p-6 space-y-4">
         <h2 className="font-heading font-bold text-navy text-lg">Generate New Document</h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-navy mb-1">Document Type</label>
             <select

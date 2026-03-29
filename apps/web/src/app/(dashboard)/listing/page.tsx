@@ -223,7 +223,7 @@ export default function ListingBuilderPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-heading font-bold text-navy text-3xl">Create New Listing</h1>
+        <h1 className="font-heading font-bold text-navy text-2xl sm:text-3xl">Create New Listing</h1>
         <p className="text-navy-light mt-1">List your property in just a few steps</p>
       </div>
 
@@ -321,7 +321,7 @@ export default function ListingBuilderPage() {
               </select>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-navy mb-1">Beds</label>
                 <input

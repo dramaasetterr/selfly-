@@ -45,7 +45,7 @@ function PricingResultsContent() {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="font-heading font-bold text-navy text-3xl">Pricing Results</h1>
+          <h1 className="font-heading font-bold text-navy text-2xl sm:text-3xl">Pricing Results</h1>
           <p className="text-navy-light mt-1">No pricing data found.</p>
         </div>
         <div className="bg-white rounded-2xl border border-gold-muted/30 p-8 text-center">
@@ -89,7 +89,7 @@ function PricingResultsContent() {
       </div>
 
       {/* Price Recommendations */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
         {tiers.map((tier, i) => (
           <div
             key={i}
@@ -103,7 +103,7 @@ function PricingResultsContent() {
               </span>
             )}
             <p className="text-sm font-medium text-navy-light mb-1">{tier.tier}</p>
-            <p className="text-3xl font-bold text-navy mb-3">{formatCurrency(tier.price)}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-navy mb-3">{formatCurrency(tier.price)}</p>
             <p className="text-sm text-navy-light leading-relaxed">{tier.reasoning}</p>
           </div>
         ))}
