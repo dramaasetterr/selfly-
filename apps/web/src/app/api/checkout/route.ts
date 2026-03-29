@@ -4,12 +4,16 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!);
+}
 
-const PRICE_MAP: Record<string, string> = {
-  seller_pro: process.env.STRIPE_PRICE_SELLER_PRO!,
-  full_service: process.env.STRIPE_PRICE_FULL_SERVICE!,
-};
+function getPriceMap(): Record<string, string> {
+  return {
+    seller_pro: process.env.STRIPE_PRICE_SELLER_PRO!,
+    full_service: process.env.STRIPE_PRICE_FULL_SERVICE!,
+  };
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,6 +27,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { planId } = await request.json();
+    const PRICE_MAP = getPriceMap();
 
     if (!planId || !PRICE_MAP[planId]) {
       return NextResponse.json(
@@ -33,6 +38,7 @@ export async function POST(request: NextRequest) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],

@@ -4,13 +4,16 @@ import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!);
+}
 
-// Reverse map: price ID -> plan name
-const PRICE_TO_PLAN: Record<string, string> = {
-  [process.env.STRIPE_PRICE_SELLER_PRO!]: "seller_pro",
-  [process.env.STRIPE_PRICE_FULL_SERVICE!]: "full_service",
-};
+function getPriceToPlan(): Record<string, string> {
+  return {
+    [process.env.STRIPE_PRICE_SELLER_PRO!]: "seller_pro",
+    [process.env.STRIPE_PRICE_FULL_SERVICE!]: "full_service",
+  };
+}
 
 // Admin Supabase client with service role (bypasses RLS)
 function getServiceSupabase() {
@@ -32,6 +35,8 @@ export async function POST(request: NextRequest) {
   }
 
   let event: Stripe.Event;
+
+  const stripe = getStripe();
 
   try {
     event = stripe.webhooks.constructEvent(
@@ -70,7 +75,7 @@ export async function POST(request: NextRequest) {
       );
       const priceId = lineItems.data[0]?.price?.id;
       if (priceId) {
-        plan = PRICE_TO_PLAN[priceId];
+        plan = getPriceToPlan()[priceId];
       }
     }
 
