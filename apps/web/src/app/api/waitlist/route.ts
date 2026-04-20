@@ -4,14 +4,18 @@ import { json, OPTIONS } from "../_cors";
 
 export { OPTIONS };
 
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error("Missing required environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
+let _supabase: ReturnType<typeof createClient> | null = null;
+function getSupabase() {
+  if (!_supabase) {
+    const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) {
+      throw new Error("Missing Supabase env (SUPABASE_URL/NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY)");
+    }
+    _supabase = createClient(url, key);
+  }
+  return _supabase;
 }
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,7 +26,7 @@ export async function POST(req: NextRequest) {
       return json({ success: false, error: "Email and plan are required" }, 400);
     }
 
-    const { error } = await supabase.from("waitlist").insert({
+    const { error } = await getSupabase().from("waitlist").insert({
       email: email.trim().toLowerCase(),
       plan,
       source: source || "web",

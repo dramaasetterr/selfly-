@@ -1,6 +1,15 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let _resend: Resend | null = null;
+function getResend(): Resend {
+  if (!_resend) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error("Missing required environment variable: RESEND_API_KEY");
+    }
+    _resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return _resend;
+}
 
 const FROM = "Chiavi <notifications@chiavi.com>";
 
@@ -113,7 +122,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
     </p>
   `);
 
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: `Welcome to Chiavi, ${firstName}!`,
@@ -177,7 +186,7 @@ export async function sendNewOfferEmail(
     </p>
   `);
 
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: `New offer on ${address}: ${formattedPrice}`,
@@ -219,7 +228,7 @@ export async function sendNewMessageEmail(
     </p>
   `);
 
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: `New message from ${senderName} about ${address}`,
@@ -284,7 +293,7 @@ export async function sendListingPublishedEmail(
     </p>
   `);
 
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: `Your listing at ${address} is now live!`,

@@ -10,19 +10,29 @@ function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error("Missing required environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
-}
-if (!process.env.RESEND_API_KEY) {
-  throw new Error("Missing required environment variable: RESEND_API_KEY");
+let _supabase: ReturnType<typeof createClient> | null = null;
+function getSupabase() {
+  if (!_supabase) {
+    const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) {
+      throw new Error("Missing Supabase env (SUPABASE_URL/NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY)");
+    }
+    _supabase = createClient(url, key);
+  }
+  return _supabase;
 }
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+let _resend: Resend | null = null;
+function getResend(): Resend {
+  if (!_resend) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error("Missing required environment variable: RESEND_API_KEY");
+    }
+    _resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return _resend;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch the availability slot
-    const { data: slot, error: slotError } = await supabase
+    const { data: slot, error: slotError } = await getSupabase()
       .from("showing_availability")
       .select("*")
       .eq("id", slot_id)
@@ -50,7 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch listing for seller info
-    const { data: listing } = await supabase
+    const { data: listing } = await getSupabase()
       .from("listings")
       .select("*, user_id")
       .eq("id", listing_id)
@@ -61,14 +71,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Get seller profile for email
-    const { data: seller } = await supabase
+    const { data: seller } = await getSupabase()
       .from("profiles")
       .select("email, full_name")
       .eq("id", listing.user_id)
       .single();
 
     // Create the showing record
-    const { data: showing, error: showingError } = await supabase
+    const { data: showing, error: showingError } = await getSupabase()
       .from("showings")
       .insert({
         listing_id,
@@ -90,7 +100,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Mark slot as booked
-    await supabase
+    await getSupabase()
       .from("showing_availability")
       .update({ is_booked: true })
       .eq("id", slot_id);
@@ -107,7 +117,7 @@ export async function POST(request: NextRequest) {
     // Send email notification to seller
     if (seller?.email) {
       try {
-        await resend.emails.send({
+        await getResend().emails.send({
           from: "Chiavi <notifications@chiavi.com>",
           to: seller.email,
           subject: `New Showing Booked — ${listing.address}`,

@@ -4,14 +4,18 @@ import { json, OPTIONS } from "../../../_cors";
 
 export { OPTIONS };
 
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error("Missing required environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
+let _supabase: ReturnType<typeof createClient> | null = null;
+function getSupabase() {
+  if (!_supabase) {
+    const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) {
+      throw new Error("Missing Supabase env (SUPABASE_URL/NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY)");
+    }
+    _supabase = createClient(url, key);
+  }
+  return _supabase;
 }
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
 export async function GET(
   request: NextRequest,
@@ -26,7 +30,7 @@ export async function GET(
 
     const today = new Date().toISOString().split("T")[0];
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from("showing_availability")
       .select("*")
       .eq("listing_id", listingId)
