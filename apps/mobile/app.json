@@ -16,7 +16,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.selfly.app",
+      "bundleIdentifier": "com.chiavi.app",
       "buildNumber": "1",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Chiavi needs access to your photo library to add photos of your property to your listing.",
@@ -29,7 +29,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FEF7E4"
       },
-      "package": "com.selfly.app",
+      "package": "com.chiavi.app",
       "versionCode": 1,
       "permissions": [
         "android.permission.RECORD_AUDIO"

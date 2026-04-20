@@ -171,6 +171,64 @@ export interface Document {
 export type PropertyCondition = "Excellent" | "Good" | "Fair" | "Needs Work";
 export type PriceType = "sell_fast" | "recommended" | "maximize";
 
+export type PoolType =
+  | "none"
+  | "above_ground"
+  | "in_ground"
+  | "saltwater"
+  | "heated"
+  | "saltwater_heated"
+  | "infinity"
+  | "indoor";
+
+export const PREMIUM_FINISHES = [
+  "marble_countertops",
+  "granite_countertops",
+  "quartz_countertops",
+  "hardwood_floors",
+  "heated_floors",
+  "custom_millwork",
+  "chef_kitchen",
+  "smart_home",
+  "wine_cellar",
+  "home_theater",
+  "sauna",
+  "gym",
+  "elevator",
+  "vaulted_ceilings",
+  "skylights",
+  "floor_to_ceiling_windows",
+  "fireplace",
+  "butler_pantry",
+  "walk_in_closets",
+  "designer_bathrooms",
+] as const;
+export type PremiumFinish = (typeof PREMIUM_FINISHES)[number];
+
+export const OUTDOOR_FEATURES = [
+  "fire_pit",
+  "outdoor_kitchen",
+  "bbq_patio",
+  "covered_patio",
+  "deck",
+  "pergola",
+  "gazebo",
+  "koi_pond",
+  "water_feature",
+  "landscape_lighting",
+  "sprinkler_system",
+  "playground",
+  "sport_court",
+  "tennis_court",
+  "fenced_yard",
+  "gated",
+  "mountain_view",
+  "water_view",
+  "city_view",
+  "privacy_trees",
+] as const;
+export type OutdoorFeature = (typeof OUTDOOR_FEATURES)[number];
+
 export interface PricingInput {
   address: string;
   sqft: number;
@@ -178,7 +236,40 @@ export interface PricingInput {
   bathrooms: number;
   year_built: number;
   condition: PropertyCondition;
+  property_type?: PropertyType;
   features?: string;
+
+  /** Lot size in square feet (43,560 sqft = 1 acre) */
+  lot_size_sqft?: number;
+
+  /** Enclosed garage spaces */
+  garage_spaces?: number;
+
+  /** Additional driveway/lot parking spaces beyond the garage */
+  parking_spaces?: number;
+
+  /** Pool type and premium pool features */
+  pool_type?: PoolType;
+  pool_has_spa?: boolean;
+
+  /** Finished basement square footage (reported separately from main sqft) */
+  finished_basement_sqft?: number;
+
+  /** Whether the finished basement functions as a full ADU / mother-in-law suite */
+  basement_is_adu?: boolean;
+
+  /** Structured premium interior features */
+  premium_finishes?: PremiumFinish[];
+
+  /** Structured outdoor features and amenities */
+  outdoor_features?: OutdoorFeature[];
+
+  /** Optional recent professional appraisal (acts as valuation anchor) */
+  recent_appraisal_value?: number;
+  recent_appraisal_date?: string; // ISO date
+
+  /** Owner-provided photo URLs (Supabase Storage or external) for vision analysis */
+  photos?: string[];
 }
 
 export interface PricingResult {
@@ -186,6 +277,10 @@ export interface PricingResult {
   sell_fast_price: number;
   maximize_price: number;
   reasoning: string[];
+  /** Optional high-level narrative summary */
+  summary?: string;
+  /** Optional comparable-sales reasoning bullets returned by the model */
+  comps?: string[];
 }
 
 /** Showing types */

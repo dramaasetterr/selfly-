@@ -1,6 +1,6 @@
-# Selfly — For Sale By Owner Real Estate Platform
+# Chiavi — For Sale By Owner Real Estate Platform
 
-Selfly is a full-stack FSBO (For Sale By Owner) real estate platform that empowers homeowners to list, market, and sell their properties directly to buyers — no agent required.
+Chiavi is a full-stack FSBO (For Sale By Owner) real estate platform that empowers homeowners to list, market, and sell their properties directly to buyers — no agent required.
 
 ## Tech Stack
 
@@ -15,7 +15,7 @@ Selfly is a full-stack FSBO (For Sale By Owner) real estate platform that empowe
 ## Monorepo Structure
 
 ```
-selfly/
+chiavi/
 ├── apps/
 │   ├── mobile/          # Expo React Native app (iOS App Store target)
 │   └── web/             # Next.js API backend + marketing site
@@ -91,7 +91,7 @@ selfly/
 1. **Clone the repo**
    ```bash
    git clone <repo-url>
-   cd selfly
+   cd chiavi
    ```
 
 2. **Install dependencies**

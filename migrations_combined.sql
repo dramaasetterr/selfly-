@@ -1,5 +1,5 @@
 -- ============================================
--- SELFLY: All Migrations Combined
+-- CHIAVI: All Migrations Combined
 -- Paste this entire script into Supabase SQL Editor and click "Run"
 -- ============================================
 

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import type { PricingInput, PricingResult } from '@/shared';
+import type { PricingInput, PricingResult } from "@/shared";
 import { json, OPTIONS } from "../_cors";
 
 export { OPTIONS };
@@ -11,385 +11,263 @@ if (!process.env.ANTHROPIC_API_KEY) {
 
 const anthropic = new Anthropic();
 
-// Regional price per square foot by state
-const STATE_PRICE_PER_SQFT: Record<string, number> = {
-  CA: 500, NY: 350, NJ: 325, CT: 300, FL: 275,
-  TX: 225, CO: 350, WA: 375, MA: 400, IL: 225,
-  AZ: 275, OR: 325, NV: 250, GA: 225, NC: 240,
-  VA: 300, MD: 325, PA: 250, OH: 185, MI: 185,
-  TN: 240, SC: 240, MN: 260, WI: 215, MO: 200,
-  IN: 185, HI: 600, DC: 475, UT: 310, ID: 280,
-};
-const DEFAULT_PRICE_PER_SQFT = 250;
+const PRICING_MODEL = "claude-sonnet-4-6";
+const PRICING_FALLBACK_MODEL = "claude-haiku-4-5-20251001";
+const MAX_PHOTOS_TO_ANALYZE = 8;
 
-// Parse state abbreviation from address string
-function parseStateFromAddress(address: string): string | null {
-  // Try to match a 2-letter state abbreviation near the end
-  // Patterns: "City, ST 12345", "City, ST", "City ST 12345", "Something, State"
-  const abbrevMatch = address.match(/\b([A-Z]{2})\s*\d{5}/) || address.match(/,\s*([A-Z]{2})\s*$/);
-  if (abbrevMatch) return abbrevMatch[1];
+function buildPropertySummary(input: PricingInput): string {
+  const lines: string[] = [];
+  const age = new Date().getFullYear() - input.year_built;
 
-  // Try full state names to abbreviations
-  const stateNames: Record<string, string> = {
-    california: "CA", "new york": "NY", "new jersey": "NJ", connecticut: "CT",
-    florida: "FL", texas: "TX", colorado: "CO", washington: "WA",
-    massachusetts: "MA", illinois: "IL", arizona: "AZ", oregon: "OR",
-    nevada: "NV", georgia: "GA", "north carolina": "NC", virginia: "VA",
-    maryland: "MD", pennsylvania: "PA", ohio: "OH", michigan: "MI",
-    tennessee: "TN", "south carolina": "SC", minnesota: "MN", wisconsin: "WI",
-    missouri: "MO", indiana: "IN", hawaii: "HI", utah: "UT", idaho: "ID",
-  };
-  const lower = address.toLowerCase();
-  for (const [name, abbrev] of Object.entries(stateNames)) {
-    if (lower.includes(name)) return abbrev;
-  }
-  return null;
-}
+  lines.push(`Address: ${input.address}`);
+  if (input.property_type) lines.push(`Property Type: ${input.property_type.replace(/_/g, " ")}`);
+  lines.push(`Above-grade Living Area: ${input.sqft.toLocaleString()} sqft`);
 
-// Parse features string for value-add keywords
-function applyFeatureAdjustments(features: string, basePrice: number, reasoning: string[]): number {
-  if (!features || features.trim().length === 0) return basePrice;
-
-  const lower = features.toLowerCase();
-  let adjustment = 0;
-  let percentageBoost = 0;
-  const appliedFeatures: string[] = [];
-
-  // Pool: +$25K-50K scaled with home value
-  if (lower.includes("pool")) {
-    const poolValue = basePrice > 800000 ? 50000 : basePrice > 400000 ? 35000 : 25000;
-    adjustment += poolValue;
-    appliedFeatures.push(`pool (+$${(poolValue / 1000).toFixed(0)}K)`);
-  }
-
-  // Finished basement: +$30K-60K
-  if (lower.includes("basement")) {
-    const basementValue = basePrice > 800000 ? 60000 : basePrice > 400000 ? 45000 : 30000;
-    adjustment += basementValue;
-    appliedFeatures.push(`basement (+$${(basementValue / 1000).toFixed(0)}K)`);
-  }
-
-  // Renovated/remodeled/updated: +8%
-  if (lower.includes("renovated") || lower.includes("remodeled") || lower.includes("updated")) {
-    percentageBoost += 8;
-    appliedFeatures.push("renovated/updated (+8%)");
-  }
-
-  // Garage: +$15K per mention
-  const garageMatches = lower.match(/garage/g);
-  if (garageMatches) {
-    const garageValue = garageMatches.length * 15000;
-    adjustment += garageValue;
-    appliedFeatures.push(`garage (+$${(garageValue / 1000).toFixed(0)}K)`);
-  }
-
-  // New roof: +$10K
-  if (lower.includes("new roof")) {
-    adjustment += 10000;
-    appliedFeatures.push("new roof (+$10K)");
-  }
-
-  // Hardwood: +$8K
-  if (lower.includes("hardwood")) {
-    adjustment += 8000;
-    appliedFeatures.push("hardwood floors (+$8K)");
-  }
-
-  // Solar: +$15K
-  if (lower.includes("solar")) {
-    adjustment += 15000;
-    appliedFeatures.push("solar (+$15K)");
-  }
-
-  // Large lot/acre/backyard: +$20K
-  if (lower.includes("acre") || lower.includes("large lot") || lower.includes("backyard")) {
-    adjustment += 20000;
-    appliedFeatures.push("lot/yard premium (+$20K)");
-  }
-
-  // View/waterfront/lakefront: +15%
-  if (lower.includes("view") || lower.includes("waterfront") || lower.includes("lakefront")) {
-    percentageBoost += 15;
-    appliedFeatures.push("view/waterfront (+15%)");
-  }
-
-  // Vaulted/high ceiling: +$10K
-  if (lower.includes("vaulted") || lower.includes("high ceiling")) {
-    adjustment += 10000;
-    appliedFeatures.push("vaulted/high ceilings (+$10K)");
-  }
-
-  let result = basePrice + adjustment;
-  if (percentageBoost > 0) {
-    result *= 1 + percentageBoost / 100;
-  }
-
-  if (appliedFeatures.length > 0) {
-    reasoning.push(
-      `Property features adjustment: ${appliedFeatures.join(", ")}. ` +
-      `Total feature-based adjustment: +$${Math.round(result - basePrice).toLocaleString()}.`
+  if (input.finished_basement_sqft && input.finished_basement_sqft > 0) {
+    const aduNote = input.basement_is_adu
+      ? " — finished as a full ADU / mother-in-law suite (separate living, kitchen, bath)"
+      : " — finished living space";
+    lines.push(
+      `Finished Basement: ${input.finished_basement_sqft.toLocaleString()} sqft${aduNote}`
+    );
+    const totalLivable = input.sqft + input.finished_basement_sqft;
+    lines.push(
+      `Total Livable Space (above grade + finished basement): ${totalLivable.toLocaleString()} sqft`
     );
   }
 
-  return result;
+  lines.push(`Bedrooms: ${input.bedrooms}`);
+  lines.push(`Bathrooms: ${input.bathrooms}`);
+  lines.push(`Year Built: ${input.year_built} (${age} years old)`);
+  lines.push(`Owner-reported Condition: ${input.condition}`);
+
+  if (input.lot_size_sqft && input.lot_size_sqft > 0) {
+    const acres = input.lot_size_sqft / 43560;
+    lines.push(
+      `Lot Size: ${input.lot_size_sqft.toLocaleString()} sqft (${acres.toFixed(2)} acres)`
+    );
+  }
+
+  if (input.garage_spaces && input.garage_spaces > 0) {
+    lines.push(`Garage: ${input.garage_spaces}-car enclosed`);
+  }
+  if (input.parking_spaces && input.parking_spaces > 0) {
+    lines.push(
+      `Additional Parking: ${input.parking_spaces} driveway/lot spaces beyond garage`
+    );
+  }
+
+  if (input.pool_type && input.pool_type !== "none") {
+    const poolLabel = input.pool_type.replace(/_/g, " ");
+    const spa = input.pool_has_spa ? " with attached spa/hot tub" : "";
+    lines.push(`Pool: ${poolLabel}${spa}`);
+  }
+
+  if (input.premium_finishes && input.premium_finishes.length > 0) {
+    lines.push(
+      `Premium Interior Features: ${input.premium_finishes
+        .map((f) => f.replace(/_/g, " "))
+        .join(", ")}`
+    );
+  }
+
+  if (input.outdoor_features && input.outdoor_features.length > 0) {
+    lines.push(
+      `Outdoor Features: ${input.outdoor_features
+        .map((f) => f.replace(/_/g, " "))
+        .join(", ")}`
+    );
+  }
+
+  if (input.features && input.features.trim().length > 0) {
+    lines.push(`Additional owner-described features: ${input.features.trim()}`);
+  }
+
+  if (input.recent_appraisal_value && input.recent_appraisal_value > 0) {
+    const dateNote = input.recent_appraisal_date
+      ? ` (dated ${input.recent_appraisal_date})`
+      : "";
+    lines.push(
+      `Recent Professional Appraisal: $${input.recent_appraisal_value.toLocaleString()}${dateNote} — treat as a strong anchor, but consider post-appraisal improvements and current market conditions.`
+    );
+  }
+
+  return lines.join("\n");
 }
 
-function generateFallbackPricing(body: PricingInput): PricingResult & { source: "fallback" } {
-  const { address, sqft, bedrooms, bathrooms, year_built, condition, features } = body;
-  const reasoning: string[] = [];
+const SYSTEM_PROMPT = `You are an elite US residential real estate appraiser and pricing strategist.
 
-  // 1. Regional base price per sqft
-  const stateAbbrev = parseStateFromAddress(address);
-  const basePricePerSqft = stateAbbrev
-    ? (STATE_PRICE_PER_SQFT[stateAbbrev] ?? DEFAULT_PRICE_PER_SQFT)
-    : DEFAULT_PRICE_PER_SQFT;
+You help For-Sale-By-Owner (FSBO) sellers price their homes at top dollar — replacing the role a traditional listing agent plays. Your analysis must be rigorous, locally-aware, and honest.
 
-  const stateLabel = stateAbbrev || "unknown state";
+Core principles:
+- Never use a one-size-fits-all price-per-square-foot. Anchor to the specific submarket (city, neighborhood, ZIP) and adjust for the property's unique profile.
+- Finished basements and ADUs add real livable value — but not at the same $/sqft as above-grade space. Weigh them based on ceiling height, quality of finish, independent utilities, and whether they'd show up in comparable sales.
+- Luxury amenities (saltwater heated pools, outdoor kitchens, ADUs, acreage, extensive landscaping, premium finishes) meaningfully compound in certain markets — especially when they help the home stand out in the top 10-20% of its neighborhood.
+- Trust a recent professional appraisal as an anchor, but do not under-price improvements made after the appraisal.
+- When photos are provided, use them to judge true quality tier, condition, finish level, and curb appeal — things that text cannot fully convey.
+- Mentally perform comparable-sales analysis: think about what comparable homes in the same city/ZIP have sold for recently (through early 2026), adjusting for bed/bath/sqft/lot/condition/amenity differences.
+- Price to the current 2026 US housing market conditions for the specific region.
 
-  // 2. Property size with tiered diminishing returns
-  let sizeValue: number;
-  if (sqft <= 2500) {
-    sizeValue = sqft * basePricePerSqft;
-  } else if (sqft <= 4000) {
-    const basePortion = 2500 * basePricePerSqft;
-    const midPortion = (sqft - 2500) * basePricePerSqft * 0.90;
-    sizeValue = basePortion + midPortion;
-  } else {
-    const basePortion = 2500 * basePricePerSqft;
-    const midPortion = 1500 * basePricePerSqft * 0.90;
-    const upperPortion = (sqft - 4000) * basePricePerSqft * 0.82;
-    sizeValue = basePortion + midPortion + upperPortion;
+Output: 3 price points (sell-fast, recommended, maximize) plus specific reasoning. No hedging, no disclaimers, no generic advice. Be concrete about comps and $/sqft figures used.`;
+
+function userPromptFor(input: PricingInput, hasPhotos: boolean): string {
+  return `Price the following property. Your goal is to help the owner sell at top dollar.
+
+${buildPropertySummary(input)}
+${hasPhotos ? `\nThe owner has attached ${Math.min(input.photos!.length, MAX_PHOTOS_TO_ANALYZE)} property photos. Examine them carefully for finish quality, condition, curb appeal, outdoor amenities, and anything that affects market value beyond the text description.` : ""}
+
+Return ONLY a JSON object, no markdown, no prose before or after, exactly this shape:
+{
+  "recommended_price": <integer — your best list price, rounded to nearest $1,000>,
+  "sell_fast_price": <integer — price for a quick sale, typically ~5-8% below recommended, rounded to nearest $1,000>,
+  "maximize_price": <integer — top-of-market price for a patient seller, typically ~5-10% above recommended, rounded to nearest $1,000>,
+  "summary": <string — 1-2 sentence executive summary of the valuation>,
+  "reasoning": [
+    <string — comparable sales context: cite specific $/sqft figures and comp adjustments you used for this submarket>,
+    <string — how above-grade square footage and finished basement / ADU contribute to total livable value>,
+    <string — lot, parking, pool, and outdoor amenity premiums specific to this market>,
+    <string — condition, premium finishes, and what the photos reveal about the true quality tier (omit photo mention if no photos)>,
+    <string — pricing strategy: why the recommended price hits the sweet spot vs. sell-fast and maximize>
+  ],
+  "comps": [
+    <string — short description of a comparable that supports this valuation>,
+    <string — another comparable>,
+    <string — another comparable>
+  ]
+}
+
+Be specific. Cite neighborhood, cite $/sqft you're anchoring to, cite concrete amenity premiums in dollar terms. If a recent appraisal is provided, explain how your number relates to it.`;
+}
+
+function parsePricing(text: string): PricingResult {
+  let cleaned = text.trim();
+  if (cleaned.startsWith("```")) {
+    cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "");
+  }
+  const parsed = JSON.parse(cleaned);
+
+  const recommended = Math.round(Number(parsed.recommended_price));
+  const sellFast = Math.round(Number(parsed.sell_fast_price));
+  const maximize = Math.round(Number(parsed.maximize_price));
+
+  if (
+    !Number.isFinite(recommended) ||
+    !Number.isFinite(sellFast) ||
+    !Number.isFinite(maximize) ||
+    recommended <= 0 ||
+    sellFast <= 0 ||
+    maximize <= 0
+  ) {
+    throw new Error("Model returned invalid price values");
   }
 
-  const reasoningParts: string[] = [];
-  if (sqft <= 2500) {
-    reasoningParts.push(`${sqft.toLocaleString()} sqft at full $${basePricePerSqft}/sqft`);
-  } else if (sqft <= 4000) {
-    reasoningParts.push(`first 2,500 sqft at full $${basePricePerSqft}/sqft`);
-    reasoningParts.push(`remaining ${(sqft - 2500).toLocaleString()} sqft at 90% rate`);
-  } else {
-    reasoningParts.push(`first 2,500 sqft at full $${basePricePerSqft}/sqft`);
-    reasoningParts.push(`next 1,500 sqft at 90% rate`);
-    reasoningParts.push(`remaining ${(sqft - 4000).toLocaleString()} sqft at 82% rate`);
+  const reasoning = Array.isArray(parsed.reasoning)
+    ? parsed.reasoning.filter((r: unknown) => typeof r === "string" && r.length > 0)
+    : [];
+  if (reasoning.length === 0) {
+    throw new Error("Model returned no reasoning");
   }
 
-  reasoning.push(
-    `Base valuation of $${basePricePerSqft}/sqft for ${stateLabel.toUpperCase()} applied to ${sqft.toLocaleString()} sqft` +
-    (sqft > 2500 ? ` (${reasoningParts.join(", ")})` : "") +
-    ` = $${Math.round(sizeValue).toLocaleString()} base.`
-  );
-
-  let price = sizeValue;
-
-  // 3. Bedroom adjustment — scales with home value tier
-  let bedroomAdj = 0;
-  if (bedrooms > 3) {
-    const extra = bedrooms - 3;
-    if (price > 1000000) {
-      bedroomAdj = extra * 40000;
-    } else if (price > 500000) {
-      bedroomAdj = extra * 25000;
-    } else {
-      bedroomAdj = extra * 15000;
-    }
-  } else if (bedrooms < 3) {
-    bedroomAdj = -((3 - bedrooms) * 10000);
-  }
-  price += bedroomAdj;
-
-  // 4. Bathroom adjustment — scales with home value tier
-  let bathroomAdj = 0;
-  if (bathrooms > 2) {
-    const extra = bathrooms - 2;
-    if (price > 1000000) {
-      bathroomAdj = extra * 30000;
-    } else if (price > 500000) {
-      bathroomAdj = extra * 20000;
-    } else {
-      bathroomAdj = extra * 10000;
-    }
-  } else if (bathrooms < 2) {
-    bathroomAdj = -((2 - bathrooms) * 10000);
-  }
-  price += bathroomAdj;
-
-  if (bedroomAdj !== 0 || bathroomAdj !== 0) {
-    const parts: string[] = [];
-    if (bedroomAdj > 0) parts.push(`+$${bedroomAdj.toLocaleString()} for ${bedrooms - 3} extra bedroom(s) above the 3-bed baseline`);
-    if (bedroomAdj < 0) parts.push(`-$${Math.abs(bedroomAdj).toLocaleString()} for being ${3 - bedrooms} bedroom(s) below the 3-bed baseline`);
-    if (bathroomAdj > 0) parts.push(`+$${bathroomAdj.toLocaleString()} for ${bathrooms - 2} extra bathroom(s) above the 2-bath baseline`);
-    if (bathroomAdj < 0) parts.push(`-$${Math.abs(bathroomAdj).toLocaleString()} for being ${2 - bathrooms} bathroom(s) below the 2-bath baseline`);
-    reasoning.push(`Bedroom/bathroom adjustments (scaled to home value tier): ${parts.join("; ")}.`);
-  } else {
-    reasoning.push(`${bedrooms} bedrooms and ${bathrooms} bathrooms match the standard 3-bed/2-bath baseline — no adjustment needed.`);
-  }
-
-  // 5. Age adjustment
-  const age = new Date().getFullYear() - year_built;
-  let ageMultiplier: number;
-  let ageLabel: string;
-  if (age <= 5) {
-    ageMultiplier = 1.08;
-    ageLabel = "new construction (0-5 years)";
-  } else if (age <= 15) {
-    ageMultiplier = 1.03;
-    ageLabel = "modern build (6-15 years)";
-  } else if (age <= 30) {
-    ageMultiplier = 1.0;
-    ageLabel = "established (16-30 years)";
-  } else if (age <= 50) {
-    ageMultiplier = 0.95;
-    ageLabel = "older construction (31-50 years)";
-  } else {
-    ageMultiplier = 0.92;
-    ageLabel = "historic (50+ years)";
-  }
-  price *= ageMultiplier;
-
-  const ageReasonParts = `Built in ${year_built} (${age} years old) — classified as ${ageLabel}`;
-  if (age > 50) {
-    reasoning.push(`${ageReasonParts}, applying a -8% age adjustment. Note: historic properties may command a premium for period charm and architectural character that this algorithm cannot fully capture.`);
-  } else if (ageMultiplier !== 1.0) {
-    const pctStr = ageMultiplier > 1
-      ? `+${((ageMultiplier - 1) * 100).toFixed(0)}%`
-      : `${((ageMultiplier - 1) * 100).toFixed(0)}%`;
-    reasoning.push(`${ageReasonParts}, applying a ${pctStr} age adjustment.`);
-  } else {
-    reasoning.push(`${ageReasonParts} — no age adjustment applied.`);
-  }
-
-  // 6. Condition multiplier
-  const conditionMultipliers: Record<string, { mult: number; label: string }> = {
-    excellent: { mult: 1.12, label: "Excellent (+12%)" },
-    good: { mult: 1.05, label: "Good (+5%)" },
-    fair: { mult: 0.92, label: "Fair (-8%)" },
-    needs_work: { mult: 0.82, label: "Needs Work (-18%)" },
-  };
-  const conditionKey = condition.toLowerCase().replace(/\s+/g, "_");
-  const condEntry = conditionMultipliers[conditionKey] ?? { mult: 1.0, label: condition };
-  price *= condEntry.mult;
-
-  reasoning.push(`Condition rated as "${condEntry.label}" — ${condEntry.mult > 1 ? "premium" : condEntry.mult < 1 ? "discount" : "neutral"} applied to reflect the property's current state.`);
-
-  // 7. Features adjustment
-  price = applyFeatureAdjustments(features ?? "", price, reasoning);
-
-  // 8. Luxury premium — based on size, bedrooms, and estimated price
-  const isLargeSqft = sqft >= 4000;
-  const isManyBeds = bedrooms >= 5;
-  const isHighValue = price > 800000;
-  const luxuryConditions = [isLargeSqft, isManyBeds, isHighValue].filter(Boolean).length;
-
-  if (luxuryConditions >= 3) {
-    price *= 1.15;
-    reasoning.push(`Luxury premium of 15% applied — property meets all three luxury criteria: 4,000+ sqft, 5+ bedrooms, and $800K+ estimated value.`);
-  } else if (luxuryConditions === 2) {
-    price *= 1.12;
-    reasoning.push(`Luxury premium of 12% applied — property meets two of three luxury criteria (4,000+ sqft, 5+ bedrooms, $800K+ value).`);
-  } else if (luxuryConditions === 1) {
-    price *= 1.08;
-    reasoning.push(`Luxury premium of 8% applied — property meets one luxury criterion (4,000+ sqft, 5+ bedrooms, or $800K+ value).`);
-  }
-
-  // 9. Market trend factor (+3% for 2026)
-  price *= 1.03;
-
-  // Floor
-  price = Math.max(price, 50000);
-
-  const recommended = Math.round(price / 1000) * 1000; // Round to nearest $1K
-  const sell_fast = Math.round(recommended * 0.93 / 1000) * 1000;
-  const maximize = Math.round(recommended * 1.08 / 1000) * 1000;
-
-  reasoning.push(`A 3% market appreciation factor for 2026 market conditions has been applied. Sell-fast price is set 7% below recommended to attract competitive offers quickly; maximize price is 8% above for sellers willing to wait for the right buyer.`);
+  const comps = Array.isArray(parsed.comps)
+    ? parsed.comps.filter((c: unknown) => typeof c === "string" && c.length > 0)
+    : undefined;
 
   return {
     recommended_price: recommended,
-    sell_fast_price: sell_fast,
+    sell_fast_price: sellFast,
     maximize_price: maximize,
     reasoning,
-    source: "fallback",
-  } as PricingResult & { source: "fallback" };
+    summary: typeof parsed.summary === "string" ? parsed.summary : undefined,
+    comps,
+  };
+}
+
+async function buildContentBlocks(
+  input: PricingInput,
+  hasPhotos: boolean
+): Promise<Anthropic.ContentBlockParam[]> {
+  const blocks: Anthropic.ContentBlockParam[] = [
+    { type: "text", text: userPromptFor(input, hasPhotos) },
+  ];
+
+  if (hasPhotos && input.photos) {
+    const photosToUse = input.photos.slice(0, MAX_PHOTOS_TO_ANALYZE);
+    for (const url of photosToUse) {
+      if (typeof url === "string" && /^https?:\/\//i.test(url)) {
+        blocks.push({
+          type: "image",
+          source: { type: "url", url },
+        });
+      }
+    }
+  }
+
+  return blocks;
+}
+
+async function callModel(
+  model: string,
+  content: Anthropic.ContentBlockParam[]
+): Promise<PricingResult> {
+  const message = await anthropic.messages.create({
+    model,
+    max_tokens: 2000,
+    system: SYSTEM_PROMPT,
+    messages: [{ role: "user", content }],
+  });
+
+  const textBlock = message.content.find((b) => b.type === "text");
+  if (!textBlock || textBlock.type !== "text") {
+    throw new Error("Model response contained no text block");
+  }
+
+  return parsePricing(textBlock.text);
 }
 
 export async function POST(request: NextRequest) {
+  let input: PricingInput;
   try {
-    const body: PricingInput = await request.json();
-
-    const { address, sqft, bedrooms, bathrooms, year_built, condition } = body;
-
-    if (!address || !sqft || !bedrooms || !bathrooms || !year_built || !condition) {
-      return json({ error: "All property fields are required" }, 400);
-    }
-
-    let result: PricingResult & { source?: string };
-
-    try {
-      const featuresLine = body.features
-        ? `\n- Notable Features: ${body.features}`
-        : "";
-
-      const message = await anthropic.messages.create({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1500,
-        messages: [
-          {
-            role: "user",
-            content: `You are an expert real estate appraiser and pricing analyst with deep knowledge of regional US housing markets. Analyze the following property and provide a data-driven pricing recommendation.
-
-Property Details:
-- Address: ${address}
-- Square Footage: ${sqft.toLocaleString()}
-- Bedrooms: ${bedrooms}
-- Bathrooms: ${bathrooms}
-- Year Built: ${year_built} (${new Date().getFullYear() - year_built} years old)
-- Condition: ${condition}${featuresLine}
-
-Consider ALL of the following in your analysis:
-1. Regional market conditions based on the property's location (state/city)
-2. Price per square foot typical for the area
-3. Bedroom and bathroom count relative to area norms
-4. Property age and its impact (new construction premium, historic charm, etc.)
-5. Current condition and how it affects market value
-6. 2026 housing market trends for this region
-7. Comparable property values in similar neighborhoods
-${body.features ? "8. The specific property features mentioned and their impact on value" : ""}
-
-Return a JSON object with exactly this structure:
-{
-  "recommended_price": <number - your best estimate list price, rounded to nearest $1000>,
-  "sell_fast_price": <number - approximately 7% below recommended, rounded to nearest $1000>,
-  "maximize_price": <number - approximately 8% above recommended, rounded to nearest $1000>,
-  "reasoning": [<string>, <string>, <string>, <string>, <string>] - exactly 5 detailed bullet points explaining your pricing logic. Each point should reference specific data points ($/sqft, market comps, condition impact, age factor, regional trends).
-}
-
-Be specific in your reasoning — cite the approximate $/sqft you used, explain adjustments for bedrooms/bathrooms/condition/age, and reference the local market. Return ONLY valid JSON, no markdown or other text.`,
-          },
-        ],
-      });
-
-      const textBlock = message.content.find((block) => block.type === "text");
-      if (!textBlock || textBlock.type !== "text") {
-        throw new Error("AI response did not contain a text block");
-      }
-
-      try {
-        result = JSON.parse(textBlock.text);
-      } catch {
-        throw new Error("Failed to parse AI JSON response");
-      }
-      result.source = "ai";
-    } catch (aiError) {
-      result = generateFallbackPricing(body);
-    }
-
-    return json(result);
+    input = (await request.json()) as PricingInput;
   } catch {
+    return json({ error: "Invalid JSON body" }, 400);
+  }
+
+  if (
+    !input?.address ||
+    !input?.sqft ||
+    !input?.bedrooms ||
+    !input?.bathrooms ||
+    !input?.year_built ||
+    !input?.condition
+  ) {
     return json(
-      { error: "An unexpected error occurred. Please try again." },
-      500
+      { error: "Missing required fields: address, sqft, bedrooms, bathrooms, year_built, condition" },
+      400
     );
   }
+
+  const hasPhotos =
+    Array.isArray(input.photos) &&
+    input.photos.length > 0 &&
+    input.photos.some((u) => typeof u === "string" && /^https?:\/\//i.test(u));
+
+  const content = await buildContentBlocks(input, hasPhotos);
+
+  try {
+    const result = await callModel(PRICING_MODEL, content);
+    return json(result);
+  } catch (primaryErr) {
+    try {
+      const result = await callModel(PRICING_FALLBACK_MODEL, content);
+      return json(result);
+    } catch {
+      return json(
+        {
+          error:
+            "The pricing engine is temporarily unavailable. Please try again in a moment.",
+        },
+        503
+      );
+    }
+  }
 }
-
-
