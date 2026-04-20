@@ -171,6 +171,64 @@ export interface Document {
 export type PropertyCondition = "Excellent" | "Good" | "Fair" | "Needs Work";
 export type PriceType = "sell_fast" | "recommended" | "maximize";
 
+export type PoolType =
+  | "none"
+  | "above_ground"
+  | "in_ground"
+  | "saltwater"
+  | "heated"
+  | "saltwater_heated"
+  | "infinity"
+  | "indoor";
+
+export const PREMIUM_FINISHES = [
+  "marble_countertops",
+  "granite_countertops",
+  "quartz_countertops",
+  "hardwood_floors",
+  "heated_floors",
+  "custom_millwork",
+  "chef_kitchen",
+  "smart_home",
+  "wine_cellar",
+  "home_theater",
+  "sauna",
+  "gym",
+  "elevator",
+  "vaulted_ceilings",
+  "skylights",
+  "floor_to_ceiling_windows",
+  "fireplace",
+  "butler_pantry",
+  "walk_in_closets",
+  "designer_bathrooms",
+] as const;
+export type PremiumFinish = (typeof PREMIUM_FINISHES)[number];
+
+export const OUTDOOR_FEATURES = [
+  "fire_pit",
+  "outdoor_kitchen",
+  "bbq_patio",
+  "covered_patio",
+  "deck",
+  "pergola",
+  "gazebo",
+  "koi_pond",
+  "water_feature",
+  "landscape_lighting",
+  "sprinkler_system",
+  "playground",
+  "sport_court",
+  "tennis_court",
+  "fenced_yard",
+  "gated",
+  "mountain_view",
+  "water_view",
+  "city_view",
+  "privacy_trees",
+] as const;
+export type OutdoorFeature = (typeof OUTDOOR_FEATURES)[number];
+
 export interface PricingInput {
   address: string;
   sqft: number;
@@ -178,7 +236,20 @@ export interface PricingInput {
   bathrooms: number;
   year_built: number;
   condition: PropertyCondition;
+  property_type?: PropertyType;
   features?: string;
+  lot_size_sqft?: number;
+  garage_spaces?: number;
+  parking_spaces?: number;
+  pool_type?: PoolType;
+  pool_has_spa?: boolean;
+  finished_basement_sqft?: number;
+  basement_is_adu?: boolean;
+  premium_finishes?: PremiumFinish[];
+  outdoor_features?: OutdoorFeature[];
+  recent_appraisal_value?: number;
+  recent_appraisal_date?: string;
+  photos?: string[];
 }
 
 export interface PricingResult {
@@ -186,6 +257,8 @@ export interface PricingResult {
   sell_fast_price: number;
   maximize_price: number;
   reasoning: string[];
+  summary?: string;
+  comps?: string[];
 }
 
 /** Showing types */
