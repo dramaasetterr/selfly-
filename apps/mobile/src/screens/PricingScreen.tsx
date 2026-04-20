@@ -191,17 +191,22 @@ export default function PricingScreen() {
     const urls: string[] = [];
     try {
       for (let i = 0; i < photos.length; i++) {
-        const p = photos[i];
-        const ext = (p.uri.split(".").pop() || "jpg").split("?")[0];
-        const fileName = `${user.id}/pricing_${Date.now()}_${i}.${ext}`;
-        const resp = await fetch(p.uri);
-        const blob = await resp.blob();
-        const { error } = await supabase.storage
-          .from("listing-photos")
-          .upload(fileName, blob, { contentType: p.mimeType || "image/jpeg" });
-        if (error) continue;
-        const { data } = supabase.storage.from("listing-photos").getPublicUrl(fileName);
-        if (data?.publicUrl) urls.push(data.publicUrl);
+        try {
+          const p = photos[i];
+          const ext = (p.uri.split(".").pop() || "jpg").split("?")[0];
+          const fileName = `${user.id}/pricing_${Date.now()}_${i}.${ext}`;
+          const resp = await fetch(p.uri);
+          const blob = await resp.blob();
+          const { error } = await supabase.storage
+            .from("listing-photos")
+            .upload(fileName, blob, { contentType: p.mimeType || "image/jpeg" });
+          if (error) continue;
+          const { data } = supabase.storage.from("listing-photos").getPublicUrl(fileName);
+          if (data?.publicUrl) urls.push(data.publicUrl);
+        } catch {
+          // skip this photo, continue with the rest
+          continue;
+        }
       }
     } finally {
       setUploadingPhotos(false);
